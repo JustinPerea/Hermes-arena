@@ -170,3 +170,33 @@ Justin: arms, elbows, shoulders and hands looked like puppets. New drawLimb(): t
 - apply-stages.cjs refreshed the stage block (Kyllene: pale wash behind scenery, cream/gold standable edges, solid vs dashed undersides).
 - Iris's Bridge of Heaven now draws the same edge marker (ink outline, #fff8e2 top, gold band, dashed ink underside) over its rainbow.
 - Lab quick 98.5 (all four). Video: videos/v29-floors.mp4.
+
+## v30 (2026-11-10) CPUs use down specials; two rule and CPU fixes found on the way
+
+Lab: quick 98.5 (all four), full 98.4 (Hermes, Aethon), full 98.8 (all four): the same as v29 on each run. The lab now launches the installed Google Chrome (`launch()` in page.cjs); numbers are identical to Playwright's Chromium.
+
+| Change | Notes |
+|---|---|
+| `CPU_LV[level].dspec` (0.1 / 0.45 / 0.8): how often a level takes a down-special chance. `cpuDown`, `cpuCounter`, `cpuTrap` sit just above `cpuInput` | The CPU reads what the move does (counter, stomp, field, pour), not the fighter's name |
+| Hermes, Psychopomp Guard: answers a melee hit that will land inside the stance window and whose hitbox will reach him. Smashes (can be charged past the stance) and tilts that may still become a smash are countered less often. Ground only | 1.7 uses a match per fighter, 86% land |
+| Aethon, Phalanx Stomp: shockwave when the foe stands 30-96 px away on the same solid floor; plunge when the foe is below and there is floor under him with 14 px to spare each side. Neither once the foe is past 110% (it chips, it does not kill) | 5.4 uses a match |
+| Kairos, Stilled Instant: on a foe who cannot move (knocked down, dazed, long hitstun), or from the ground when the foe will run into the far half of the field. Afterwards he steps out of his own field and shoots or pokes in instead of walking back in | 0.5-1 use a match. See QUESTIONS.md Q4: the move gives its user no edge |
+| Iris, Styx Pour: a puddle on solid floor when the foe is 44-170 px away and has to come back along it (then she waits behind it, shooting); the stream when the foe is below her and the fall time lines up | 7.4 uses a match, about half land |
+| Rule: a grounded attack, grab or roll no longer carries its fighter off an edge (specials still can). In `physics()` | Found from Aethon's self-destructs: a smash hitting a shield at the stage lip pushed him off backwards mid-move, and he fell for the rest of it. Smash does not let this happen. See QUESTIONS.md Q5 |
+| CPU recovery: the side special is used on the way back only if it carries the fighter (dash or arc) | Kairos's is the thrown Orrery Ring; he was throwing rings while falling |
+
+Measured with CPU Hard mirror matches (scratch scripts, not in the repo: 100 seeds each; the lab's own 6 seeds are too few to tell 0.07 from 0.14 self-destructs):
+
+| | v29 | v30 |
+|---|---|---|
+| Self-destructs per stock: Hermes / Aethon / Kairos / Iris | 0.02 / 0.10 / 0.10 / 0.02 | 0.002 / 0.04 / 0.01 / 0.002 |
+| KO % (Aethon) | 145 | 152 (fewer low-percent self-destructs, plus stomp damage) |
+| Seconds per stock | 29-33 | 31-33 |
+
+Down specials on for one side only, 200 matches per fighter on the Altar: Hermes 105-95, Aethon 125-75, Kairos 101-99, Iris 118-82. Same on Kyllene, Normal and Easy: no stuck states, no page errors.
+
+Tried and dropped: an air counter for Hermes (whiffed half the time), a counter "read" on a foe dropping in (13% landed), Kairos casting whenever the foe was in range (cost him about 0.2 stocks a match on Kyllene).
+
+Also seen, not fixed: the KO slow motion can fire on a hit that does not KO (Iris down smash on a tripped foe at 45%: `willKO` ignores the side platforms).
+
+Clips: `cpu_counter`, `cpu_stomp`, `cpu_plunge`, `cpu_field`, `cpu_puddle`, `cpu_stream` in scenarios.js (the header there lists which fighter to pass). `find-seeds.cjs` finds a seed where a dice-rolling scenario shows its move. Played in the real page too (Chrome, real loop and key events, 90 s against each CPU fighter): steady 60 fps, no errors.

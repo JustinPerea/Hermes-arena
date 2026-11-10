@@ -47,10 +47,11 @@ node lab.cjs                # full score incl. CPU-vs-CPU pacing
 node lab.cjs --quick --ch hermes,aethon,kairos,iris
 node lab.cjs --set "FEEL.kbGrowth=1.9"   # try a change in-page without editing
 node clips.cjs              # GIFs + contact sheets into feel-lab/out/
+node find-seeds.cjs --only cpu_puddle --ch iris   # a seed where a dice-rolling clip scenario shows its move
 node video.cjs --before old.html         # side-by-side before/after MP4
 ```
 
-The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build. Last recorded score: 98.4 (v28).
+The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build, and use the installed Google Chrome when there is one. Last recorded score: 98.4 (v30; quick run with all four fighters 98.5).
 
 ## Working on the cyanotype engine / plugin
 

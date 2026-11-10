@@ -174,7 +174,7 @@ _Kairos and Iris pixel designs, the v26 arm-drawing fix (drawLimb), and where th
 - Iris: 'pearl' chiton with an 'aqua' sash, rainbow wings (rbr..rbv ramps, drawRainbowWing), 'ihair', a bronze hydria (drawPitcher) and a ribbon of light (drawRibbon).
 - The functions are in pixel-hermes.html: drawKairos/drawIris (side view) and drawKairosFront/drawIrisFront, registered in FRONT_DRAW. The dev poses kIdle/kRun/iIdle/iRun live only in the scratchpad file ki-poses.js.
 - PLAYABLE since v28 (2026-11-09). Special-move mechanics live in one block before tickFx (kiMove/kiSpawn/kiTick, fields, puddles, temp PLATS with .temp, kparts, vfxs, trails; kiDrawBack/kiDrawFront/kiShot). Hold-special input is I.specHeld.
-- CPU never picks down specials (generic CPU). Lab: `node lab.cjs --quick --ch hermes,aethon,kairos,iris`. Move showcase video: feel-lab/showcase.cjs + seg-ki.js.
+- CPU uses down specials since v30 (see [[v30-cpu-down-specials]]). Lab: `node lab.cjs --quick --ch hermes,aethon,kairos,iris`. Move showcase video: feel-lab/showcase.cjs + seg-ki.js.
 
 **Arm fix, v26.** Justin said everyone's arms, elbows, shoulders and hands "look like puppets, not Street Fighter pixel arms."
 - drawLimb(B,sh,{el,hd,d2},o) draws each whole arm as one part:
@@ -332,3 +332,15 @@ Source: https://raw.githubusercontent.com/NousResearch/hermes-agent/main/website
 - One-click install link: `hermes://plugin/install?repo=owner/repo&enable=1`.
 
 Used by the Hermes Arena game plan: [[hermes-arena-plan]].
+
+## v30-cpu-down-specials
+
+_Where the Claude Code session of 2026-11-10 left the pixel game (branch `cpu-down-specials`, not pushed)_
+
+- CPUs use all four down specials (v30). How each is used, the numbers and what was dropped: feel-lab/LOG.md, v30. Lab unchanged: quick 98.5, full 98.4.
+- Two fixes came out of it: grounded attacks, grabs and rolls stop at an edge (QUESTIONS.md Q5, Justin can veto), and the CPU no longer throws Kairos's ring as a recovery move. CPU self-destructs fell to 0.04 per stock or less for every fighter.
+- Open for Justin: QUESTIONS.md Q4 (Stilled Instant gives Kairos no edge; recommended: caster immune and a 28-frame cast), Q2 (his Tuning values).
+- The lab's 6 CPU matches per fighter are too few for the pacing metrics: self-destructs and KO % sat on their band edges and flipped between pass and warn on dice alone. Measure CPU changes over 100 seeds before trusting a 0.4-point move in the score. Raising the lab's default seed count is a cheap next step (a match simulates in about 0.05 s).
+- Not done, in rough order: the KO slow motion firing on hits that do not KO (`willKO` ignores side platforms); CPU matches on Kyllene still time out often (KOs need about 200% there); Aethon's frame-data and recovery warns; 2-player (Justin said not yet); porting the pixel game into the Hermes Desktop plugin shell.
+- Machine notes: run the lab with `NODE_PATH=$(npm root -g)` (Playwright is installed globally, not in the repo). The lab drives the installed Google Chrome. ImageMagick here is v7; `convert` and `montage` still work.
+

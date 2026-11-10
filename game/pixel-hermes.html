@@ -2808,9 +2808,11 @@ function physics(b,dt,grav,maxFall=430){
   if (!b.ground) b.vy=Math.min(b.vy+grav*dt,maxFall);
   const py=b.y; b.x+=b.vx*dt; b.y+=b.vy*dt;
   if (b.ground){
-    if (b.plat.soft){ if (b.x<b.plat.l-3||b.x>b.plat.r+3){ b.ground=false; b.jumps=Math.min(b.jumps??1,1); } }
+    // a grounded attack, grab or roll never carries its fighter off the edge (shield pushback at the lip used to); specials still can
+    const hold=b.mv && !b.mv.A.special, stay=()=>{ b.x=clamp(b.x,b.plat.l-3,b.plat.r+3); b.vx=0; };
+    if (b.plat.soft){ if (b.x<b.plat.l-3||b.x>b.plat.r+3){ if (hold) stay(); else { b.ground=false; b.jumps=Math.min(b.jumps??1,1); } } }
     else { let sup=null; for (const s of SOLIDS){ if (b.x>=s.l-3 && b.x<=s.r+3 && s.t>=b.y-7 && s.t<=b.y+7 && (!sup||s.t<sup.t)) sup=s; }
-      if (sup){ b.y=sup.t; b.plat=sup; } else { b.ground=false; if (b.jumps!=null) b.jumps=Math.min(b.jumps,1); } }
+      if (sup){ b.y=sup.t; b.plat=sup; } else if (hold && b.plat) stay(); else { b.ground=false; if (b.jumps!=null) b.jumps=Math.min(b.jumps,1); } }
   }
   if (!b.ground && b.vy>=0){
     let best=null;
@@ -3471,14 +3473,59 @@ function step(dt){
 // ---- CPU ---------------------------------------------------------------------
 // It reads the situation every so often (slower on Easy), then presses buttons like a player would:
 // recover to the stage first, otherwise approach and pick an attack from where the foe is.
-const CPU_LV=[{think:[0.4,0.75],acc:0.5,aggr:0.45,charge:0.15,combo:0.15,di:0,shield:0.12,tech:0.15,oos:0.2,parry:0,guard:0},
-  {think:[0.2,0.38],acc:0.8,aggr:0.7,charge:0.35,combo:0.5,di:0.6,shield:0.35,tech:0.5,oos:0.5,parry:0.1,guard:0.6},
-  {think:[0.08,0.18],acc:0.95,aggr:0.9,charge:0.55,combo:0.85,di:1,shield:0.6,tech:0.85,oos:0.8,parry:0.3,guard:1.8}];
+const CPU_LV=[{think:[0.4,0.75],acc:0.5,aggr:0.45,charge:0.15,combo:0.15,di:0,shield:0.12,tech:0.15,oos:0.2,parry:0,guard:0,dspec:0.1},
+  {think:[0.2,0.38],acc:0.8,aggr:0.7,charge:0.35,combo:0.5,di:0.6,shield:0.35,tech:0.5,oos:0.5,parry:0.1,guard:0.6,dspec:0.45},
+  {think:[0.08,0.18],acc:0.95,aggr:0.9,charge:0.55,combo:0.85,di:1,shield:0.6,tech:0.85,oos:0.8,parry:0.3,guard:1.8,dspec:0.8}];
 const rr=(a,b)=>a+Math.random()*(b-a);
+// Down specials. Each fighter's is a different tool, so the CPU looks at what the move does (counter, stomp, field, pour)
+// and spends it only where that tool works. L.dspec is how often a level takes the chance; ai.dsCd spaces the uses out.
+function cpuDown(F,I,ai,L,foe,dx,dy,adx,to){
+  const A=FC(F).anims.dspec; if (!A || ai.dsCd>0 || F.helpless) return false;
+  const roll=k=>Math.random()<L.dspec*k;
+  const go=cd=>{ I.ax=0; I.up=false; I.down=true; I.p.special=true; I.p.attack=false; I.atkHeld=false; ai.dsCd=cd; return true; };
+  // Aethon's stomp chips rather than kills, so once the foe is at kill percent the CPU leaves it for smashes
+  if (A.stomp){
+    // on a solid floor with the foe standing a little way off: the shockwave runs along the ground to them
+    if (F.ground && !F.plat.soft && foe.ground && !foe.lie && foe.dmg<110 && Math.abs(dy)<8 && adx>30 && adx<96 && !intang(foe) && roll(0.3)) return go(rr(2.5,4.5));
+    // above the foe with floor underneath (and to spare on both sides, the plunge drifts): drop onto them
+    const floor=x=>{ const sy=surfaceBelow({x,y:F.y}); return sy!==null && sy-F.y<200; };
+    if (!F.ground && !foe.ledge && foe.dmg<110 && dy>30 && dy<150 && Math.abs(dx+(foe.vx-F.vx*0.5)*0.3)<13 && floor(F.x-14) && floor(F.x+14) && floor(F.x+F.vx*0.4) && roll(0.6)) return go(rr(2,3.5)); }
+  if (A.field && (F.fieldCool||0)<=0 && F.face===to && Math.abs(dy)<24){
+    // the field opens a little ahead of Kairos: cast it where the foe will be, best of all on a foe who cannot move away
+    const ahead=(foe.x+foe.vx*0.27-F.x)*to, stuck=foe.lie||foe.brk>0||(foe.ground&&foe.stun>0.3);
+    if (stuck ? ahead>-10 && ahead<50 && roll(0.9) : F.ground && !offStage(foe) && adx>62 && ahead>26 && ahead<62 && roll(0.3)){ ai.trapT=A.field.life; return go(1); } }
+  if (A.pour){
+    // a puddle on the floor between Iris and a foe who has to come back along it
+    if (F.ground && !F.plat.soft && !foe.lie && !foe.ledge && F.face===to && dy<10 && dy>-90 && adx>44 && adx<170 && !offStage(foe) && !puddles.some(q=>q.own===F) && roll(0.35)){ ai.trapT=rr(1.4,2.4); return go(rr(3,5)); }
+    // in the air above the foe: the stream falls about 325 px a second from frame 14, so aim at where they will be
+    if (!F.ground && dy>30 && (F.jumps>0 || !offStage(F))){ const t0=A.pour.f/60, sx=F.x+F.face*8+F.vx*t0*0.9, sy=F.y-8+F.vy*t0; let t=t0+0.3, dist=0;
+      for (let i=0;i<2;i++){ dist=foe.y-24+(foe.ground?0:foe.vy*t*0.7)-sy; t=t0+clamp(dist/325,0,0.55); }
+      if (dist>12 && dist<165 && Math.abs(foe.x+foe.vx*t*0.8-sx)<10 && roll(0.6)) return go(rr(1.2,2)); } }
+  return false; }
+// with a trap out, hold a spot instead of walking in: Kairos stays outside his slow field, Iris waits behind her puddle.
+// Returns the direction to hold (0 = stand), or null when there is no trap to play around.
+function cpuTrap(F,ai,foe,to){
+  for (const q of fields) if (q.own===F && q.life-q.t>0.25){ const inF=Math.hypot(F.x-q.x,F.y-24-q.y)<q.r+3, foeIn=Math.hypot(foe.x-q.x,foe.y-24-q.y)<q.r+10;
+    if (inF) return Math.sign(F.x-q.x)||-to;
+    if (foeIn && Math.hypot(F.x+to*12-q.x,F.y-24-q.y)<q.r+3) return 0; }
+  if (ai.trapT>0) for (const q of puddles) if (q.own===F && q.life-q.t>0.3 && foe.ground && foe.plat===q.plat && (q.x-F.x)*to>4 && (foe.x-q.x)*to>6) return 0;
+  return null; }
+// a counter stance (Hermes) answers a melee hit that will land inside its window and can reach
+function cpuCounter(F,ai,L,foe,fm,first,adx,dy){
+  const A=FC(F).anims.dspec, c=A&&A.counter, eta=first-fm.f; if (!c || ai.dsCd>0) return false;
+  if (eta<c.f[0]+2 || eta>c.f[1]-4) return false;
+  // will the hitbox be on Hermes when it comes out? (a dashing move is judged by distance instead)
+  const h=fm.A.hits.find(q=>q.f[0]===first), t=eta/60, fx=foe.x+foe.vx*t*(foe.ground?0.4:0.9), fy=foe.y+(foe.ground?0:foe.vy*t), hb=FC(F).hurt||[9,52];
+  const on=fm.A.dash ? adx<FC(foe).reach+40 && Math.abs(dy)<24 : Math.abs(fx+foe.face*h.dx-F.x)<h.r+hb[0]+2 && fy+h.dy>F.y-hb[1]-h.r+2 && fy+h.dy<F.y+h.r-2;
+  // an aerial that will have landed by then never comes out
+  const sy=foe.ground?null:surfaceBelow(foe); if (sy!==null && fy+450*t*t>sy-3) return false;
+  // a smash can be held back past the stance (and a tilt may still turn into one), so those are countered less often
+  if (!on || Math.random()>L.dspec*(fm.A.charge?0.3:fm.smash?0.6:0.9)) return false;
+  ai.dsCd=rr(1.5,3); return true; }
 function cpuInput(F,dt){
   const ai=F.ai||(F.ai={cd:0.8,hold:0,holdDir:'n',jumpHold:0,projCd:1,wander:0});
   const L=CPU_LV[cpu.level], foe=F.foe, I={ax:0,up:false,down:false,jumpHeld:false,atkHeld:false,shieldHeld:false,p:{}};
-  ai.cd-=dt; ai.projCd-=dt; ai.wander-=dt;
+  ai.cd-=dt; ai.projCd-=dt; ai.wander-=dt; ai.dsCd=(ai.dsCd||0)-dt; ai.trapT=(ai.trapT||0)-dt;
   // DI: held toward the stage (and up) so launches bend back toward safety
   if (L.di && ((ai.diT=(ai.diT||0)-dt)<=0)){ ai.diT=0.5; ai.diOn=Math.random()<L.di; }
   if (ai.diOn) I.di={x:F.x<208?1:-1,y:-1};
@@ -3527,6 +3574,7 @@ function cpuInput(F,dt){
   if (F.ground && !F.mv && !(F.lag>0) && F.squat<=0 && fm && fm!==ai.seen && (lastHit(fm)||fm.A.grab) && adx<75 && Math.abs(dy)<40){
     ai.seen=fm; const first=fm.A.hits&&fm.A.hits.length?Math.min(...fm.A.hits.map(h=>h.f[0])):99;
     if (fm.A.grab){ if (Math.random()<L.shield*0.6){ I.shieldHeld=true; ai.shieldT=0.05; ai.dodge=Math.random()<0.5?'spot':-to; return I; } }
+    else if (cpuCounter(F,ai,L,foe,fm,first,adx,dy)){ I.down=true; I.p.special=true; return I; }
     else if (fm.f<first-4 && Math.random()<L.parry){ I.shieldHeld=true; ai.shieldT=9; ai.parryMv=fm; ai.parryF=first; return I; }
     else if (fm.f<first && Math.random()<L.shield){ I.shieldHeld=true; ai.shieldT=rr(0.25,0.5); const r=Math.random();
       if (r<0.15) ai.dodge='spot'; else if (r<0.25) ai.dodge=-to; return I; } }
@@ -3544,6 +3592,7 @@ function cpuInput(F,dt){
   const foeOff=!foe.ground && !foe.ledge && foe.stocks>0 && offStage(foe);
   if (ai.guardT>0 && !F.ground){ ai.guardT-=dt;
     if (foeOff && F.y<homeLedge(foe).y && (F.jumps>1 || F.vy<0)){ I.ax=to;
+      if (!F.mv && cpuDown(F,I,ai,L,foe,dx,dy,adx,to)) return I;
       if (!F.mv && adx<FC(F).reach+14 && Math.abs(dy)<40){ I.p.attack=true; if (dy>18) I.down=true; else if (dy<-20) I.up=true; }
       else if (F.vy>60 && F.jumps>1){ I.p.jump=true; ai.jumpHold=0.15; }
       return I; }
@@ -3568,7 +3617,9 @@ function cpuInput(F,dt){
     if (F.vy>-30 && F.jumps>0 && F.y>HT-50){ I.p.jump=true; ai.jumpHold=0.25; return I; }
     if (F.jumps<=0){
       if (F.y>HT-25 && !F.used.up){ I.ax=FC(F).recAx?home:0; I.up=true; I.p.special=true; return I; }
-      if (edge>60 && !F.used.side && F.y<HT+20){ I.p.special=true; return I; }
+      // a side special that carries the fighter (a dash or an arc) helps the way back; Kairos's is a thrown ring, which does not
+      const ss=FC(F).anims.sspec;
+      if (edge>60 && ss && (ss.dash||ss.arc) && !F.used.side && F.y<HT+20){ I.p.special=true; return I; }
       I.jumpHeld=!!FC(F).glide;
     }
     return I;
@@ -3586,7 +3637,8 @@ function cpuInput(F,dt){
   const walk=dir=>{ I.ax=nearEdge(dir)?0:dir; };
   // 2. between decisions: close in, follow onto platforms
   if (ai.cd>0 && !follow){
-    if (ai.wander>0) walk(ai.wDir); else if (adx>24) walk(to);
+    const hold=cpuTrap(F,ai,foe,to);
+    if (hold!==null){ if (hold) walk(hold); } else if (ai.wander>0) walk(ai.wDir); else if (adx>24) walk(to);
     if (F.ground && dy<-34 && adx<70 && Math.random()<dt*2.5){ I.p.jump=true; ai.jumpHold=0.25; }
     if (F.ground && F.plat.soft && dy>30 && adx<60 && Math.random()<dt*3) I.p.down=true;
     if (STAGE.big) cpuClimb(F,I,ai,dt,dx,dy,adx,to);
@@ -3603,6 +3655,8 @@ function cpuInput(F,dt){
   const reach=FC(F).reach+10, sloppy=Math.random()>L.acc;
   const press=(dir,special,hold)=>{ if (dir==='f') I.ax=to; if (dir==='u') I.up=true; if (dir==='d') I.down=true;
     if (special) I.p.special=true; else { I.p.attack=true; I.atkHeld=!!hold; if (hold) ai.hold=hold; } };
+  if (cpuDown(F,I,ai,L,foe,dx,dy,adx,to)) return I;
+  const hold=cpuTrap(F,ai,foe,to);
   if (F.ground){
     if (adx<26 && Math.abs(dy)<16 && (foe.shielding ? Math.random()<0.4+L.acc*0.5 : Math.random()<0.12)){ I.p.grab=true; return I; }   // grabs beat shields
     if (adx<reach+(sloppy?20:6) && Math.abs(dy)<24){
@@ -3615,6 +3669,10 @@ function cpuInput(F,dt){
       else press('d',false,ch);
       return I;
     }
+    // a trap is out and the foe is past arm's reach: shoot from here, do not walk in
+    if (hold!==null && adx<220 && Math.abs(dy)<40){
+      if (ai.projCd<=0 && F.face===to){ ai.projCd=rr(0.9,1.6); press('n',true); } else if (hold) walk(hold); else if (F.face!==to){ I.ax=to; ai.cd=0.03; }
+      return I; }
     if (dy<-24 && adx<26){ press('u',false,Math.random()<(foe.dmg>80?0.6:0.3)?(SMASH_HOLD+2)/60+rr(0,L.charge):0); return I; }
     if (dy<-34 && adx<80){ I.p.jump=true; ai.jumpHold=0.3; I.ax=to; return I; }
     if (adx>70 && adx<220 && Math.abs(dy)<40 && ai.projCd<=0 && Math.random()<0.45){

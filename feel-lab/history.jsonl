@@ -82,3 +82,25 @@
 {"when":"2026-11-10T12:34:46.025Z","md5":"3822ae87ee","label":"v29 baseline (installed Chrome)","set":"","quick":false,"score":98.8,"counts":{"pass":124,"warn":3,"fail":0},"fails":[]}
 {"when":"2026-11-10T12:35:02.228Z","md5":"3822ae87ee","label":"v29 baseline quick","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
 {"when":"2026-11-10T12:35:08.375Z","md5":"3822ae87ee","label":"v29 baseline full 2ch","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:39:22.753Z","md5":"1aadc40b54","label":"cpu dspec pass 1","set":"","quick":false,"score":98.4,"counts":{"pass":123,"warn":4,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:45:33.029Z","md5":"f5770064f1","label":"cpu dspec pass 2","set":"","quick":false,"score":98.4,"counts":{"pass":123,"warn":4,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:45:39.973Z","md5":"f5770064f1","label":"cpu dspec pass 2 (2ch)","set":"","quick":false,"score":97.6,"counts":{"pass":60,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:45:46.353Z","md5":"f5770064f1","label":"","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:49:02.171Z","md5":"7f379b11c8","label":"cpu dspec + edge hold","set":"","quick":false,"score":98.4,"counts":{"pass":123,"warn":4,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:49:09.009Z","md5":"7f379b11c8","label":"cpu dspec + edge hold (2ch)","set":"","quick":false,"score":97.6,"counts":{"pass":60,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:49:15.555Z","md5":"7f379b11c8","label":"","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:51:17.168Z","md5":"d70e60393d","label":"cpu dspec + edge hold, pass 3","set":"","quick":false,"score":98.8,"counts":{"pass":124,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:51:23.873Z","md5":"d70e60393d","label":"pass 3 (2ch)","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T12:51:30.535Z","md5":"d70e60393d","label":"","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:09:11.078Z","md5":"47922c90fc","label":"v30: CPU down specials + edge hold (4 fighters)","set":"","quick":false,"score":98.8,"counts":{"pass":124,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:09:20.485Z","md5":"47922c90fc","label":"v30: CPU down specials + edge hold","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:09:30.087Z","md5":"47922c90fc","label":"v30 quick","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:14:18.398Z","md5":"aec69f9a77","label":"v30: CPU down specials + edge hold (4 fighters)","set":"","quick":false,"score":98.4,"counts":{"pass":123,"warn":4,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:14:24.851Z","md5":"aec69f9a77","label":"v30: CPU down specials + edge hold","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:14:30.967Z","md5":"aec69f9a77","label":"v30 quick","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:15:37.897Z","md5":"4bb5a3cc1f","label":"v30: CPU down specials + edge hold (4 fighters)","set":"","quick":false,"score":98.4,"counts":{"pass":123,"warn":4,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:15:44.657Z","md5":"4bb5a3cc1f","label":"v30: CPU down specials + edge hold","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:15:51.127Z","md5":"4bb5a3cc1f","label":"v30 quick","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:16:40.804Z","md5":"4ff7688ea6","label":"v30: CPU down specials, edge hold, Kairos recovery (4 fighters)","set":"","quick":false,"score":98.8,"counts":{"pass":124,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:16:47.337Z","md5":"4ff7688ea6","label":"v30: CPU down specials, edge hold, Kairos recovery","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:16:53.647Z","md5":"4ff7688ea6","label":"v30 quick","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
