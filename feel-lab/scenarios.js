@@ -43,7 +43,7 @@ S.cpu_exchange={frames:360, every:3, cpu:true, seed:5, setup(){ H.dmg=40; D.dmg=
 // CPU Hard (P2) using each down special against a scripted P1. Run each with its own fighter:
 //   node clips.cjs --only cpu_counter --ch hermes     (Psychopomp Guard answers a forward tilt)
 //   node clips.cjs --only cpu_stomp,cpu_plunge --ch aethon   (shockwave along the floor; plunge from above)
-//   node clips.cjs --only cpu_field --ch kairos       (Stilled Instant, then Kairos steps out of his own field)
+//   node clips.cjs --only cpu_field --ch kairos       (Stilled Instant dropped on a whiffed smash, then the punish)
 //   node clips.cjs --only cpu_puddle,cpu_stream --ch iris    (a puddle in the runner's path; the stream on a foe below)
 // The CPU rolls dice, so each has a seed where the move comes out (find-seeds.cjs looks for them with ok()).
 const wait=(cd=1.5)=>{ D.ai={cd,hold:0,holdDir:'n',jumpHold:0,projCd:1,wander:0}; };
@@ -53,8 +53,8 @@ S.cpu_stomp={frames:150, cpu:true, seed:4, setup(){ H.x=120; H.face=1; D.x=230; 
   input:i=>i<30?{ax:1}:{}, ok:()=>H.stun>0 && D.mv && D.mv.key==='dspec' && !D.mv.plunge};
 S.cpu_plunge={frames:170, cpu:true, seed:4, setup(){ H.x=208; H.face=1; H.dmg=D.dmg=30; Object.assign(D,{x:206,y:53,face:-1}); wait(0.2); },
   input:i=>({shieldHeld:i>70&&i<80}), ok:()=>D.mv && D.mv.key==='dspec' && D.mv.plunge && D.mv.hit.has('spike')};
-S.cpu_field={frames:240, every:3, cpu:true, seed:14, setup(){ H.x=110; H.face=1; D.x=250; D.face=-1; H.dmg=D.dmg=30; wait(0.3); },
-  input:i=>({ax:1}), ok:()=>fields.some(q=>q.own===D && Math.hypot(H.x-q.x,H.y-24-q.y)<q.r) && slowOf(D)===1 && H.stun>0};
+S.cpu_field={frames:200, every:3, cpu:true, seed:49, setup(){ H.x=152; H.face=1; D.x=204; D.face=-1; H.dmg=D.dmg=30; wait(0.4); },
+  input:i=>i>=8&&i<24?{ax:1,atkHeld:true,p:{attack:i===8}}:{}, ok:()=>fields.some(q=>q.own===D) && slowOf(H)<1 && H.stun>0};
 S.cpu_puddle={frames:200, every:3, cpu:true, seed:1, setup(){ H.x=110; H.face=1; D.x=285; D.face=-1; H.dmg=D.dmg=30; wait(0.2); },
   input:i=>i<20?{}:{ax:1}, ok:()=>!!H.lie && H.dmg>30 && H.dmg<=32.5};
 S.cpu_stream={frames:170, cpu:true, seed:4, setup(){ H.x=208; H.face=1; H.dmg=D.dmg=30; Object.assign(D,{x:206,y:53,face:-1}); wait(0.2); },

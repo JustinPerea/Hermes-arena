@@ -20,14 +20,15 @@ The roster doc rates Aethon's recovery 3/5, the same as Hermes, but also gives h
 - **Shorten the glide to about 1 s (recommended):** recovery drops to a normal range and he stays the hard-to-kill heavy.
 - **Keep it:** Aethon is a recovery specialist; the doc's recovery rating should go up to 4-5.
 
-## Q4. Stilled Instant gives Kairos nothing. Change it? (open)
+## Q4. Stilled Instant gives Kairos nothing. Change it? (answered: Kairos is immune to his own field, done in v31; cast length still open)
 
-You said to try the slow field as is (it slows everyone, Kairos included). Measured over 200 CPU Hard matches where only one Kairos uses it: about even on the Altar, and about 0.2 stocks a match worse on Kyllene when he used it freely. Two reasons: he stands inside it for the 0.8 s the cast takes to finish at half speed, and a 40-frame move that deals no damage costs him the exchange. So the CPU now uses it rarely (under once a match).
+Before v31 the field slowed Kairos too, and the CPU got hit out of the cast most of the time. Justin: he should be immune. Done, and the CPU now casts it only on a foe who cannot answer in time (LOG.md, v31): safe, about 8% net damage per cast, but under one cast a match, so it does not move match results.
 
-- **Kairos immune to his own field, and a shorter cast, 40 to 28 frames (recommended):** measured as roughly even to slightly ahead (+0.07 Altar, +0.04 Kyllene), so at least no longer a liability. A real payoff probably needs more on top (a longer field, or shots keeping full speed inside it).
-- **Keep as is:** it stays a move the CPU, and a good player, mostly avoids.
+Still open: the cast is 40 frames, 16 before the field opens. That is why it can only be used on a foe who is already stuck.
+- **Shorten it to 28 frames (recommended to try):** with immunity this measured +0.07 stocks a match on the Altar and +0.04 on Kyllene under the older, looser CPU rule. It would let the field be used in neutral, which is what a zoner wants it for.
+- **Keep 40:** it stays a follow-up tool only.
 
-Try it without editing: `node lab.cjs --set "slowOf=function(F){ if (F.stocks<=0) return 1; for (const q of fields) if (q.own!==F && Math.hypot(F.x-q.x,F.y-24-q.y)<q.r) return 0.5; return 1; }; CHARS.kairos.anims.dspec.total=28"`.
+Try it: `node lab.cjs --set "CHARS.kairos.anims.dspec.total=28"`.
 
 ## Q5. Grounded attacks no longer slide off the edge (done in v30; say if you want it back)
 

@@ -383,6 +383,32 @@
    ],
    "why": "CPU falling off on its own is not a fight.",
    "source": "design"
+  },
+  "kofx_false": {
+   "label": "Share of KO slow-motion moments where nobody was KO'd",
+   "target": [
+    0,
+    0.15
+   ],
+   "warn": [
+    0,
+    0.3
+   ],
+   "why": "The slow motion and zoom promise a KO. Until v31 it fired on 63% of strong hits that the victim simply recovered from.",
+   "source": "design; Smash's KO zoom is rarely wrong"
+  },
+  "kofx_missed": {
+   "label": "Share of KOs off a hit that got no slow motion",
+   "target": [
+    0,
+    0.1
+   ],
+   "warn": [
+    0,
+    0.2
+   ],
+   "why": "A kill should get its moment.",
+   "source": "design"
   }
  },
  "stability": {

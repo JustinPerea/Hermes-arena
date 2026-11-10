@@ -104,3 +104,13 @@
 {"when":"2026-11-10T13:16:40.804Z","md5":"4ff7688ea6","label":"v30: CPU down specials, edge hold, Kairos recovery (4 fighters)","set":"","quick":false,"score":98.8,"counts":{"pass":124,"warn":3,"fail":0},"fails":[]}
 {"when":"2026-11-10T13:16:47.337Z","md5":"4ff7688ea6","label":"v30: CPU down specials, edge hold, Kairos recovery","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
 {"when":"2026-11-10T13:16:53.647Z","md5":"4ff7688ea6","label":"v30 quick","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:31:46.182Z","md5":"c25b45db95","label":"v31: Kairos immune to his own field (4 fighters)","set":"","quick":false,"score":98.8,"counts":{"pass":124,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:31:56.180Z","md5":"c25b45db95","label":"v31: Kairos immune to his own field","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:32:02.502Z","md5":"c25b45db95","label":"v31 quick","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:34:31.125Z","md5":"d20f4dde65","label":"v31: Kairos immune, KO slow-mo only on real KOs (4 fighters)","set":"","quick":false,"score":98.8,"counts":{"pass":124,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:34:37.343Z","md5":"d20f4dde65","label":"v31: Kairos immune, KO slow-mo only on real KOs","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:34:43.332Z","md5":"d20f4dde65","label":"v31 quick","set":"","quick":true,"score":98.5,"counts":{"pass":100,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:35:21.259Z","md5":"3822ae87ee","label":"v29 re-measured with the v31 lab (30 seeds, KO slow-mo metrics)","set":"","quick":false,"score":95.5,"counts":{"pass":63,"warn":2,"fail":2},"fails":["kofx_false:hermes","kofx_false:aethon"]}
+{"when":"2026-11-10T13:35:27.779Z","md5":"3822ae87ee","label":"v29 re-measured with the v31 lab, 4 fighters","set":"","quick":false,"score":95.9,"counts":{"pass":128,"warn":3,"fail":4},"fails":["kofx_false:hermes","kofx_false:aethon","kofx_false:kairos","kofx_false:iris"]}
+{"when":"2026-11-10T13:35:35.009Z","md5":"d20f4dde65","label":"v31","set":"","quick":false,"score":98.5,"counts":{"pass":65,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:35:41.770Z","md5":"d20f4dde65","label":"v31, 4 fighters","set":"","quick":false,"score":98.9,"counts":{"pass":132,"warn":3,"fail":0},"fails":[]}

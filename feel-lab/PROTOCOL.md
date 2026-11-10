@@ -8,7 +8,7 @@ The game is one file: `game/pixel-hermes.html` in this repo (published at https:
 | Command | What it does | Time |
 |---|---|---|
 | `node lab.cjs --quick` | Movement, combat and frame-data probes for both fighters, scored against `spec.json` | ~7 s |
-| `node lab.cjs` | Same plus 6 seeded CPU Hard mirror matches per fighter (pacing, stability) | ~10 s |
+| `node lab.cjs` | Same plus 30 seeded CPU Hard mirror matches per fighter (pacing, KO slow-motion accuracy, stability) | ~10 s |
 | `node lab.cjs --set "FEEL.stunK=0.002"` | Run with a change applied in the page, without editing the game | |
 | `node sweep.cjs [--full] --try "A" --try "B"` | Compare candidates to the current game, metric by metric | ~10 s each |
 | `node clips.cjs [--only name] [--ch both] [--set ...]` | GIFs + labelled contact sheets of scenarios in `scenarios.js` | ~8 s each |

@@ -200,3 +200,20 @@ Tried and dropped: an air counter for Hermes (whiffed half the time), a counter 
 Also seen, not fixed: the KO slow motion can fire on a hit that does not KO (Iris down smash on a tripped foe at 45%: `willKO` ignores the side platforms).
 
 Clips: `cpu_counter`, `cpu_stomp`, `cpu_plunge`, `cpu_field`, `cpu_puddle`, `cpu_stream` in scenarios.js (the header there lists which fighter to pass). `find-seeds.cjs` finds a seed where a dice-rolling scenario shows its move. Played in the real page too (Chrome, real loop and key events, 90 s against each CPU fighter): steady 60 fps, no errors.
+
+## v31 (2026-11-10) Kairos immune to his own field; KO slow motion only on real KOs; lab measures both
+
+The lab changed in this version, so scores are not comparable with earlier entries: it now plays 30 CPU matches per fighter instead of 6 and scores two new metrics. Re-measured with the new lab: **v29 95.5 (2 fails) to v31 98.5** (Hermes, Aethon); with all four fighters 95.9 (4 fails) to 98.9. With the old lab v31 reads the same as v30 (quick 98.5, full 98.4 and 98.8).
+
+| Change | Notes |
+|---|---|
+| Kairos is not slowed by his own Stilled Instant (Justin, Q4). `slowOf()`; help text and move description updated | Projectiles, his own included, still slow down inside it |
+| CPU Kairos casts it only on a foe who cannot answer within the 16 frames it takes to open: knocked down, dazed, launched out of arm's reach, or stuck in the tail of a whiffed move, and who will still be inside when it opens. The "step out of your own field" stance is gone | Per cast, over the next 3 s: 10.4% dealt, 2.1% taken, hit out of the cast 4% of the time. Before this rule (casting on a free foe in range): 6.3 dealt, 9.7 taken, hit out of it 62% of the time |
+| CPU shield timer runs on the attacker's clock | A hit thrown from inside a slow field arrives late; the CPU used to drop shield before it landed |
+| `willKO()` follows the launch for the victim's hitstun plus `FEEL.koLook` (10) frames and stops at any platform, instead of 150 frames of free flight | The slow motion and zoom fired on 63% of strong hits on the Altar where the victim then recovered (45% on Kyllene). Now 6% and 1%; KOs that get no slow motion stay at 1%. Sweep: koLook 0 gives 0% false and 7% missed; 20 gives 12% and 1% |
+| Lab: `kofx_false` and `kofx_missed` in spec.json (pacing), measured in the CPU matches | v29 fails `kofx_false` for every fighter (0.57 to 0.71) |
+| Lab: 30 seeds by default (`--seeds`) | With 6, self-destructs and KO % flipped between pass and warn on dice alone. Still about 7 s |
+
+Still even in one-sided tests (Kairos with the field against Kairos without, 400 matches): 205-195 on the Altar. At about 0.6 casts a match the move is safe now, not strong. The cast length (40 frames) is unchanged; Q4 has the numbers for 28.
+
+Clip: `cpu_field` now shows the field dropped on a whiffed smash.

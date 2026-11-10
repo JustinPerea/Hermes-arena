@@ -155,11 +155,16 @@ LAB.match=function(level,capS){
   const lastHit=new Map([[H,-99],[D,-99]]); let t=0;
   const oLH=landHit, oKB=koBurst;
   landHit=function(T){ const d0=T.dmg; const r=oLH.apply(this,arguments); if (T.dmg>d0) lastHit.set(T,t); return r; };
-  koBurst=function(b){ out.kos.push({who:b===H?'P1':'P2',pct:Math.round(b.dmg),t:+t.toFixed(1),since:+(t-lastHit.get(b)).toFixed(1)}); return oKB.apply(this,arguments); };
+  // KO slow motion: fired, fired on a hit that did not KO within 6 s, and KOs off a hit that got none
+  out.fx=0; out.fxWrong=0; out.fxMissed=0; out.hitKOs=0; let lastFx=null, pend=[]; const fxAt=new Map([[H,-99],[D,-99]]);
+  koBurst=function(b){ out.kos.push({who:b===H?'P1':'P2',pct:Math.round(b.dmg),t:+t.toFixed(1),since:+(t-lastHit.get(b)).toFixed(1)});
+    if (t-lastHit.get(b)<=4){ out.hitKOs++; if (t-fxAt.get(b)>6) out.fxMissed++; } pend=pend.filter(q=>q.o!==b); return oKB.apply(this,arguments); };
   const seen=new Map();
   playerInput=()=>cpuInput(H,DT);
   try {
     for (let i=0;i<capS*60;i++){ step(DT); t+=DT; out.frames++;
+      if (koFx && koFx!==lastFx){ lastFx=koFx; out.fx++; fxAt.set(koFx.o,t); pend.push({o:koFx.o,t}); }
+      if (pend.length && t-pend[0].t>6){ out.fxWrong++; pend.shift(); }
       if (match.over>0) break;
       for (const F of [H,D]){ if (!isFinite(F.x)||!isFinite(F.y)||!isFinite(F.vx)||!isFinite(F.vy)) out.nan++;
         const st=F.mv||(F.stun>0?'stun':null)||(F.brk>0?'brk':null)||(F.lie?'lie':null)||(F.ledge?'ledge':null)||(F.holding?'hold':null)||(F.shielding?'shield':null)||F.helpless&&'helpless'||'free';

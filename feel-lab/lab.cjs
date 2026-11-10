@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 // Hermes Arena feel lab: measures the game against spec.json and writes a scorecard.
-// usage: node lab.cjs [--html path] [--out dir] [--quick] [--seeds 3] [--label text] [--set 'FEEL.shortHop=300']
+// usage: node lab.cjs [--html path] [--out dir] [--quick] [--seeds 30] [--label text] [--set 'FEEL.shortHop=300']
 //   --set     JS run in the page before probing: try a change without editing the game
-//   --quick   skip the CPU pacing matches (about 10 s instead of ~1-2 min)
+//   --quick   skip the CPU pacing matches
+//   --seeds   CPU Hard mirror matches per fighter (default 30; with fewer the pacing numbers swing on dice alone)
 // Output: <out>/report.json, <out>/report.md, and one line appended to <lab>/history.jsonl
 const fs=require('fs'); const path=require('path'); const crypto=require('crypto');
 const LAB=__dirname;
@@ -10,7 +11,7 @@ const arg=(k,d)=>{ const i=process.argv.indexOf('--'+k); return i<0?d:(process.a
 const HTML=path.resolve(arg('html',path.join(__dirname,'../game/pixel-hermes.html')));
 const CHS=String(arg('ch','hermes,aethon')).split(',');
 const OUT=path.resolve(arg('out',path.join(LAB,'out')));
-const SET=arg('set',''), QUICK=!!arg('quick',false), SEEDS=+arg('seeds',6), LABEL=arg('label','');
+const SET=arg('set',''), QUICK=!!arg('quick',false), SEEDS=+arg('seeds',30), LABEL=arg('label','');
 const spec=JSON.parse(fs.readFileSync(path.join(LAB,'spec.json'),'utf8'));
 fs.mkdirSync(OUT,{recursive:true});
 
@@ -30,6 +31,8 @@ function grade(v,m){ if (v==null||Number.isNaN(v)) return 'fail'; const [a,b]=m.
       r.ko_pct=stocks?Math.round(kos.reduce((a,k)=>a+k.pct,0)/stocks):0;
       r.timeout_rate=+(ms.filter(m=>m.timeout).length/ms.length).toFixed(2);
       r.self_destructs=stocks?+(kos.filter(k=>k.since>4).length/stocks).toFixed(2):0;
+      const sum=k=>ms.reduce((a,m)=>a+(m[k]||0),0);
+      r.kofx_false=sum('fx')?+(sum('fxWrong')/sum('fx')).toFixed(2):0; r.kofx_missed=sum('hitKOs')?+(sum('fxMissed')/sum('hitKOs')).toFixed(2):0;
       r.nan_frames=ms.reduce((a,m)=>a+m.nan,0); r.stuck=ms.reduce((a,m)=>a+m.stuck,0);
       r._matches=ms.map(m=>({secs:m.secs,timeout:m.timeout,kos:m.kos,stuckWhat:m.stuckWhat})); }
     res.fighters[ch]=r; }
