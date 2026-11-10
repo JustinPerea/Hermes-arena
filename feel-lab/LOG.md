@@ -165,3 +165,8 @@ Justin: arms, elbows, shoulders and hands looked like puppets. New drawLimb(): t
 - Engine: specHeld input (K/L/C or right mouse), slow-field dt scaling for fighters and shots, temp platforms, piercing shots. Fixed: rise up-specials did nothing from the ground (Hermes too). Kairos tether grab now reaches close foes. Design notes hidden per fighter.
 - Tuning: Kairos run .97 air .72 grav .84 fall 278 weight .92; Iris air .78 fall 280 dJump 296; smash KO power trimmed; Kairos dair hovers.
 - Lab (lab.cjs now takes --ch): quick 98.5 for all four; full with matches 98.4. Video: videos/v28-kairos-iris.mp4.
+
+## v29 (2026-11-10) Stage drop 3: clearer floors
+- apply-stages.cjs refreshed the stage block (Kyllene: pale wash behind scenery, cream/gold standable edges, solid vs dashed undersides).
+- Iris's Bridge of Heaven now draws the same edge marker (ink outline, #fff8e2 top, gold band, dashed ink underside) over its rainbow.
+- Lab quick 98.5 (all four). Video: videos/v29-floors.mp4.

@@ -108,6 +108,26 @@ function stageColumn(B,x0,top,bot,w,mat,o={}){
   if (o.ionic){ ell(B,x0-2.6,top-2.8,1.8,1.8,mat,{flat:12}); ell(B,x0+w+2.6,top-2.8,1.8,1.8,mat,{flat:12}); }
   if (o.base!==false) poly(B,[[x0-1.5,bot-3],[x0+w+1.5,bot-3],[x0+w+3,bot],[x0-3,bot]],mat,{...o,flat:13}); }
 
+// big maps: a pale wash over the scenery, then every surface you can stand on drawn crisp on top:
+// a bright cream-and-gold top edge with a dark ink outline. Solid ground gets a solid dark underside;
+// pass-through floors get a dashed underside, so you can tell which ones you can jump up through.
+function hazeLayer(s,col){ const {LX,LY,LW,LH}=stageBounds(s); return {par:1, draw:g=>{ g.fillStyle=col; g.fillRect(LX,LY,LW,LH); }}; }
+function walkLayer(s){
+  const {LX,LY,LW,LH}=stageBounds(s), K=RES, cv=document.createElement('canvas'); cv.width=LW*K; cv.height=LH*K;
+  const g=cv.getContext('2d'), R=(x,y,w,h,c)=>{ g.fillStyle=c; g.fillRect(Math.round((x-LX)*K),Math.round((y-LY)*K),Math.round(w*K),Math.round(h*K)); };
+  const INKC='#0b1030', TOP='#fff8e2', GLD='#efbe46', GLD2='#c98a1c', FACE='#e2e7f2', FACE2='#bcc7e2';
+  const edge=(l,r,t,soft)=>{ const w=r-l;
+    R(l-1.5,t-1,w+3,soft?6:5.5,INKC);                 // ink outline
+    R(l-1,t-0.5,w+2,1.5,TOP);                         // lit walking surface
+    R(l-1,t+1,w+2,1,GLD); R(l-1,t+2,w+2,1,GLD2);      // gold band
+    R(l-1,t+3,w+2,soft?1.5:1.5,soft?FACE2:FACE);
+    if (soft){ for (let x=l;x<r-2;x+=6) R(x,t+5,3,1.5,INKC); }               // dashed underside = pass-through
+    else R(l-1.5,t+4.5,w+3,1.5,INKC);
+    R(l-1.5,t-1,1,soft?6:6,INKC); R(r+0.5,t-1,1,soft?6:6,INKC); };
+  for (const k of s.blocks||[]) edge(k.l,k.r,k.t,false);
+  for (const p of s.plats) edge(p.l,p.r,p.t,true);
+  return {par:1, cv, x:LX,y:LY,w:LW,h:LH}; }
+
 // ---- 1. Altar of the Agora: the original stage, art built above ----------------------------
 defStage({id:'altar', name:'ALTAR', full:'ALTAR OF THE AGORA',
   solids:SOLIDS.map(o=>({...o})), plats:PLATS.map(o=>({...o})), altar:{...ALTAR}, camb:{...CAMB}, spawns:[142,276],
@@ -265,7 +285,7 @@ defStage({id:'kyllene', name:'KYLLENE', full:'SANCTUARY OF KYLLENE', big:true, m
       // leaves drifting from the groves
       for (let i=0;i<12;i++){ const k=((t*0.05+i/12)%1), x=-420+((i*131+t*20)%1300), y=-100+k*360+Math.sin(t*2+i)*4;
         g.fillStyle=i%2?'#83996f':'#5a7550'; g.fillRect(snap(x),snap(y),1.5,1); } }};
-    return {back:[far,mid,fg,fx], front:[]};
+    return {back:[far,mid,fg,hazeLayer(s,'rgba(205,216,238,0.36)'),walkLayer(s),fx], front:[]};
   }});
 
 const STAGE_IDS=Object.keys(STAGES);

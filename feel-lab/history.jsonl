@@ -78,4 +78,4 @@
 {"when":"2026-11-09T19:56:54.114Z","md5":"f1d4102706","label":"sweep","set":"CHARS.aethon.glideMax=1; CHARS.aethon.airSpeed=0.6; CHARS.aethon.anims.uspec.beatDrift=65; CHARS.aethon.dJump=240; CHARS.aethon.anims.uspec.beatV=180","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
 {"when":"2026-11-09T19:57:01.606Z","md5":"f1d4102706","label":"sweep","set":"CHARS.aethon.glideMax=1; CHARS.aethon.airSpeed=0.6; CHARS.aethon.anims.uspec.beatDrift=65; CHARS.aethon.dJump=250; CHARS.aethon.anims.uspec.beatV=190","quick":false,"score":96.8,"counts":{"pass":60,"warn":2,"fail":1},"fails":["recovery_h:aethon"]}
 {"when":"2026-11-09T19:57:15.998Z","md5":"74e36eb0df","label":"v22: Aethon glide 1 s, air speed 0.6, dJump 240, wingbeats 180/65","set":"","quick":false,"score":98.4,"counts":{"pass":61,"warn":2,"fail":0},"fails":[]}
-{"when":"2026-11-10T11:34:00.279Z","md5":"e9c05b04a6","label":"","set":"","quick":true,"score":98,"counts":{"pass":49,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T11:36:23.143Z","md5":"3822ae87ee","label":"","set":"","quick":true,"score":98,"counts":{"pass":49,"warn":2,"fail":0},"fails":[]}
