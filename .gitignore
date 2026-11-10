@@ -1,5 +1,6 @@
 node_modules/
 cyanotype/dist/
+plugin/dist/
 dist/
 feel-lab/out/
 feel-lab/videos/

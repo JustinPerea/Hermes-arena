@@ -2,7 +2,7 @@
 
 An original Smash-style platform fighter set in the world of the Nous Research Hermes mascot, built to run as a plugin for **Hermes Desktop**. All characters and stages are drawn procedurally in code: no image files ship with the game.
 
-The current direction is **pixel art** (`game/pixel-hermes.html`): four playable fighters (Hermes, Aethon, Kairos, Iris), two stages (Altar of the Agora and the big multi-storey Sanctuary of Kyllene), a CPU opponent, full match flow (title, fighter select, 3-2-1-GO, pause, results), synthesized sound and gamepad support. An earlier **cyanotype** (blue-ink engraving) engine lives in `cyanotype/` and is the one that currently builds the Hermes Desktop plugin.
+The current direction is **pixel art** (`game/pixel-hermes.html`): four playable fighters (Hermes, Aethon, Kairos, Iris), two stages (Altar of the Agora and the big multi-storey Sanctuary of Kyllene), a CPU opponent, full match flow (title, fighter select, 3-2-1-GO, pause, results), synthesized sound and gamepad support. `plugin/` builds it into a Hermes Desktop plugin. An earlier **cyanotype** (blue-ink engraving) engine lives in `cyanotype/`.
 
 ## Quick start
 
@@ -21,9 +21,10 @@ Useful URL flags: `?stage=kyllene` picks a stage. Controls are listed on the pag
 |---|---|
 | `game/pixel-hermes.html` | **The current game.** Single file: rasteriser, all four fighters, moves, CPU, camera, stages, match flow, sound, tuning panel, animation sheet. |
 | `stages/` | Stage registry (`stages.js`), the patch that merges it into the game (`apply-stages.cjs`), previews, and parked drop-1 stages (`stages-archive.js`). See `stages/README.md`. |
+| `plugin/` | Builds the pixel game into a **Hermes Desktop plugin** (`build.mjs`) and checks it in Chrome (`test.cjs`). The game file is not changed; see `plugin/README.md`. |
 | `feel-lab/` | Automated feel testing: drives the real game headless, scores it against Smash-derived targets (`spec.json`), renders GIF/video comparisons. `PROTOCOL.md` is the improvement loop, `LOG.md` the change history, `QUESTIONS.md` open design questions. |
 | `art/` | Pixel design studies: front-facing portraits (`front-views/`), Kairos and Iris design code and sheets (`kairos-iris/`), the v26 arm comparison. |
-| `cyanotype/` | The earlier modular engine (`src/`), with build script, headless rules/balance tests (`tools/`), cutout puppet skins (`concepts/`), roster doc snapshot (`data/`) and balance reports. Builds the web page, animation book and the **Hermes Desktop plugin**. |
+| `cyanotype/` | The earlier modular engine (`src/`), with build script, headless rules/balance tests (`tools/`), cutout puppet skins (`concepts/`), roster doc snapshot (`data/`) and balance reports. Builds the web page, animation book and its own Hermes Desktop plugin (same plugin id as the pixel one). |
 | `reference/` | Visual references: GPT Image mockups Justin made, Nous Hermes reference art (`nous-reference/`), and the Krea sprite-sheet test page. |
 | `docs/PROJECT-NOTES.md` | Decision history and working notes: what was decided, why, and how to apply it. Read this before changing direction. |
 
@@ -53,7 +54,16 @@ node video.cjs --before old.html         # side-by-side before/after MP4
 
 The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build, and use the installed Google Chrome when there is one. Last recorded score: 98.5 (v31; 98.9 with all four fighters). The lab plays 30 CPU matches per fighter since v31, so earlier scores in LOG.md are not comparable (v29 re-measured: 95.5).
 
-## Working on the cyanotype engine / plugin
+## Hermes Desktop plugin (pixel game)
+
+```
+node plugin/build.mjs                              # writes plugin/dist/hermes-arena/plugin.js
+NODE_PATH=$(npm root -g) node plugin/test.cjs      # mount, play, unmount and loader checks in Chrome
+```
+
+Copy `plugin/dist/hermes-arena/` to `~/.hermes/desktop-plugins/` and reload desktop plugins (⌘K): the game appears as "Hermes Arena" in the sidebar. Rebuild after every change to the game. The checks use a stand-in for the app shell; as of v31 the plugin has not yet been run inside Hermes Desktop itself. How the wrapper works and the layout decisions: `plugin/README.md`. The plugin format notes are in `docs/PROJECT-NOTES.md` (section `hermes-desktop-plugin-format`).
+
+## Working on the cyanotype engine
 
 ```
 cd cyanotype
@@ -62,9 +72,7 @@ node tools/rules-test.cjs         # 19 engine rule checks
 node tools/balance.cjs out --fighters hermes,hermes   # KO table and frame checks
 ```
 
-`dist/hermes-arena/plugin.js` is the Hermes Desktop plugin: copy the `hermes-arena` folder to `~/.hermes/desktop-plugins/` and reload desktop plugins (⌘K). The plugin format notes are in `docs/PROJECT-NOTES.md` (section `hermes-desktop-plugin-format`).
-
-Porting the pixel game into the plugin shell is not done yet; it is the natural next step for shipping.
+`dist/hermes-arena/plugin.js` is the cyanotype game as a Hermes Desktop plugin. It has the same plugin id as the pixel one (`hermes-arena`), so install only one of them.
 
 ## Design documents (Claude artifacts)
 
@@ -78,7 +86,7 @@ These links are private to the owner's claude.ai account.
 
 ## Not in the repo
 
-Generated output is ignored: `cyanotype/dist/`, `feel-lab/out/`, `feel-lab/videos/` (feel-lab comparison videos, ~200 MB) and the Krea per-frame sprite PNGs. They can all be regenerated from the scripts here.
+Generated output is ignored: `cyanotype/dist/`, `plugin/dist/`, `feel-lab/out/`, `feel-lab/videos/` (feel-lab comparison videos, ~200 MB) and the Krea per-frame sprite PNGs. They can all be regenerated from the scripts here.
 
 ## Credits
 
