@@ -3475,9 +3475,9 @@ function step(dt){
 // ---- CPU ---------------------------------------------------------------------
 // It reads the situation every so often (slower on Easy), then presses buttons like a player would:
 // recover to the stage first, otherwise approach and pick an attack from where the foe is.
-const CPU_LV=[{think:[0.4,0.75],acc:0.5,aggr:0.45,charge:0.15,combo:0.15,di:0,shield:0.12,tech:0.15,oos:0.2,parry:0,guard:0,dspec:0.1},
-  {think:[0.2,0.38],acc:0.8,aggr:0.7,charge:0.35,combo:0.5,di:0.6,shield:0.35,tech:0.5,oos:0.5,parry:0.1,guard:0.6,dspec:0.45},
-  {think:[0.08,0.18],acc:0.95,aggr:0.9,charge:0.55,combo:0.85,di:1,shield:0.6,tech:0.85,oos:0.8,parry:0.3,guard:1.8,dspec:0.8}];
+const CPU_LV=[{think:[0.4,0.75],acc:0.5,aggr:0.45,charge:0.15,combo:0.15,di:0,shield:0.12,tech:0.15,oos:0.2,parry:0,guard:0,dspec:0.1,haz:0},
+  {think:[0.2,0.38],acc:0.8,aggr:0.7,charge:0.35,combo:0.5,di:0.6,shield:0.35,tech:0.5,oos:0.5,parry:0.1,guard:0.6,dspec:0.45,haz:0},
+  {think:[0.08,0.18],acc:0.95,aggr:0.9,charge:0.55,combo:0.85,di:1,shield:0.6,tech:0.85,oos:0.8,parry:0.3,guard:1.8,dspec:0.8,haz:0}];
 const rr=(a,b)=>a+Math.random()*(b-a);
 // Down specials. Each fighter's is a different tool, so the CPU looks at what the move does (counter, stomp, field, pour)
 // and spends it only where that tool works. L.dspec is how often a level takes the chance; ai.dsCd spaces the uses out.
@@ -3525,7 +3525,35 @@ function cpuCounter(F,ai,L,foe,fm,first,adx,dy){
   // a smash can be held back past the stance (and a tilt may still turn into one), so those are countered less often
   if (!on || Math.random()>L.dspec*(fm.A.charge?0.3:fm.smash?0.6:0.9)) return false;
   ai.dsCd=rr(1.5,3); return true; }
-function cpuInput(F,dt){
+// Hazards the foe has put down. A CPU that has noticed one (L.haz is the chance, rolled once per hazard and fighter) keeps off
+// a Styx puddle: it hops one that is in its path or being poured at its feet, and steers a landing away from it. It also keeps out
+// of a slow field: it walks out if it is inside, and waits at the rim rather than walking in.
+// Only plain movement is changed; an attack, shield or jump the CPU has chosen goes ahead.
+// OFF at every level (haz:0) until Justin decides: it halves the trips but costs the CPU about 0.1 stocks a match against Iris,
+// because barging through a puddle usually works (feel-lab/QUESTIONS.md Q6).
+function cpuHazards(F,I){
+  const L=CPU_LV[cpu.level], foe=F.foe;
+  if (!L.haz || F.stun>0 || F.lie || F.ledge || F.grabbedBy || F.holding || F.shielding || F.helpless) return I;
+  const act=I.p.attack || I.p.special || I.p.grab || I.p.shield || I.p.jump || I.shieldHeld || I.atkHeld, free=!F.mv && !act;
+  if (!free && !(F.mv && F.mv.A.air && !F.ground)) return I;
+  const sees=q=>{ if (!q.seen) q.seen=new Map(); if (!q.seen.has(F)) q.seen.set(F,Math.random()<L.haz); return q.seen.get(F); };
+  // puddles on the floor, and the spot the foe is pouring onto right now (known before the water lands)
+  const spots=puddles.filter(q=>q.own===foe && q.life-q.t>0.1).map(q=>({x:q.x,plat:q.plat,q})), pm=foe.mv;
+  if (pm && pm.A.pour && foe.ground && pm.f<pm.A.pour.f+2) spots.push({x:foe.x+foe.face*20,plat:foe.plat,q:pm});
+  for (const p of spots){ if (!sees(p.q)) continue;
+    // on the ground it trips anyone moving faster than a crawl. Far enough ahead: hop it. Too close for the jump to leave the floor
+    // in time: a shield tap kills the speed, and the hop comes from a standstill
+    if (F.ground){ const d=(p.x-F.x)*(I.ax||Math.sign(F.vx)), fast=Math.abs(F.vx)>40; if (p.plat!==F.plat || !free) continue;
+      if (fast ? d>22 && d<48 : I.ax && d>-14 && d<=22){ I.p.jump=true; I.jumpHeld=true; if (F.ai) F.ai.jumpHold=0.3; return I; }      // a full hop: a short one comes down on it
+      if (fast && d>-14 && d<=22){ I.ax=0; I.shieldHeld=true; return I; } }
+    else if (F.vy>0){ const sy=surfaceBelow(F); if (sy===null || Math.abs(sy-p.plat.t)>1) continue;
+      const lx=F.x+F.vx*Math.min(0.5,(sy-F.y)/Math.max(F.vy,150)); if (Math.abs(lx-p.x)<18) I.ax=lx<p.x?-1:1; } }
+  if (F.ground) for (const q of fields) if (q.own===foe && q.life-q.t>0.2 && sees(q)){ const out=Math.sign(F.x-q.x)||-(Math.sign(foe.x-F.x)||1);
+    if (Math.hypot(F.x-q.x,F.y-24-q.y)<q.r){ I.ax=out; I.down=false; }
+    else if (I.ax && Math.hypot(F.x+I.ax*10-q.x,F.y-24-q.y)<q.r+2) I.ax=0; }
+  return I; }
+function cpuInput(F,dt){ return cpuHazards(F,cpuThink(F,dt)); }
+function cpuThink(F,dt){
   const ai=F.ai||(F.ai={cd:0.8,hold:0,holdDir:'n',jumpHold:0,projCd:1,wander:0});
   const L=CPU_LV[cpu.level], foe=F.foe, I={ax:0,up:false,down:false,jumpHeld:false,atkHeld:false,shieldHeld:false,p:{}};
   ai.cd-=dt; ai.projCd-=dt; ai.wander-=dt; ai.dsCd=(ai.dsCd||0)-dt; ai.trapT=(ai.trapT||0)-dt;

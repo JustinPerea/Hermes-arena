@@ -339,7 +339,7 @@ _Where the Claude Code session of 2026-11-10 left the pixel game (branch `cpu-do
 
 - CPUs use all four down specials (v30). How each is used, the numbers and what was dropped: feel-lab/LOG.md, v30. Lab unchanged: quick 98.5, full 98.4.
 - Two fixes came out of it: grounded attacks, grabs and rolls stop at an edge (QUESTIONS.md Q5, Justin can veto), and the CPU no longer throws Kairos's ring as a recovery move. CPU self-destructs fell to 0.04 per stock or less for every fighter.
-- Open for Justin: QUESTIONS.md Q4 (shorten the Stilled Instant cast from 40 to 28 frames?), Q5 (edge rule, can veto), Q2 (his Tuning values).
+- Open for Justin: QUESTIONS.md Q4 (shorten the Stilled Instant cast from 40 to 28 frames?), Q5 (edge rule, can veto), Q6 (CPU hazard awareness is built but off: it costs the CPU more than tripping does), Q2 (his Tuning values).
 - v31 (same day): Justin said Kairos should be immune to his own field. Done; CPU casts it only on a foe who cannot answer in time. KO slow motion now fires only on real KOs (it was wrong 63% of the time). The lab plays 30 matches per fighter and scores KO slow-motion accuracy, so its scores are on a new footing: v29 95.5, v31 98.5 (LOG.md, v31).
 - CPU-vs-CPU numbers are dice: one-sided tests need about 400 matches to see 0.1 stocks a match. Measure a CPU change that way (and per use: damage dealt and taken after it) before believing it helps.
 - Not done, in rough order: CPU matches on Kyllene still time out often (KOs need about 200% there); Aethon's frame-data and recovery warns; 2-player (Justin said not yet); porting the pixel game into the Hermes Desktop plugin shell.

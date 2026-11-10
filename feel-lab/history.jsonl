@@ -116,3 +116,6 @@
 {"when":"2026-11-10T13:35:41.770Z","md5":"d20f4dde65","label":"v31, 4 fighters","set":"","quick":false,"score":98.9,"counts":{"pass":132,"warn":3,"fail":0},"fails":[]}
 {"when":"2026-11-10T13:38:44.916Z","md5":"d20f4dde65","label":"v31 final","set":"","quick":false,"score":98.5,"counts":{"pass":65,"warn":2,"fail":0},"fails":[]}
 {"when":"2026-11-10T13:38:52.481Z","md5":"d20f4dde65","label":"v31 final, 4 fighters","set":"","quick":false,"score":98.9,"counts":{"pass":132,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:48:54.315Z","md5":"e070710d47","label":"v31 + hazard awareness (off)","set":"","quick":false,"score":98.5,"counts":{"pass":65,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:49:01.673Z","md5":"e070710d47","label":"v31 + hazard awareness (off), 4 fighters","set":"","quick":false,"score":98.9,"counts":{"pass":132,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T13:49:09.762Z","md5":"e070710d47","label":"","set":"CPU_LV[2].haz=0.9","quick":false,"score":99.3,"counts":{"pass":67,"warn":1,"fail":0},"fails":[]}

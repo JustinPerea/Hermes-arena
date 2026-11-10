@@ -37,3 +37,12 @@ A grounded attack, grab or roll now stops at the edge of what its fighter stands
 - **Keep (recommended).**
 - **Revert:** dash attacks and rolls carry off the edge again.
 
+## Q6. Should CPUs respect Iris's puddle and Kairos's field? (open; built, switched off)
+
+A CPU that hops puddles and backs out of slow fields is in the game (`cpuHazards`), set to never notice them. Turned on, it trips about 40% less often, and loses about 0.1 stocks a match more against Iris on the Altar, because running through a puddle usually works and tripping is cheap (LOG.md, v31).
+
+- **Leave it off (recommended) and make the puddle worth respecting first:** for example trip a fighter who is in a move too (a dash attack currently slides through untouched), or a longer knockdown. Then turn this on and re-measure.
+- **Turn it on for looks:** the CPU reads as smarter and plays slightly worse against Iris. Hard: `CPU_LV[2].haz=0.9`, Normal: `CPU_LV[1].haz=0.5`.
+
+Try it: `node lab.cjs --ch iris --set "CPU_LV[2].haz=0.9"`.
+

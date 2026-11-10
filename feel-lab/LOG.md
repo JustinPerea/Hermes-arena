@@ -217,3 +217,11 @@ The lab changed in this version, so scores are not comparable with earlier entri
 Still even in one-sided tests (Kairos with the field against Kairos without, 400 matches): 205-195 on the Altar. At about 0.6 casts a match the move is safe now, not strong. The cast length (40 frames) is unchanged; Q4 has the numbers for 28.
 
 Clip: `cpu_field` now shows the field dropped on a whiffed smash.
+
+## v31, later the same day: CPU hazard awareness built, measured, left switched off
+
+`cpuHazards()` post-processes the CPU's input: hop a Styx puddle in its path (full hop; a short hop comes down on it), brake with a shield tap when too close to jump, steer a landing away from it, read the pour before the water lands, walk out of a foe's slow field and wait at its rim. `CPU_LV[level].haz` is the chance a CPU notices each hazard; it is 0 at every level, so nothing changes in play and the lab reads the same (98.5 / 98.9).
+
+Why off: with it on for one Iris-mirror side only (200 matches a run, Hard), trips fell from about 0.85 to 0.5 a match, but that side lost slightly more in every variant on the Altar: 91-109, 91-108, 88-111 (no brake), 93-107 (stop short and wait instead of hopping); Kyllene was even. A trip costs 2% and a knockdown, and about 6 in 10 runs through a puddle do not trip at all (a fighter in a move is exempt), so respecting the puddle gives up more than it saves. Field avoidance changed nothing: a foe is slowed about 1.2 s a match either way, because CPU Kairos only casts on a foe who is already stuck. Question for Justin: QUESTIONS.md Q6.
+
+What the remaining trips are (aware side): landing on it 26, sliding onto it out of a move 17, poured under the feet 15, running into it 8.
