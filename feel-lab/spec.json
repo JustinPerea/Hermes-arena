@@ -327,7 +327,7 @@
     65,
     100
    ],
-   "why": "See FRAME_BANDS in lab.cjs: startup and shield advantage per move class.",
+   "why": "See BANDS in probes.js: startup and shield advantage per move class. Fighters with weight over 1 get wider startup bands for smashes (10 to 24) and aerials (4 to 20), as Smash's heavies have.",
    "source": "SSBU"
   }
  },

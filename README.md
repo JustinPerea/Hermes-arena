@@ -53,7 +53,7 @@ node clips.cjs --only cpu_cross --ch aethon       # a scenario can name its stag
 node video.cjs --before old.html         # side-by-side before/after MP4
 ```
 
-The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build, and use the installed Google Chrome when there is one. Last recorded score: 98.6 (v32; 99.0 with all four fighters). The lab's yardstick grew twice, so earlier scores in LOG.md are not comparable: since v31 it plays 30 CPU matches per fighter, and since v32 another 10 on the big map, Kyllene (`--big <stage>`), to check that the CPUs find each other there (v31 re-measured: 97.9 with all four).
+The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build, and use the installed Google Chrome when there is one. Last recorded score: 99.3 (v33, also with all four fighters). The lab's yardstick grew twice, so earlier scores in LOG.md are not comparable: since v31 it plays 30 CPU matches per fighter, and since v32 another 10 on the big map, Kyllene (`--big <stage>`), to check that the CPUs find each other there (v31 re-measured: 97.9 with all four).
 
 ## Hermes Desktop plugin (pixel game)
 

@@ -20,7 +20,9 @@ The roster doc rates Aethon's recovery 3/5, the same as Hermes, but also gives h
 - **Shorten the glide to about 1 s (recommended):** recovery drops to a normal range and he stays the hard-to-kill heavy.
 - **Keep it:** Aethon is a recovery specialist; the doc's recovery rating should go up to 4-5.
 
-## Q4. Stilled Instant gives Kairos nothing. Change it? (answered: Kairos is immune to his own field, done in v31; cast length still open)
+## Q4. Stilled Instant gives Kairos nothing. Change it? (answered: immune to his own field, v31; cast shortened to 28 frames, v33)
+
+2026-11-10, Justin: yes, shorten it. Done in v33 (LOG.md). The rest of this entry is the history.
 
 Before v31 the field slowed Kairos too, and the CPU got hit out of the cast most of the time. Justin: he should be immune. Done, and the CPU now casts it only on a foe who cannot answer in time (LOG.md, v31): safe, about 8% net damage per cast, but under one cast a match, so it does not move match results.
 
@@ -30,14 +32,14 @@ Still open: the cast is 40 frames, 16 before the field opens. That is why it can
 
 Try it: `node lab.cjs --set "CHARS.kairos.anims.dspec.total=28"`.
 
-## Q5. Grounded attacks no longer slide off the edge (done in v30; say if you want it back)
+## Q5. Grounded attacks no longer slide off the edge (answered 2026-11-10: keep)
 
 A grounded attack, grab or roll now stops at the edge of what its fighter stands on, as in Smash; specials (Swift Courier, Aspis Rush, Rainbow Arc) still leave it. Before, shield pushback at the lip could shove an attacker off backwards in the middle of a smash, which was most of Aethon's CPU self-destructs and could happen to a player too. It is one block in `physics()`.
 
 - **Keep (recommended).**
 - **Revert:** dash attacks and rolls carry off the edge again.
 
-## Q6. Should CPUs respect Iris's puddle and Kairos's field? (open; built, switched off)
+## Q6. Should CPUs respect Iris's puddle and Kairos's field? (answered 2026-11-10: leave it off; built, switched off)
 
 A CPU that hops puddles and backs out of slow fields is in the game (`cpuHazards`), set to never notice them. Turned on, it trips about 40% less often, and loses about 0.1 stocks a match more against Iris on the Altar, because running through a puddle usually works and tripping is cheap (LOG.md, v31).
 
@@ -46,7 +48,7 @@ A CPU that hops puddles and backs out of slow fields is in the game (`cpuHazards
 
 Try it: `node lab.cjs --ch iris --set "CPU_LV[2].haz=0.9"`.
 
-## Q7. Aethon's frame-data warning is the band, not the game (open)
+## Q7. Aethon's frame-data warning is the band, not the game (answered 2026-11-10: heavies get their own bands, done in v33)
 
 The lab scores each move's startup against one band per move class, taken from Smash's cast as a whole: smashes 10-20 frames, aerials 4-13. Aethon has three moves outside them: forward smash 21, forward air 14, down air 19. That is 10 of 13 moves in band (77%, the bar is 80%), and it has been a warning since v18. Smash's own heavies sit outside these bands too (Bowser forward smash 22, Ganondorf 31, Donkey Kong 22), and the roster doc makes Aethon slow on purpose.
 
@@ -56,7 +58,7 @@ The lab scores each move's startup against one band per move class, taken from S
 
 His other standing warning, recovery 1.04 against a 0.9 ceiling, is what is left after Q3 (you chose the shorter glide; going lower means cutting one of his three jumps).
 
-## Q8. Aethon mirror matches on Kyllene run long (open)
+## Q8. Aethon mirror matches on Kyllene run long (answered 2026-11-10: leave it until Justin has played there)
 
 With the chasm stand-offs fixed (v32), CPU Aethon against CPU Aethon on Kyllene still takes about 44 s a stock against 33 on the Altar, and 5 of 30 matches pass four minutes. They are fighting the whole time. He is the heaviest fighter with three jumps and a glide, and Kyllene's blast lines are far out, so he goes at about 170% (152% on the Altar; the other three go at 115 to 137% on both maps).
 

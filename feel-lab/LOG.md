@@ -250,3 +250,17 @@ Lab: two new pacing metrics, measured in 10 extra matches per fighter on Kyllene
 
 Clip: `cpu_cross` (scenarios can now name a stage): the CPU on the temple crosses the east chasm to a foe on the cliff. It gets across within 3 s on each of the first three seeds; v31 needed seeds 23, 33 and 36 to do it three times.
 
+## v33 (2026-11-10) Justin's answers to Q4 to Q8: shorter Stilled Instant, heavy bands
+
+Justin said yes to the recommendation on each open question (QUESTIONS.md).
+
+| Change | Notes |
+|---|---|
+| Q4: Stilled Instant is 28 frames long instead of 40. The field still opens on frame 16; the pose keys were retimed so the staff plant stays on that frame | One-sided, CPU Kairos with 28 against CPU Kairos with 40: Altar 99-100 over 200 matches, Kyllene 55-44 over 100. Hit out of the cast 7 times against 19. The CPU still casts it only on a foe who cannot answer (0.7 casts a match); the 12 frames saved are for a human to use it in neutral |
+| Q7: the lab gives fighters with weight over 1 their own startup bands, smashes 10 to 24 and aerials 4 to 20 (`HEAVY_SU` in probes.js) | Aethon goes from 77% to 100% in band; the game is unchanged. Only Aethon is over 1 |
+| Q5 keep the edge rule, Q6 leave CPU hazard awareness off, Q8 leave Aethon on Kyllene | No change |
+
+Lab: **99.3** (Hermes, Aethon), 99.3 with all four. Left: recovery height for Aethon (1.04) and Iris (0.98) against a 0.9 ceiling.
+
+Looked at and left alone: how the CPUs use Kyllene's floors (10 matches a fighter). They stand on every level (ground about 20% of the time, the two galleries 12 to 16%, the roof 4 to 16%, the wings up to 10%), are on different floors while both standing 2 to 5% of the time and never for longer than 1.7 s, and land as many hits a minute as on the Altar (Hermes 46 against 52, Aethon 31 against 36, Kairos 44 against 45, Iris 53 against 51). The "45% on different floors" in the v32 notes counted height differences in the air. Aethon is the slow one to re-engage there (a third of his time is in stretches of over 4 s without a hit, a fifth on the Altar), which is Q8 again.
+

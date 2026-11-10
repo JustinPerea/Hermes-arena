@@ -129,3 +129,6 @@
 {"when":"2026-11-10T17:51:51.816Z","md5":"24716a0eeb","label":"","set":"","quick":false,"score":99,"counts":{"pass":140,"warn":3,"fail":0},"fails":[]}
 {"when":"2026-11-10T17:52:08.636Z","md5":"67b628876b","label":"v31 with the big-map metrics","set":"","quick":false,"score":97.9,"counts":{"pass":138,"warn":4,"fail":1},"fails":["big_stall:aethon"]}
 {"when":"2026-11-10T17:52:17.282Z","md5":"24716a0eeb","label":"","set":"","quick":false,"score":98.6,"counts":{"pass":69,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T20:40:21.252Z","md5":"24716a0eeb","label":"","set":"","quick":true,"score":99,"counts":{"pass":101,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T20:41:58.154Z","md5":"46f23fe986","label":"","set":"","quick":false,"score":99.3,"counts":{"pass":70,"warn":1,"fail":0},"fails":[]}
+{"when":"2026-11-10T20:42:05.918Z","md5":"46f23fe986","label":"","set":"","quick":false,"score":99.3,"counts":{"pass":141,"warn":2,"fail":0},"fails":[]}

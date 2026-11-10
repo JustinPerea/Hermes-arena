@@ -134,10 +134,12 @@ LAB.combat=function(){
 // startup = first active frame (1-based); on-shield advantage = shieldstun - frames until the attacker can act after the last hit.
 // Aerials are scored on landing: shieldstun of the hit minus landing lag (as in Smash).
 const BANDS={jab:{su:[2,5],sh:[-16,-4]}, tilt:{su:[5,11],sh:[-22,-6]}, smash:{su:[10,20],sh:[-45,-14]}, aerial:{su:[4,13],sh:[-14,0]}, dash:{su:[5,12],sh:[-28,-8]}};
+// Heavies (weight over 1) wind up longer, as Smash's do (Bowser forward smash 22, Ganondorf 31): their own startup bands (Justin, Q7).
+const HEAVY_SU={smash:[10,24], aerial:[4,20]};
 const CLASS={jab1:'jab',attack:'tilt',utilt:'tilt',dtilt:'tilt',fsmash:'smash',usmash:'smash',dsmash:'smash',nair:'aerial',fair:'aerial',bair:'aerial',uair:'aerial',dair:'aerial',dashatk:'dash'};
 LAB.framedata=function(){
-  const AN=FC(H).anims, rows=[]; let ok=0, n=0;
-  for (const k in CLASS){ const A=AN[k]; if (!A||!A.hits) continue; const c=CLASS[k], b=BANDS[c];
+  const AN=FC(H).anims, rows=[], heavy=(FC(H).weight||1)>1; let ok=0, n=0;
+  for (const k in CLASS){ const A=AN[k]; if (!A||!A.hits) continue; const c=CLASS[k], b=heavy&&HEAVY_SU[c]?{su:HEAVY_SU[c],sh:BANDS[c].sh}:BANDS[c];
     const first=Math.min(...A.hits.map(h=>h.f[0])), lastH=A.hits.reduce((a,h)=>h.f[0]>=a.f[0]?h:a), su=first+1;
     const ss=Math.round(2+0.8*lastH.dmg); let sh;
     // grounded moves cancel early only on hit (cancelF in the game), so on shield they run to total
