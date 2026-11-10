@@ -1,9 +1,9 @@
 // walkthrough video of the match flow, rendered frame by frame from the real game loop (flowFrame), with its sound
-const {chromium}=require('playwright'); const fs=require('fs'); const path=require('path'); const {execFileSync}=require('child_process');
-const {load}=require('./page.cjs');
+const fs=require('fs'); const path=require('path'); const {execFileSync}=require('child_process');
+const {load,launch}=require('./page.cjs');
 const OUT=process.argv[2]||__dirname+'/out/stages.mp4', DIR=require('os').tmpdir()+'/hermes-sv';
 fs.rmSync(DIR,{recursive:true,force:true}); fs.mkdirSync(DIR,{recursive:true});
-(async()=>{ const errors=[]; const b=await chromium.launch(); const p=await load(b,errors,require('path').join(__dirname,'../game/pixel-hermes.html'));
+(async()=>{ const errors=[]; const b=await launch(); const p=await load(b,errors,require('path').join(__dirname,'../game/pixel-hermes.html'));
  await p.evaluate(()=>{ __seed(7); stage.width=832; stage.height=468; SFX.rec=[]; window.__realPI=playerInput; });
  const plan=[['altar','hermes','aethon'],['delphi','aethon','hermes'],['olympus','hermes','aethon'],['styx','aethon','hermes']];
  let i=0, k=0;

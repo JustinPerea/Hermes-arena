@@ -3,8 +3,8 @@
 // usage: node clips.cjs [--html path] [--out dir] [--only ko_smash,jab_chain] [--ch hermes|aethon|both] [--set 'FEEL.shortHop=300']
 // For each scenario x fighter: <out>/<name>-<ch>.gif (real-time, 30 fps) and <out>/<name>-<ch>-sheet-N.png
 // (contact sheets, every 2nd frame by default, each tile stamped with its game frame number).
-const {chromium}=require('playwright'); const fs=require('fs'); const path=require('path'); const {execFileSync}=require('child_process');
-const {load}=require('./page.cjs');
+const fs=require('fs'); const path=require('path'); const {execFileSync}=require('child_process');
+const {load,launch}=require('./page.cjs');
 const arg=(k,d)=>{ const i=process.argv.indexOf('--'+k); return i<0?d:process.argv[i+1]; };
 const HTML=path.resolve(arg('html',path.join(__dirname,'../game/pixel-hermes.html')));
 const OUT=path.resolve(arg('out',path.join(__dirname,'out','clips')));
@@ -12,7 +12,7 @@ const SET=arg('set',''), ONLY=arg('only',''), CHS=arg('ch','hermes')==='both'?['
 fs.mkdirSync(OUT,{recursive:true});
 
 (async()=>{
-  const errors=[]; const browser=await chromium.launch(); const page=await load(browser,errors,HTML,['scenarios.js'],SET);
+  const errors=[]; const browser=await launch(); const page=await load(browser,errors,HTML,['scenarios.js'],SET);
   await page.evaluate(()=>{ stage.width=832; stage.height=468; });
   const names=await page.evaluate(()=>Object.keys(LAB.scen));
   const made=[];

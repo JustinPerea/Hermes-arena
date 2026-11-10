@@ -1,9 +1,9 @@
 // walkthrough video of the match flow, rendered frame by frame from the real game loop (flowFrame), with its sound
-const {chromium}=require('playwright'); const fs=require('fs'); const path=require('path'); const {execFileSync}=require('child_process');
-const {load}=require('./page.cjs');
+const fs=require('fs'); const path=require('path'); const {execFileSync}=require('child_process');
+const {load,launch}=require('./page.cjs');
 const OUT=process.argv[2]||__dirname+'/out/match-flow.mp4', DIR=require('os').tmpdir()+'/hermes-fv';
 fs.rmSync(DIR,{recursive:true,force:true}); fs.mkdirSync(DIR,{recursive:true});
-(async()=>{ const errors=[]; const b=await chromium.launch(); const p=await load(b,errors,require('path').join(__dirname,'../game/pixel-hermes.html'));
+(async()=>{ const errors=[]; const b=await launch(); const p=await load(b,errors,require('path').join(__dirname,'../game/pixel-hermes.html'));
  await p.evaluate(()=>{ __seed(7); stage.width=832; stage.height=468; Object.assign(MS,{p1:'hermes',p2:'aethon',lv:1,stocks:3,time:0}); toMenu('title');
    SFX.rec=[]; const realPI=playerInput; window.__realPI=realPI;
    const at={180:'attack',230:'down',265:'right',305:'left',345:'down',385:'down',420:'right',460:'down',495:'left',530:'left',570:'down',605:'right',645:'down',690:'attack'};

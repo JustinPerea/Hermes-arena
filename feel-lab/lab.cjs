@@ -4,7 +4,7 @@
 //   --set     JS run in the page before probing: try a change without editing the game
 //   --quick   skip the CPU pacing matches (about 10 s instead of ~1-2 min)
 // Output: <out>/report.json, <out>/report.md, and one line appended to <lab>/history.jsonl
-const {chromium}=require('playwright'); const fs=require('fs'); const path=require('path'); const crypto=require('crypto');
+const fs=require('fs'); const path=require('path'); const crypto=require('crypto');
 const LAB=__dirname;
 const arg=(k,d)=>{ const i=process.argv.indexOf('--'+k); return i<0?d:(process.argv[i+1]&&!process.argv[i+1].startsWith('--')?process.argv[i+1]:true); };
 const HTML=path.resolve(arg('html',path.join(__dirname,'../game/pixel-hermes.html')));
@@ -14,12 +14,12 @@ const SET=arg('set',''), QUICK=!!arg('quick',false), SEEDS=+arg('seeds',6), LABE
 const spec=JSON.parse(fs.readFileSync(path.join(LAB,'spec.json'),'utf8'));
 fs.mkdirSync(OUT,{recursive:true});
 
-const {load}=require('./page.cjs');
+const {load,launch}=require('./page.cjs');
 
 function grade(v,m){ if (v==null||Number.isNaN(v)) return 'fail'; const [a,b]=m.target, [c,d]=m.warn; if (v>=a&&v<=b) return 'pass'; if (v>=c&&v<=d) return 'warn'; return 'fail'; }
 
 (async()=>{
-  const t0=Date.now(); const errors=[]; const browser=await chromium.launch();
+  const t0=Date.now(); const errors=[]; const browser=await launch();
   const page=await load(browser,errors,HTML,[],SET);
   const res={html:HTML, md5:crypto.createHash('md5').update(fs.readFileSync(HTML)).digest('hex').slice(0,10), when:new Date().toISOString(), label:LABEL, set:SET, fighters:{}};
   for (const ch of CHS){

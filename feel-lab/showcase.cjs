@@ -1,10 +1,10 @@
 // scripted showcase of a fighter's moves, with captions and sound -> mp4
 // usage: node showcase.cjs <segments.js> <out.mp4> [html]
-const {chromium}=require('playwright'); const fs=require('fs'); const path=require('path'); const {execFileSync}=require('child_process');
-const {load}=require('./page.cjs');
+const fs=require('fs'); const path=require('path'); const {execFileSync}=require('child_process');
+const {load,launch}=require('./page.cjs');
 const SEG=fs.readFileSync(path.resolve(process.argv[2]),'utf8'), OUT=path.resolve(process.argv[3]), HTML=path.resolve(process.argv[4]||path.join(__dirname,'../game/pixel-hermes.html'));
 const DIR=OUT+'_frames'; fs.rmSync(DIR,{recursive:true,force:true}); fs.mkdirSync(DIR,{recursive:true});
-(async()=>{ const errors=[]; const b=await chromium.launch(); const p=await load(b,errors,HTML);
+(async()=>{ const errors=[]; const b=await launch(); const p=await load(b,errors,HTML);
   await p.evaluate(src=>{ stage.width=832; stage.height=468; window.SEGS=(0,eval)(src); SFX.rec=[]; window.__fi=0; },SEG);
   const n=await p.evaluate(()=>SEGS.length); let k=0;
   for (let s=0;s<n;s++){

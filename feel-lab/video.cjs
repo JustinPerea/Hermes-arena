@@ -2,7 +2,7 @@
 // Before/after comparison video of scenarios: two builds side by side with a title card per scenario.
 // usage: node video.cjs --before old.html [--after new.html] [--only a,b] [--ch hermes] [--out out/compare.mp4] [--slow 2]
 // Scenarios play at 1/slow speed (default half speed) except cpu_exchange, which plays in real time.
-const {execFileSync}=require('child_process'); const {chromium}=require('playwright'); const {load}=require('./page.cjs'); const fs=require('fs'); const path=require('path');
+const {execFileSync}=require('child_process'); const {load,launch}=require('./page.cjs'); const fs=require('fs'); const path=require('path');
 const arg=(k,d)=>{ const i=process.argv.indexOf('--'+k); return i<0?d:process.argv[i+1]; };
 const BEFORE=path.resolve(arg('before')), AFTER=path.resolve(arg('after',path.join(__dirname,'../game/pixel-hermes.html')));
 const ONLY=arg('only','shield_punish,ko_smash,shorthop_aerials,dthrow_followup,cpu_exchange'), CH=arg('ch','hermes');
@@ -24,7 +24,7 @@ const wav=(file,[L,R])=>{ const n=L.length, b=Buffer.alloc(44+n*4); b.write('RIF
   b.writeUInt32LE(44100,24); b.writeUInt32LE(44100*4,28); b.writeUInt16LE(4,32); b.writeUInt16LE(16,34); b.write('data',36); b.writeUInt32LE(n*4,40);
   for (let i=0;i<n;i++){ b.writeInt16LE(Math.round(Math.max(-1,Math.min(1,L[i]))*32767),44+i*4); b.writeInt16LE(Math.round(Math.max(-1,Math.min(1,R[i]))*32767),46+i*4); } fs.writeFileSync(file,b); };
 (async()=>{
-const browser=await chromium.launch(); const page=await load(browser,[],AFTER); const hasSnd=await page.evaluate(()=>typeof sfxRender==='function');
+const browser=await launch(); const page=await load(browser,[],AFTER); const hasSnd=await page.evaluate(()=>typeof sfxRender==='function');
 for (const [k,name] of ONLY.split(',').entries()){
   const fb=path.join(TMP,'before','_frames',`${name}-${CH}`), fa=path.join(TMP,'after','_frames',`${name}-${CH}`);
   const n=Math.min(fs.readdirSync(fb).filter(f=>/^\d+\.png$/.test(f)).length, fs.readdirSync(fa).filter(f=>/^\d+\.png$/.test(f)).length);

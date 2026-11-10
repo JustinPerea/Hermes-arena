@@ -19,4 +19,9 @@ async function load(browser,errors,HTML,extra=[],set=''){
   if (set) await p.evaluate(js=>{ (0,eval)(js); },set);
   return p; }
 
-module.exports={load};
+// The browser: the installed Google Chrome when there is one (it keeps getting security updates, sandbox on),
+// otherwise Playwright's own Chromium.
+const CHROME={darwin:'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',linux:'/usr/bin/google-chrome',win32:'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'}[process.platform];
+function launch(opts={}){ const {chromium}=require('playwright'); return chromium.launch(CHROME&&fs.existsSync(CHROME)?{channel:'chrome',...opts}:opts); }
+
+module.exports={load,launch};
