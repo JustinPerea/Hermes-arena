@@ -24,7 +24,7 @@ Useful URL flags: `?stage=kyllene` picks a stage. Controls are listed on the pag
 | `feel-lab/` | Automated feel testing: drives the real game headless, scores it against Smash-derived targets (`spec.json`), renders GIF/video comparisons. `PROTOCOL.md` is the improvement loop, `LOG.md` the change history, `QUESTIONS.md` open design questions. |
 | `art/` | Pixel design studies: front-facing portraits (`front-views/`), Kairos and Iris design code and sheets (`kairos-iris/`), the v26 arm comparison. |
 | `cyanotype/` | The earlier modular engine (`src/`), with build script, headless rules/balance tests (`tools/`), cutout puppet skins (`concepts/`), roster doc snapshot (`data/`) and balance reports. Builds the web page, animation book and the **Hermes Desktop plugin**. |
-| `reference/` | Visual references: GPT Image mockups Justin made and the Krea sprite-sheet test page. |
+| `reference/` | Visual references: GPT Image mockups Justin made, Nous Hermes reference art (`nous-reference/`), and the Krea sprite-sheet test page. |
 | `docs/PROJECT-NOTES.md` | Decision history and working notes: what was decided, why, and how to apply it. Read this before changing direction. |
 
 ## Working on the pixel game
@@ -81,4 +81,4 @@ Generated output is ignored: `cyanotype/dist/`, `feel-lab/out/`, `feel-lab/video
 
 ## Credits
 
-Hermes and the Hermes Desktop app are by Nous Research. Everything in the game itself is original and drawn in code. Code is under the Apache 2.0 license (`LICENSE`).
+Hermes and the Hermes Desktop app are by Nous Research; the images in `reference/nous-reference/` are their art, kept only as a style reference and not covered by this repo's license. Everything in the game itself is original and drawn in code. Code is under the Apache 2.0 license (`LICENSE`).
