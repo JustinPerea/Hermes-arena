@@ -264,3 +264,24 @@ Lab: **99.3** (Hermes, Aethon), 99.3 with all four. Left: recovery height for Ae
 
 Looked at and left alone: how the CPUs use Kyllene's floors (10 matches a fighter). They stand on every level (ground about 20% of the time, the two galleries 12 to 16%, the roof 4 to 16%, the wings up to 10%), are on different floors while both standing 2 to 5% of the time and never for longer than 1.7 s, and land as many hits a minute as on the Altar (Hermes 46 against 52, Aethon 31 against 36, Kairos 44 against 45, Iris 53 against 51). The "45% on different floors" in the v32 notes counted height differences in the air. Aethon is the slow one to re-engage there (a third of his time is in stretches of over 4 s without a hit, a fifth on the Altar), which is Q8 again.
 
+## v34 (2026-11-10) Two players on one machine
+
+Justin asked for player against player. This is local play (one screen, one machine), not online.
+
+OPPONENT on the fighter screen has a fifth choice, PLAYER 2. The match rules are those of a CPU match (stocks, time limit, results); the second fighter takes a player's input instead of the CPU's.
+
+| Change | Notes |
+|---|---|
+| `cpu.p2`: a second player drives the other fighter. `cpu.on` now means "a real match" (it stays true); the CPU's input and its hitlag nudges are skipped when `p2` is set | The title-screen demo and the countdown ignore `p2`, as they ignore the player |
+| Keyboard split while a two-player match is on (`vsPlay()`): P1 has W A S D, F attack (X too), G special (C too), Space jump, left Shift shield, Q grab, and the mouse. P2 has the arrows, J attack, K special, N jump, L or right Shift shield, U grab. Enter, P and Esc pause for both | In menus and against the CPU every key is P1's, as before. A key is released in the map it went down in, so one held across a pause does not stick |
+| Controllers: two slots (`PAD`, `PAD2`). Against the CPU the first controller is P1's. In a two-player match two controllers are P1 and P2; a single one is P2's, because P1 has the keyboard | When a controller changes slot (match start, pause, resume), what it already holds is not counted as a press |
+| `inputFrom()` builds either player's input; `player2Input()` feeds the second fighter, including presses buffered during hitlag and the nudge when hit | |
+| Labels: P2 on the fighter screen, over the fighter, and on the results screen (P2 WINS). The countdown shows each player's controls | |
+| The press that resumes from pause no longer also acts in the match | Before, resuming with attack made P1 attack. In a two-player match that press could be P2's key |
+
+Check: `node pvp.cjs` plays the real page in Chrome with real key events and two stand-in controllers (28 checks): each half of the keyboard moves only its own fighter, both at once, nobody drives P2 when its keys are untouched, pause from either side, one controller is P2's, two are P1 and P2, a P2 win reaches the results screen, and a CPU match afterwards is as before.
+
+Not checked: real controllers (the stand-ins answer `navigator.getGamepads()`), and how it feels for two people at one keyboard. Keyboards differ in how many keys they report at once; controllers are the better way to play.
+
+Lab: unchanged, 99.3 (the lab never sets `p2`).
+

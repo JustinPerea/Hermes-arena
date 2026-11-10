@@ -85,7 +85,7 @@ kbd{font-family:var(--label);font-size:11px;border:2px solid var(--ink);border-b
   <header>
     <div class="eyebrow">Hermes Arena · pixel style study</div>
     <h1>Pixel Hermes</h1>
-    <p class="lede">Pixel-art fighters and the Altar of the Agora, all drawn entirely in code. Press attack on the title screen, then pick both fighters, the CPU level (or a training dummy that stands still), the number of stocks and a time limit. Every sprite and the whole stage are built at load time from ellipses, capsules, feathers and polygons rasterised onto a pixel grid, then shaded with five-tone ramps and a 4 × 4 dither. No image files. Everything, from fighters to columns to the damage readout, sits on the same fine pixel grid. Spar on the altar, or study each animation frame by frame below.</p>
+    <p class="lede">Pixel-art fighters and the Altar of the Agora, all drawn entirely in code. Press attack on the title screen, then pick both fighters, the opponent (a CPU level, a second player, or a training dummy that stands still), the number of stocks and a time limit. Every sprite and the whole stage are built at load time from ellipses, capsules, feathers and polygons rasterised onto a pixel grid, then shaded with five-tone ramps and a 4 × 4 dither. No image files. Everything, from fighters to columns to the damage readout, sits on the same fine pixel grid. Spar on the altar, or study each animation frame by frame below.</p>
   </header>
 
   <section aria-label="Playable stage">
@@ -98,6 +98,7 @@ kbd{font-family:var(--label);font-size:11px;border:2px solid var(--ink);border-b
       <span><kbd>Enter</kbd>, <kbd>P</kbd> or <kbd>Esc</kbd> pause (Start on a controller); in menus the arrows choose, attack or <kbd>Enter</kbd> confirms, <kbd>K</kbd> or <kbd>Esc</kbd> goes back, and you can click</span>
       <span><kbd>M</kbd> sound on or off (volume in Tuning)</span>
       <span>Controller (Xbox or PlayStation layout): left stick or d-pad move, <kbd>A</kbd> attack, <kbd>B</kbd> special, <kbd>X</kbd>/<kbd>Y</kbd> jump, <kbd>LB</kbd>/<kbd>RB</kbd> grab, <kbd>LT</kbd>/<kbd>RT</kbd> shield. Flick the right stick for a smash attack on the ground (hold it to charge) or an aerial in the air. Press a button once to wake the controller <b id="padNote"></b></span>
+      <span>Two players: pick <kbd>Player 2</kbd> as the opponent on the fighter screen. During the match the keyboard is split. Player 1: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move, <kbd>F</kbd> attack, <kbd>G</kbd> special, <kbd>Space</kbd> jump, left <kbd>Shift</kbd> shield, <kbd>Q</kbd> grab (and the mouse). Player 2: arrow keys move, <kbd>J</kbd> attack, <kbd>K</kbd> special, <kbd>N</kbd> jump, <kbd>L</kbd> or right <kbd>Shift</kbd> shield, <kbd>U</kbd> grab. One controller connected is player 2's; with two, the first is player 1's. Either player can pause</span>
       <span><kbd>S</kbd> <kbd>↓</kbd> drop through a platform; in the air while falling, a fast fall</span>
       <span><kbd>Shift</kbd> shield (it shrinks while held and breaks at zero). From shield: <kbd>S</kbd> spot dodge, <kbd>A</kbd>/<kbd>D</kbd> roll, <kbd>Space</kbd> jump, attack or <kbd>Q</kbd> grab. <kbd>Shift</kbd> in the air is an air dodge (once per jump; hold a direction to dash that way)</span>
       <span><kbd>Q</kbd> or <kbd>Shift</kbd> + click grab; then attack to pummel, or a direction to throw (forward, back, up, down)</span>
@@ -2767,15 +2768,25 @@ async function sfxRender(events,dur,timeOf){ const sr=44100, c=new OfflineAudioC
 // ---- input ------------------------------------------------------------------
 const keys={}; const KEYMAP={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',Space:'jump',KeyJ:'attack',KeyX:'attack',KeyK:'special',KeyL:'special',KeyC:'special',ArrowDown:'down',KeyS:'down',ShiftLeft:'shield',ShiftRight:'shield',KeyQ:'grab',Enter:'start',NumpadEnter:'start',KeyP:'start',Escape:'back'};
 const pressed={};
-addEventListener('keydown',e=>{ const k=KEYMAP[e.code]; if(!k) return; if (e.target.closest && (e.target.closest('select') || (e.target.closest('button,summary,input') && (e.code==='Space'||e.code==='Enter')))) return; e.preventDefault(); if(!keys[k]) pressed[k]=true; keys[k]=true; });
-addEventListener('keyup',e=>{ const k=KEYMAP[e.code]; if(!k) return; keys[k]=false; });
+// Two players (PLAYER 2 as the opponent): while a match is on, the keyboard is split. The left half is P1, the right half P2;
+// pause keys belong to both. In menus, and against the CPU, every key is P1's as before.
+const keys2={}, pressed2={}, keyDown={};
+const KEYS_P1={KeyA:'left',KeyD:'right',KeyW:'up',KeyS:'down',Space:'jump',KeyF:'attack',KeyX:'attack',KeyG:'special',KeyC:'special',ShiftLeft:'shield',KeyQ:'grab'};
+const KEYS_P2={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',KeyJ:'attack',KeyK:'special',KeyL:'shield',ShiftRight:'shield',KeyN:'jump',KeyU:'grab'};
+const KEYS_BOTH={Enter:'start',NumpadEnter:'start',KeyP:'start',Escape:'back'};
+const vsPlay=()=>cpu.p2 && (flow.s==='ready'||flow.s==='play'||flow.s==='game'||flow.s==='timeup');
+function keyFor(code){ if (!vsPlay()) return [keys,pressed,KEYMAP[code]]; if (KEYS_P2[code]) return [keys2,pressed2,KEYS_P2[code]]; return [keys,pressed,KEYS_P1[code]||KEYS_BOTH[code]]; }
+function clearPressed(){ for (const k in pressed) delete pressed[k]; for (const k in pressed2) delete pressed2[k]; }
+addEventListener('keydown',e=>{ const [ks,ps,k]=keyFor(e.code); if(!k) return; if (e.target.closest && (e.target.closest('select') || (e.target.closest('button,summary,input') && (e.code==='Space'||e.code==='Enter')))) return; e.preventDefault(); if(!ks[k]) ps[k]=true; ks[k]=true; keyDown[e.code]=[ks,k]; });
+// a key is let go in the map it went down in (the split can change while it is held)
+addEventListener('keyup',e=>{ const d=keyDown[e.code]; if (d){ d[0][d[1]]=false; delete keyDown[e.code]; } const k=KEYMAP[e.code]; if (k && !vsPlay()) keys[k]=false; });
 // mouse: left click attacks, right click specials (the held direction keys pick the move)
 let mouseAtk=false, mouseSpec=false;
 const atkHeld=()=>!!(keys.attack||mouseAtk);
 addEventListener('pointerup',e=>{ if (e.button===0) mouseAtk=false; if (e.button===2) mouseSpec=false; });
 stage.addEventListener('pointerdown',e=>{ if (e.pointerType!=='mouse' || inMenu()) return; if (e.button===0){ pressed.attack=true; mouseAtk=true; } else if (e.button===2){ pressed.special=true; mouseSpec=true; } else return; e.preventDefault(); stage.focus({preventScroll:true}); });
 stage.addEventListener('contextmenu',e=>e.preventDefault());
-addEventListener('blur',()=>{ for (const k in keys) keys[k]=false; mouseAtk=false; mouseSpec=false; });
+addEventListener('blur',()=>{ for (const k in keys) keys[k]=false; for (const k in keys2) keys2[k]=false; for (const k in keyDown) delete keyDown[k]; mouseAtk=false; mouseSpec=false; });
 document.querySelectorAll('.touch button').forEach(b=>{
   const k=b.dataset.k;
   b.addEventListener('pointerdown',e=>{ e.preventDefault(); b.setPointerCapture(e.pointerId); if(!keys[k]) pressed[k]=true; keys[k]=true; b.classList.add('on'); });
@@ -2809,7 +2820,7 @@ const FEEL={fullHop:345, shortHop:300, dJump:300,
 let simK=1;      // current sim speed relative to real time (KO slow motion)
 const sparks=[], dust=[], puffs=[], kos=[];
 const match={over:0,winner:null};
-const cpu={on:true,level:1};        // level 0 easy, 1 normal, 2 hard
+const cpu={on:true,level:1,p2:false};        // on: a real match (stocks, results); level 0 easy, 1 normal, 2 hard; p2: a second player drives the other fighter
 // back on stage after a KO: drop in from above, briefly invincible
 function respawn(b){ Object.assign(b,FRESH(),{stale:[],buf:null,jbuf:null,x:respawnX(b),y:respawnY(b),vx:0,vy:0,ground:false,jumps:1,mv:null,dmg:0,helpless:false,stun:0,lag:0,squat:0,inv:2,used:{},flash:0}); }
 // a KO: burst of lines from where the fighter left the screen, aimed back at the stage
@@ -2947,33 +2958,45 @@ const NO_INPUT={ax:0,up:false,down:false,jumpHeld:false,atkHeld:false,shieldHeld
 // ---- gamepad (standard mapping) ----
 // left stick or d-pad moves, A attack, B special, X/Y jump, LB/RB grab, LT/RT shield,
 // right stick = smash attacks on the ground and aerials in the air (hold it to charge a smash)
-const PAD={on:false,id:'',b:{},c:null,flick:null};
+const PAD={on:false,id:'',idx:-1,b:{},c:null,flick:null}, PAD2={on:false,id:'',idx:-1,b:{},c:null,flick:null};      // P1's controller, P2's controller
 const PADMAP={0:'attack',1:'special',2:'jump',3:'jump',4:'grab',5:'grab',6:'shield',7:'shield',8:'back',9:'start',12:'up',13:'down',14:'left',15:'right'};
 function stickDir(x,y,dz){ const ax=Math.abs(x), ay=Math.abs(y); if (Math.max(ax,ay)<dz) return null;
   return ay>=ax*0.75 ? {dir:y<0?'u':'d',ax:0} : {dir:'f',ax:Math.sign(x)}; }
-function padPoll(){
-  const all=navigator.getGamepads?navigator.getGamepads():[]; let g=null; for (const q of all) if (q && q.connected && q.mapping==='standard'){ g=q; break; }
-  if (!g) for (const q of all) if (q && q.connected){ g=q; break; }
-  if (!g){ if (PAD.on){ PAD.on=false; PAD.b={}; PAD.c=null; padNote(); } return; }
-  if (!PAD.on){ PAD.on=true; PAD.id=g.id; padNote(); }
+// read controller g into slot S; new button presses go to ps. moved: the pad was already in use in the other slot, so what it holds now is not a press
+function padRead(S,g,ps,moved){
+  if (!g){ if (S.on){ S.on=false; S.idx=-1; S.b={}; S.c=null; } return; }
   const now={};
   for (const i in PADMAP){ const bt=g.buttons[i]; if (bt && (bt.pressed || bt.value>0.5)) now[PADMAP[i]]=true; }
   const lx=g.axes[0]||0, ly=g.axes[1]||0;
   if (lx<-0.35) now.left=true; else if (lx>0.35) now.right=true;
   if (Math.abs(ly)>0.5 && Math.abs(ly)>=Math.abs(lx)*0.75) now[ly<0?'up':'down']=true;
-  for (const k in now) if (!PAD.b[k]){ pressed[k]=true; if (SFX.ctx && SFX.ctx.state==='suspended') SFX.ctx.resume(); }
-  PAD.b=now;
+  const skip=moved && S.idx!==g.index;
+  if (!skip) for (const k in now) if (!S.b[k]){ ps[k]=true; if (SFX.ctx && SFX.ctx.state==='suspended') SFX.ctx.resume(); }
+  S.on=true; S.id=g.id; S.idx=g.index; S.b=now;
   const c=stickDir(g.axes[2]||0,g.axes[3]||0,0.5);
-  if (c && !PAD.c) PAD.flick=c;                       // a flick of the right stick is one attack press in that direction
-  PAD.c=c;
+  if (c && !S.c && !skip) S.flick=c;                  // a flick of the right stick is one attack press in that direction
+  S.c=c;
 }
-function padNote(){ const el=document.getElementById('padNote'); if (el) el.textContent=PAD.on?'Controller connected: '+PAD.id.replace(/\s*\(.*$/,'').slice(0,40):''; }
+let padSeen=new Set();
+function padPoll(){
+  const all=navigator.getGamepads?[...navigator.getGamepads()].filter(q=>q && q.connected):[];
+  const gs=all.filter(q=>q.mapping==='standard').concat(all.filter(q=>q.mapping!=='standard'));
+  // against the CPU the first controller is P1's. In a 2-player match two controllers are P1 and P2; a single one is P2's (P1 has the keyboard)
+  const vs=vsPlay(), g1=vs&&gs.length===1?null:gs[0], g2=vs?(gs.length===1?gs[0]:gs[1]):null, was=PAD.idx+','+PAD2.idx;
+  padRead(PAD,g1,pressed,g1&&padSeen.has(g1.index)); padRead(PAD2,g2,pressed2,g2&&padSeen.has(g2.index));
+  padSeen=new Set(gs.map(q=>q.index));
+  if (was!==PAD.idx+','+PAD2.idx) padNote();
+}
+function padNote(){ const el=document.getElementById('padNote'); if (!el) return; const nm=S=>S.id.replace(/\s*\(.*$/,'').slice(0,40);
+  el.textContent=PAD.on&&PAD2.on?'Controllers connected: player 1 '+nm(PAD)+', player 2 '+nm(PAD2):PAD2.on?'Controller connected (player 2): '+nm(PAD2):PAD.on?'Controller connected: '+nm(PAD):''; }
 addEventListener('gamepadconnected',()=>padPoll()); addEventListener('gamepaddisconnected',()=>padPoll());
-function playerInput(){
-  padPoll(); const b=PAD.b, fl=PAD.flick; PAD.flick=null;
-  return {ax:(keys.right||b.right?1:0)-(keys.left||b.left?1:0), up:!!(keys.up||b.up), down:!!(keys.down||b.down), jumpHeld:!!(keys.jump||b.jump), atkHeld:atkHeld()||!!b.attack||!!PAD.c, shieldHeld:!!(keys.shield||b.shield), specHeld:!!(keys.special||b.special||mouseSpec),
-    c:fl, p:{attack:!!pressed.attack, special:!!pressed.special, jump:!!pressed.jump, down:!!pressed.down, shield:!!pressed.shield, grab:!!pressed.grab}};
+// one player's input for this frame: their keys, their presses, their controller (the mouse is P1's)
+function inputFrom(ks,ps,S,mouse){ const b=S.b, fl=S.flick; S.flick=null;
+  return {ax:(ks.right||b.right?1:0)-(ks.left||b.left?1:0), up:!!(ks.up||b.up), down:!!(ks.down||b.down), jumpHeld:!!(ks.jump||b.jump), atkHeld:!!(ks.attack||b.attack||S.c||(mouse&&mouseAtk)), shieldHeld:!!(ks.shield||b.shield), specHeld:!!(ks.special||b.special||(mouse&&mouseSpec)),
+    c:fl, p:{attack:!!ps.attack, special:!!ps.special, jump:!!ps.jump, down:!!ps.down, shield:!!ps.shield, grab:!!ps.grab}};
 }
+function playerInput(){ padPoll(); return inputFrom(keys,pressed,PAD,true); }
+function player2Input(){ return inputFrom(keys2,pressed2,PAD2,false); }
 // ---- shield, grabs, ledges and knockdowns ------------------------------------------------------
 const SHIELD_MAX=50, FF_V=470;
 let LEDGES=[{x:ALTAR.l,y:ALTAR.t,dir:1},{x:ALTAR.r,y:ALTAR.t,dir:-1}];
@@ -3463,17 +3486,19 @@ function tickFx(dt){
 }
 function step(dt){
   gameT+=dt;
-  if (hitlag>0){ hitlag-=dt/TUNE.hitlag; bufferPresses(H,simIn?NO_INPUT:playerInput(),0);
+  const human2=cpu.p2 && !simIn;      // the second fighter is a player (not during the title demo or the countdown)
+  if (hitlag>0){ hitlag-=dt/TUNE.hitlag; bufferPresses(H,simIn?NO_INPUT:playerInput(),0); if (human2) bufferPresses(D,player2Input(),0);
     // SDI: during hitlag the fighter who was hit can nudge themselves a few pixels per tap
     const V=hitVictim; if (V && V.stun>0){ let dx=0, dy=0;
       if (V===H){ dx=(pressed.right?1:0)-(pressed.left?1:0); dy=(pressed.down?1:0)-(pressed.up?1:0); }
+      else if (human2){ dx=(pressed2.right?1:0)-(pressed2.left?1:0); dy=(pressed2.down?1:0)-(pressed2.up?1:0); }
       else if (cpu.on && Math.random()<CPU_LV[cpu.level].di*0.12){ dx=V.x<208?1:-1; dy=-1; }
       if (dx||dy){ const oy=V.y; V.x+=dx*3; if (!(V.ground&&dy>0)) V.y+=dy*3;
         if (!V.ground && oy<=ALTAR.t && V.y>ALTAR.t && V.x>=ALTAR.l && V.x<=ALTAR.r) V.y=ALTAR.t; } }
-    for (const k in pressed) delete pressed[k]; return; }
+    clearPressed(); return; }
   shake=Math.max(0,shake-dt); stageStep(dt);
-  if (match.over>0){ match.over-=dt; if (match.over<=0) resetFighters(); tickFx(dt); for (const k in pressed) delete pressed[k]; return; }
-  const PI=simIn?(simIn.demo?cpuInput(H,dt):NO_INPUT):playerInput(), CI=cpu.on&&!(simIn&&simIn.lock)?cpuInput(D,dt):NO_INPUT;   // simIn: the title-screen demo or the countdown
+  if (match.over>0){ match.over-=dt; if (match.over<=0) resetFighters(); tickFx(dt); clearPressed(); return; }
+  const PI=simIn?(simIn.demo?cpuInput(H,dt):NO_INPUT):playerInput(), CI=simIn&&simIn.lock?NO_INPUT:human2?player2Input():cpu.on?cpuInput(D,dt):NO_INPUT;   // simIn: the title-screen demo or the countdown
   fighterStep(H,PI,dt*slowOf(H));
   if (match.over<=0) fighterStep(D,CI,dt*slowOf(D));
   if (!cpu.on && D.ground && D.stun<=0 && !D.mv && !D.lie && !D.grabbedBy && !D.holding && !D.shielding && !(D.brk>0)) D.face=H.x<D.x?-1:1;      // the training dummy just turns to face you
@@ -3489,7 +3514,7 @@ function step(dt){
   const apart=b=>b.ledge||b.grabbedBy||b.holding;
   if (!dashing(H) && !dashing(D) && !apart(H) && !apart(D) && H.stun<=0 && D.stun<=0){ const dx=D.x-H.x; if (Math.abs(dx)<14 && Math.abs(D.y-H.y)<20){ const push=(14-Math.abs(dx))*0.5*(dx>=0?1:-1); D.x+=push; H.x-=push; } }
   tickFx(dt);
-  for (const k in pressed) delete pressed[k];
+  clearPressed();
 }
 
 // ---- CPU ---------------------------------------------------------------------
@@ -3943,7 +3968,7 @@ function renderStage(now,dt,o={}){
   const marker=(b,label,col)=>{ const [x,y0]=toScreen(b.x,b.y-66); if (y0<-10||x<-10||x>VW+10) return; const y=Math.max(2,y0);
     drawText(sg,textCanvas(label,{fill:col,outline:'#f3f1e6'}),x,y-5,'c');
     sg.fillStyle='#f3f1e6'; sg.fillRect(x-3,y,6,1); sg.fillStyle=col; sg.fillRect(x-2,y,4,1); sg.fillRect(x-1,y+1,2,1); };
-  marker(H,'P1','#163a8c'); marker(D,cpu.on?'CPU':'DUMMY','#a8321c');
+  marker(H,'P1','#163a8c'); marker(D,cpu.p2?'P2':cpu.on?'CPU':'DUMMY','#a8321c');
   // a fighter outside the view shows in a bubble at the screen edge, like Smash's magnifying glass
   const bubble=(b,f,flip,col)=>{ const [sx,sy]=toScreen(b.x,b.y-28); const m=14;
     if (sx>-6&&sx<VW+6&&sy>-6&&sy<VH+6) return;
@@ -3971,7 +3996,7 @@ if (!STAGES[MS.stage]) MS.stage='altar';
 { const q=new URLSearchParams(location.search).get('stage'); if (q && STAGES[q]) MS.stage=q; }
 loadStage(MS.stage); resetFighters();
 const msSave=()=>{ try { localStorage.setItem('pxh-match',JSON.stringify(MS)); } catch(e){} };
-const LV_NAMES=['EASY','NORMAL','HARD','DUMMY'], TIMES=[0,2,3,5,8], FIGHTERS=['hermes','aethon','kairos','iris'];
+const LV_NAMES=['EASY','NORMAL','HARD','DUMMY','PLAYER 2'], TIMES=[0,2,3,5,8], FIGHTERS=['hermes','aethon','kairos','iris'];
 const flow={s:'title',t:0,row:0,clock:0,goT:0,cn:-1,sudden:false,stats:null,winner:null,maxSt:3,hits:[]};
 let simIn=null, gameT=0;      // simIn: the loop's input override for step(); gameT: sim seconds, for KO credit
 const inMenu=()=>flow.s!=='play' && flow.s!=='ready';
@@ -3998,7 +4023,7 @@ function go(s){ flow.s=s; flow.t=0; flow.row=s==='select'?6:0; flow.cn=-1; }
 function toMenu(s){ flow.maxSt=3; flow.stats=null; resetFighters(); go(s); }
 function startMatch(sudden){
   loadStage(MS.stage);
-  current=MS.p1; H.ch=MS.p1; D.ch=MS.p2; cpu.on=MS.lv<3; cpu.level=Math.min(MS.lv,2);
+  current=MS.p1; H.ch=MS.p1; D.ch=MS.p2; cpu.on=MS.lv!==3; cpu.p2=MS.lv===4; cpu.level=Math.min(MS.lv,2);
   resetFighters(); koFx=null; hitlag=0; kos.length=0;
   const st=sudden?1:cpu.on?MS.stocks:3; H.stocks=D.stocks=st; flow.maxSt=st;
   if (sudden){ H.dmg=D.dmg=300; } else { flow.stats={p1:newStats(),p2:newStats(),t:0}; syncSheet(); }
@@ -4009,7 +4034,7 @@ const cyc=(arr,v,d)=>arr[(arr.indexOf(v)+d+arr.length)%arr.length];
 function selChange(row,d){
   if (row===0) MS.p1=cyc(FIGHTERS,MS.p1,d);
   else if (row===1) MS.p2=cyc(FIGHTERS,MS.p2,d);
-  else if (row===2) MS.lv=(MS.lv+d+4)%4;
+  else if (row===2) MS.lv=(MS.lv+d+5)%5;
   else if (row===3){ if (MS.lv===3) return; MS.stocks=clamp(MS.stocks+d,1,5); }
   else if (row===4){ if (MS.lv===3) return; MS.time=cyc(TIMES,MS.time,d); }
   else if (row===5){ MS.stage=cyc(STAGE_IDS,MS.stage,d); loadStage(MS.stage); resetFighters(); }
@@ -4018,7 +4043,8 @@ function selChange(row,d){
 const OK=P=>P.attack||P.start||P.jump;
 function menuNav(P,n,horiz){ const back=horiz?P.left:P.up, fwd=horiz?P.right:P.down;
   if (back){ flow.row=(flow.row+n-1)%n; sfx('menu'); } if (fwd){ flow.row=(flow.row+1)%n; sfx('menu'); } }
-const PAUSE_ITEMS=[['RESUME',()=>{ go('play'); }],['RESTART',()=>startMatch()],['FIGHTER SELECT',()=>toMenu('select')],['TITLE SCREEN',()=>toMenu('title')]];
+// the press that resumes is a menu press: it must not also be an attack (in a two-player match it could be the other player's key)
+const PAUSE_ITEMS=[['RESUME',()=>{ go('play'); clearPressed(); }],['RESTART',()=>startMatch()],['FIGHTER SELECT',()=>toMenu('select')],['TITLE SCREEN',()=>toMenu('title')]];
 const RESULT_ITEMS=[['REMATCH',()=>startMatch()],['FIGHTERS',()=>toMenu('select')],['TITLE',()=>toMenu('title')]];
 function flowInput(P){
   const s=flow.s;
@@ -4029,7 +4055,7 @@ function flowInput(P){
     if (P.left) selChange(flow.row,-1); else if (P.right) selChange(flow.row,1);
     if (OK(P)){ sfx('ok'); startMatch(); } }
   else if (s==='play'){ if (P.start||P.back){ sfx('menu'); go('pause'); } }
-  else if (s==='pause'){ if (P.back||P.special||P.start&&flow.t>0.1){ go('play'); return; } menuNav(P,PAUSE_ITEMS.length,false);
+  else if (s==='pause'){ if (P.back||P.special||P.start&&flow.t>0.1){ go('play'); clearPressed(); return; } menuNav(P,PAUSE_ITEMS.length,false);
     if (P.attack||P.jump){ sfx('ok'); PAUSE_ITEMS[flow.row][1](); } }
   else if (s==='results' && flow.t>0.6){ menuNav(P,RESULT_ITEMS.length,true); menuNav(P,RESULT_ITEMS.length,false);
     if (P.back||P.special){ toMenu('select'); return; } if (OK(P)){ sfx('ok'); RESULT_ITEMS[flow.row][1](); } }
@@ -4040,7 +4066,8 @@ stage.addEventListener('click',e=>{ if (!inMenu()) return; const r=stage.getBoun
   stage.focus({preventScroll:true}); });
 // ---- one frame of the game: what runs depends on the screen ----
 function flowFrame(now,dt){
-  padPoll(); const P={...pressed}; flow.t+=dt; flowInput(P);
+  padPoll(); const P={...pressed}; if (pressed2.start) P.start=true; if (pressed2.back) P.back=true;      // either player can pause
+  flow.t+=dt; flowInput(P);
   const s=flow.s;
   if (s==='title'||s==='select'){         // CPU Hard vs CPU Hard plays behind the menus
     const on=cpu.on, lv=cpu.level; cpu.on=true; cpu.level=2; simIn={demo:true}; step(simDt(dt)); simIn=null; cpu.on=on; cpu.level=lv;
@@ -4053,7 +4080,7 @@ function flowFrame(now,dt){
     if (match.over>0 && flow.s==='play'){ go('game'); sfx('game'); } }
   else if (s==='game'){ step(simDt(dt)); if (match.over<=1.2 || flow.t>3.2) { flow.winner=match.winner; go('results'); } }
   else if (s==='timeup'){ if (flow.t>1.6){ if (H.stocks===D.stocks) startMatch(true); else { flow.winner=H.stocks>D.stocks?H:D; go('results'); } } }
-  for (const k in pressed) delete pressed[k];
+  clearPressed();
   if (flow.s!=='play') PAD.flick=null;
   renderStage(now,dt,{hud:flow.s!=='title'&&flow.s!=='select'});
   drawFlow();
@@ -4086,7 +4113,7 @@ function drawFlow(){
     TX('CHOOSE YOUR FIGHTERS',VW/2,4,tMd(GOLD),'c');
     for (const side of [0,1]){ const x0=side?218:30, w=168, y0=17, h=128, ch=side?MS.p2:MS.p1, on=flow.row===side;
       box(x0,y0,w,h,on);
-      TX(side?(MS.lv<3?'CPU':'DUMMY'):'P1',x0+6,y0+5,tMd(side?P2C:P1C));
+      TX(side?(MS.lv===4?'P2':MS.lv<3?'CPU':'DUMMY'):'P1',x0+6,y0+5,tMd(side?P2C:P1C));
       drawPose(ch,x0+w/2,y0+113,1,1,side&&MS.p1===MS.p2);
       TX(CHARS[ch].name.toUpperCase(),x0+w/2,y0+116,tMd(on?GOLD:CREAM),'c');
       TX('<',x0+6,y0+60,tMd(on?GOLD:'#8090c8')); TX('>',x0+w-13,y0+60,tMd(on?GOLD:'#8090c8'));
@@ -4102,6 +4129,9 @@ function drawFlow(){
   // in a match: the timer, the countdown and the banners
   if (s!=='results' && (flow.clock>0 || s==='timeup')) TX(clockStr(flow.clock),VW/2,4,tMd(flow.clock<10.5?P2C:CREAM),'c');
   if (s==='ready' && !flow.sudden) TX(STAGE.full,VW/2,40,tMd(CREAM),'c');
+  // two players: who has which controls, shown during the countdown
+  if (s==='ready' && cpu.p2 && !flow.sudden){ const kb1='W A S D   F ATTACK   G SPECIAL   SPACE JUMP', kb2='ARROWS   J ATTACK   K SPECIAL   N JUMP';
+    TX('P1   '+(PAD.on?'CONTROLLER 1  OR  '+kb1:kb1),VW/2,56,tSm(P1C),'c'); TX('P2   '+(PAD2.on?(PAD.on?'CONTROLLER 2':'CONTROLLER')+'  OR  '+kb2:kb2),VW/2,65,tSm(P2C),'c'); }
   if (s==='ready'){ if (flow.sudden) TX('SUDDEN DEATH',VW/2,52,tBig(3,'#ff8a5a','#c8321c'),'c');
     const n=3-Math.floor(flow.t/0.7); if (n>0){ const k=(flow.t%0.7)/0.7; TX(String(n),VW/2,78,tBig(k<0.15?8:7),'c'); } }
   if (s==='play' && flow.goT>0) TX('GO!',VW/2,78,tBig(7),'c');
@@ -4119,11 +4149,11 @@ function drawResults(){
   if (w){ const col=w===H?P1C:P2C;
     sg.fillStyle='rgba(255,229,138,0.08)'; sg.fillRect(20,20,170,190);
     drawPose(w.ch,105,188,1,1,w===D&&D.ch===H.ch);
-    TX(w===H?'P1 WINS':(cpu.on?'CPU WINS':'DUMMY WINS'),105,26,tBig(3,col,col),'c');
+    TX(w===H?'P1 WINS':(cpu.p2?'P2 WINS':cpu.on?'CPU WINS':'DUMMY WINS'),105,26,tBig(3,col,col),'c');
     TX(CHARS[w.ch].name.toUpperCase(),105,194,tMd(GOLD),'c'); }
   if (!S) return;
   const X=206, c1=338, c2=390;
-  TX('P1',c1,22,tMd(P1C),'r'); TX(cpu.on?'CPU':'DUMMY',c2,22,tMd(P2C),'r');
+  TX('P1',c1,22,tMd(P1C),'r'); TX(cpu.p2?'P2':cpu.on?'CPU':'DUMMY',c2,22,tMd(P2C),'r');
   const rows=[['KOS','kos'],['FALLS','falls'],['SELF KOS','sds'],['DAMAGE DEALT','dealt'],['DAMAGE TAKEN','taken'],['BEST COMBO','maxCombo']];
   rows.forEach(([lab,k],i)=>{ const y=38+i*14; sg.fillStyle=i%2?'rgba(255,255,255,0.03)':'rgba(255,255,255,0.07)'; sg.fillRect(X-4,y-2,194,13);
     const f=v=>k==='dealt'||k==='taken'?Math.round(v)+'%':k==='maxCombo'?(v<2?'-':v+' HITS'):String(v);
