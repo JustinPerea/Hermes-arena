@@ -61,7 +61,7 @@ node plugin/build.mjs                              # writes plugin/dist/hermes-a
 NODE_PATH=$(npm root -g) node plugin/test.cjs      # mount, play, unmount and loader checks in Chrome
 ```
 
-Copy `plugin/dist/hermes-arena/` to `~/.hermes/desktop-plugins/` and reload desktop plugins (⌘K): the game appears as "Hermes Arena" in the sidebar. Rebuild after every change to the game. The checks use a stand-in for the app shell; as of v31 the plugin has not yet been run inside Hermes Desktop itself. How the wrapper works and the layout decisions: `plugin/README.md`. The plugin format notes are in `docs/PROJECT-NOTES.md` (section `hermes-desktop-plugin-format`).
+Copy `plugin/dist/hermes-arena/` to `~/.hermes/desktop-plugins/` and reload desktop plugins (⌘K): the game appears as "Hermes Arena" in the sidebar. Rebuild after every change to the game. The checks use a stand-in for the app shell; the plugin was also installed and played in Hermes Desktop v0.23.0 (2026-11-10). How the wrapper works and the layout decisions: `plugin/README.md`. The plugin format notes are in `docs/PROJECT-NOTES.md` (section `hermes-desktop-plugin-format`).
 
 ## Working on the cyanotype engine
 

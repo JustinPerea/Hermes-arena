@@ -32,7 +32,7 @@ The game is written as a page script: it finds its elements with `document.getEl
 
 - **Play layout.** The plugin shows the stage, the controls list, Tuning and the touch buttons. The page header, the animation sheet and the design notes are hidden, and the sheet's tiles stop redrawing. `node plugin/build.mjs --full` keeps everything.
 - **The stage fits the pane.** Its width is the smaller of the pane's width and what the pane's height allows, up to 1,200 px (the standalone page stops at 900 px). A frame costs about 0.2 ms at that size in Chrome.
-- **Focus.** The game takes keyboard focus when the page opens. When focus leaves it (a click elsewhere in the app, the command palette, another window) a running match pauses and the stage shows "Click to play". The standalone page does not pause; it has the window to itself.
+- **Focus.** The game takes keyboard focus when the page opens. When focus leaves it (a click elsewhere in the app, the command palette, another window) a running match pauses and the stage shows "Click to play" in its top right corner (the one corner no screen draws in). The standalone page does not pause; it has the window to itself.
 - **Fonts** still come from Google Fonts, through one `<link>` added to the app's document while a game is mounted. Without a connection the page falls back to system fonts; text drawn on the canvas uses the game's own pixel font and is not affected.
 
 ## What the build refuses
@@ -45,4 +45,18 @@ The build stops with an error if the game starts using something the wrapper doe
 
 Part B runs `plugin.js` through the app's own loading steps. The import scan and rewrite are copied at run time from the hermes-agent checkout (`~/.hermes/hermes-agent/apps/desktop/src/contrib/runtime-loader.ts`, or `--hermes <path>`); without a checkout the test falls back to the documented pattern and says so. The module is then imported from a blob URL with shim modules, registered against a stand-in `ctx`, and mounted through a 20-line stand-in for React, including the effect, cleanup, effect order of StrictMode.
 
-Not covered: the real app. Its pane layout, its focus handling and its real React are only stood in for here. The first install in Hermes Desktop is the real test.
+The checks do not run the real app: its pane layout, its focus handling and its real React are only stood in for.
+
+## Checked by hand in Hermes Desktop (v0.23.0, 2026-11-10)
+
+Installed next to three other plugins and driven with the `agent-desktop` CLI:
+
+- The plugin loads without an error; "Hermes Arena" appears in the Sessions sidebar with the game icon, and the page opens in the main zone.
+- The stage fits the pane (1,000 x 797 px), the web fonts load, and the canvas has keyboard focus as soon as the page opens.
+- A click on the canvas moves the title screen on; keys start and play a match.
+- Switching to another app pauses the match and shows "Click to play".
+- Overwriting `plugin.js` hot-reloads it: the old game is taken down and one fresh game is mounted (a match in progress is lost, as with any reload).
+
+Not tried there: a controller, touch, and the Tuning panel.
+
+To repeat it: keys reach the app only while it is the front app, so key presses need `agent-desktop press --headed --app Hermes <key>`; check first that the canvas (accessible name "Playable Altar of the Agora stage...") has the `focused` state, and do not send Enter.

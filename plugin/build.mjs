@@ -60,7 +60,7 @@ css += `
 .wrap{max-width:1200px}
 .stage-frame{position:relative;box-sizing:border-box;align-self:center;width:min(100%,calc((100cqh - 52px)*416/234));min-width:min(100%,416px)}
 #stage:focus-visible{outline:none}
-.pxh-idle .stage-frame::after{content:'Click to play';position:absolute;left:50%;top:8px;transform:translateX(-50%);
+.pxh-idle .stage-frame::after{content:'Click to play';position:absolute;right:8px;top:8px;
   font-family:var(--label);font-size:12px;line-height:1;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
   padding:7px 10px;background:var(--paper);color:var(--ink);border:2px solid var(--ink);box-shadow:3px 3px 0 var(--ink);pointer-events:none}
 `;
