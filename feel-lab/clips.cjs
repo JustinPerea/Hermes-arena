@@ -19,7 +19,7 @@ fs.mkdirSync(OUT,{recursive:true});
   for (const name of names.filter(n=>!ONLY||ONLY.split(',').includes(n))) for (const ch of CHS){
     let events=[];
     const frames=await page.evaluate(([name,ch])=>{
-      const sc=LAB.scen[name]; __seed(sc.seed||3); LAB.setup(ch,{foe:ch,cpu:!!sc.cpu||!!sc.dummy,dummyAway:false}); if (sc.cpu) cpu.level=2;
+      const sc=LAB.scen[name]; { const st=sc.stage||'altar'; if (STAGE.id!==st){ loadStage(st); resetFighters(); } } __seed(sc.seed||3); LAB.setup(ch,{foe:ch,cpu:!!sc.cpu||!!sc.dummy,dummyAway:false}); if (sc.cpu) cpu.level=2;
       sc.setup&&sc.setup();
       const every=sc.every||2, out=[], realPI=playerInput, realCI=cpuInput; let now=1000;
       if (sc.cpu) playerInput=()=>realCI(H,1/60);

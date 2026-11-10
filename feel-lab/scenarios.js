@@ -59,4 +59,9 @@ S.cpu_puddle={frames:200, every:3, cpu:true, seed:3, setup(){ H.x=110; H.face=1;
   input:i=>i<20?{}:{ax:1}, ok:()=>!!H.lie && H.dmg>30 && H.dmg<=32.5};
 S.cpu_stream={frames:170, cpu:true, seed:4, setup(){ H.x=208; H.face=1; H.dmg=D.dmg=30; Object.assign(D,{x:206,y:53,face:-1}); wait(0.2); },
   input:i=>({}), ok:()=>H.stun>0 && D.stale[D.stale.length-1]==='stream'};
+// big map (stage:'kyllene'): the CPU on the temple crosses the east chasm to a foe standing on the cliff.
+//   node clips.cjs --only cpu_cross --ch aethon
+// Until v32 it stepped off the edge, turned back to the ledge behind it, and never got across.
+S.cpu_cross={frames:300, every:3, cpu:true, seed:1, stage:'kyllene', setup(){ H.dmg=D.dmg=30; Object.assign(H,{x:640,y:170,face:-1,ground:false}); Object.assign(D,{x:440,y:133,face:1,ground:false}); wait(0.2); },
+  input:i=>({}), ok:()=>D.ground && D.x>566 && D.y>170};
 })();

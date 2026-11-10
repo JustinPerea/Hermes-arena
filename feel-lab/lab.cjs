@@ -12,6 +12,7 @@ const HTML=path.resolve(arg('html',path.join(__dirname,'../game/pixel-hermes.htm
 const CHS=String(arg('ch','hermes,aethon')).split(',');
 const OUT=path.resolve(arg('out',path.join(LAB,'out')));
 const SET=arg('set',''), QUICK=!!arg('quick',false), SEEDS=+arg('seeds',30), LABEL=arg('label','');
+const BIG=arg('big','kyllene'), BIGN=Math.max(4,Math.round(SEEDS/3));   // matches per fighter on the big map
 const spec=JSON.parse(fs.readFileSync(path.join(LAB,'spec.json'),'utf8'));
 fs.mkdirSync(OUT,{recursive:true});
 
@@ -34,7 +35,15 @@ function grade(v,m){ if (v==null||Number.isNaN(v)) return 'fail'; const [a,b]=m.
       const sum=k=>ms.reduce((a,m)=>a+(m[k]||0),0);
       r.kofx_false=sum('fx')?+(sum('fxWrong')/sum('fx')).toFixed(2):0; r.kofx_missed=sum('hitKOs')?+(sum('fxMissed')/sum('hitKOs')).toFixed(2):0;
       r.nan_frames=ms.reduce((a,m)=>a+m.nan,0); r.stuck=ms.reduce((a,m)=>a+m.stuck,0);
-      r._matches=ms.map(m=>({secs:m.secs,timeout:m.timeout,kos:m.kos,stuckWhat:m.stuckWhat})); }
+      r._matches=ms.map(m=>({secs:m.secs,timeout:m.timeout,kos:m.kos,stuckWhat:m.stuckWhat}));
+      // the big map: do the CPUs find each other across its chasms and floors, and stay out of its pits?
+      const bs=[]; for (let s=1;s<=BIGN;s++){ const m=await page.evaluate(([ch,s,id])=>{ if (!STAGES[id]) return null; loadStage(id); resetFighters(); __seed(s*101); LAB.setup(ch);
+        try { return LAB.match(2,240); } finally { loadStage('altar'); resetFighters(); } },[ch,s,BIG]); if (m) bs.push(m); }
+      if (bs.length){ const bk=bs.flatMap(m=>m.kos), secs=bs.reduce((a,m)=>a+m.secs,0);
+        r.big_stall=+(bs.reduce((a,m)=>a+m.stall,0)/secs).toFixed(2);
+        r.big_self_destructs=bk.length?+(bk.filter(k=>k.since>4).length/bk.length).toFixed(2):0;
+        r.big_timeout_rate=+(bs.filter(m=>m.timeout).length/bs.length).toFixed(2); r.big_sec_per_stock=bk.length?+(secs/bk.length).toFixed(1):999;
+        r._big=bs.map(m=>({secs:m.secs,timeout:m.timeout,stall:m.stall,kos:m.kos})); } }
     res.fighters[ch]=r; }
   res.page_errors=errors.length; res.errors=errors;
   await browser.close();
@@ -57,6 +66,7 @@ function grade(v,m){ if (v==null||Number.isNaN(v)) return 'fail'; const [a,b]=m.
     md+=`\n## ${ch} frame data\n\n| Move | Class | Startup | Total | IASA | Landing lag | On shield | Dmg |\n|---|---|---|---|---|---|---|---|\n`;
     for (const x of f._frames) md+=`| ${x.key} | ${x.cls} | ${x.startup}${x.suOk?'':' ⚠'} | ${x.total} | ${x.iasa??''} | ${x.landLag??''} | ${x.shieldAdv}${x.shOk?'':' ⚠'} | ${x.dmg} |\n`;
     md+=`\nRecovery: ${f._recovery_px}px level with the stage · Heights: ${JSON.stringify(f._heights)} · chains: ${JSON.stringify(f._chains)}\n`;
+    if (f._big) md+=`\nBig map (${BIG}): ${f.big_sec_per_stock} s per stock, ${Math.round(f.big_timeout_rate*100)}% of matches reach the 240 s cap, stalled ${Math.round(f.big_stall*100)}% of the time\n`;
     if (f._matches) md+=`\nMatches: ${f._matches.map(m=>`${m.secs}s${m.timeout?' TIMEOUT':''} KOs [${m.kos.map(k=>k.who+'@'+k.pct+'%'+(k.since>4?' SD':'')).join(', ')}]${m.stuckWhat?' stuck:'+m.stuckWhat:''}`).join(' · ')}\n`; }
   if (errors.length) md+=`\n## Page errors\n\n${errors.map(e=>'- '+e).join('\n')}\n`;
   fs.writeFileSync(path.join(OUT,'report.md'),md);

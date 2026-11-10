@@ -49,10 +49,11 @@ node lab.cjs --quick --ch hermes,aethon,kairos,iris
 node lab.cjs --set "FEEL.kbGrowth=1.9"   # try a change in-page without editing
 node clips.cjs              # GIFs + contact sheets into feel-lab/out/
 node find-seeds.cjs --only cpu_puddle --ch iris   # a seed where a dice-rolling clip scenario shows its move
+node clips.cjs --only cpu_cross --ch aethon       # a scenario can name its stage (this one is on Kyllene)
 node video.cjs --before old.html         # side-by-side before/after MP4
 ```
 
-The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build, and use the installed Google Chrome when there is one. Last recorded score: 98.5 (v31; 98.9 with all four fighters). The lab plays 30 CPU matches per fighter since v31, so earlier scores in LOG.md are not comparable (v29 re-measured: 95.5).
+The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build, and use the installed Google Chrome when there is one. Last recorded score: 98.6 (v32; 99.0 with all four fighters). The lab's yardstick grew twice, so earlier scores in LOG.md are not comparable: since v31 it plays 30 CPU matches per fighter, and since v32 another 10 on the big map, Kyllene (`--big <stage>`), to check that the CPUs find each other there (v31 re-measured: 97.9 with all four).
 
 ## Hermes Desktop plugin (pixel game)
 

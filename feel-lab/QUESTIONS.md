@@ -56,3 +56,11 @@ The lab scores each move's startup against one band per move class, taken from S
 
 His other standing warning, recovery 1.04 against a 0.9 ceiling, is what is left after Q3 (you chose the shorter glide; going lower means cutting one of his three jumps).
 
+## Q8. Aethon mirror matches on Kyllene run long (open)
+
+With the chasm stand-offs fixed (v32), CPU Aethon against CPU Aethon on Kyllene still takes about 44 s a stock against 33 on the Altar, and 5 of 30 matches pass four minutes. They are fighting the whole time. He is the heaviest fighter with three jumps and a glide, and Kyllene's blast lines are far out, so he goes at about 170% (152% on the Altar; the other three go at 115 to 137% on both maps).
+
+- **Leave it (recommended for now):** a big map is meant to play longer, and a human Aethon player will not survive the way a CPU that always holds toward the stage does. Worth another look once you have played a few matches there.
+- **Pull Kyllene's side blast lines in:** every fighter dies earlier there; the map loses some of its room.
+- **Weaken Aethon's recovery further:** changes him on the Altar too, where he is in band.
+

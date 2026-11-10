@@ -124,3 +124,8 @@
 {"when":"2026-11-10T14:42:02.353Z","md5":"67b628876b","label":"v31: edgeStop flags removed","set":"","quick":false,"score":98.5,"counts":{"pass":65,"warn":2,"fail":0},"fails":[]}
 {"when":"2026-11-10T14:42:09.277Z","md5":"67b628876b","label":"v31: edgeStop flags removed, 4 fighters","set":"","quick":false,"score":98.9,"counts":{"pass":132,"warn":3,"fail":0},"fails":[]}
 {"when":"2026-11-10T15:01:37.446Z","md5":"67b628876b","label":"","set":"","quick":true,"score":98,"counts":{"pass":49,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T17:50:44.096Z","md5":"24716a0eeb","label":"","set":"","quick":false,"score":98.5,"counts":{"pass":65,"warn":2,"fail":0},"fails":[]}
+{"when":"2026-11-10T17:50:50.822Z","md5":"24716a0eeb","label":"","set":"","quick":false,"score":98.9,"counts":{"pass":132,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T17:51:51.816Z","md5":"24716a0eeb","label":"","set":"","quick":false,"score":99,"counts":{"pass":140,"warn":3,"fail":0},"fails":[]}
+{"when":"2026-11-10T17:52:08.636Z","md5":"67b628876b","label":"v31 with the big-map metrics","set":"","quick":false,"score":97.9,"counts":{"pass":138,"warn":4,"fail":1},"fails":["big_stall:aethon"]}
+{"when":"2026-11-10T17:52:17.282Z","md5":"24716a0eeb","label":"","set":"","quick":false,"score":98.6,"counts":{"pass":69,"warn":2,"fail":0},"fails":[]}

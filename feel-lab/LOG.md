@@ -225,3 +225,28 @@ Clip: `cpu_field` now shows the field dropped on a whiffed smash.
 Why off: with it on for one Iris-mirror side only (200 matches a run, Hard), trips fell from about 0.85 to 0.5 a match, but that side lost slightly more in every variant on the Altar: 91-109, 91-108, 88-111 (no brake), 93-107 (stop short and wait instead of hopping); Kyllene was even. A trip costs 2% and a knockdown, and about 6 in 10 runs through a puddle do not trip at all (a fighter in a move is exempt), so respecting the puddle gives up more than it saves. Field avoidance changed nothing: a foe is slowed about 1.2 s a match either way, because CPU Kairos only casts on a foe who is already stuck. Question for Justin: QUESTIONS.md Q6.
 
 What the remaining trips are (aware side): landing on it 26, sliding onto it out of a move 17, poured under the feet 15, running into it 8.
+
+## v32 (2026-11-10) CPUs cross Kyllene's chasms; lab checks the big map
+
+On Kyllene two CPUs often ended up on either side of a chasm and stayed there, each hopping at its own edge, for up to a minute at a time. 34 of 120 CPU matches hit the 240 s cap (Aethon 24 of 30, Hermes 8 of 30). KO percent was never the problem (an earlier note here guessed 200%; it is 130 to 170).
+
+Why: on a big map the CPU calls itself "off stage" whenever nothing is under its feet, and its way back was always the nearest block ledge. So it turned round the moment it left an edge. It also walked off its own edge to "guard" the foe's ledge on the far side.
+
+| Change | Notes |
+|---|---|
+| Over a gap, the CPU heads for the nearest surface toward the foe that its jumps and up special still reach (`cpuLanding`), instead of the ledge behind it. Not while tumbling from a launch | The reach is scaled by the fighter's air speed, so Aethon tries less than Hermes |
+| It guards a ledge or traps a hanging foe only from the floor that ledge belongs to (`mine()` in `cpuThink`) | Before, it stepped into the chasm to get there, over and over |
+| Falling past an edge, it steers onto a surface below that the fall still reaches (`cpuDrop`) before thinking about a ledge above | Kyllene has 8 px slits between the stepping stones and the cliffs; the old steering pulled the fighter away from the stone and against the wall |
+| It does not start an aerial in the moment it drops past an edge (`cpuAirSafe`, big maps only) | One-sided, 120 matches a fighter on Kyllene: Aethon's self-destructs 3 against 19 with wins even (51-52); Hermes 0 against 2 (58-62) |
+| Aethon's air stomp checks the floor at five points instead of three | It could pass with the stone on one side and the temple on the other and land in the slit |
+
+Tried and dropped: the same aerial rule with a wider margin (any gap within 8 px, plus an estimate of whether the fighter could climb back). It removed the self-destructs but lost 0.2 to 0.3 stocks a match on Kyllene, and 0.3 to 0.6 on the Altar (Hermes 60-140), because it also blocked ordinary aerials near every platform edge. A recovery-height estimate alone prevented nothing.
+
+Kyllene after (30 matches a fighter, CPU Hard mirror; before in brackets): matches at the cap Hermes 0 (8), Aethon 5 (24), Kairos 0 (0), Iris 0 (2); seconds per stock 34 (45), 44 (80), 34 (33), 30 (33); self-destructs per stock 0, 0.03, 0, 0. Aethon's five long matches are not stalls (4% of the time without contact): he takes about 170% to KO there. That is Q8.
+
+The Altar is untouched: all the new rules are behind `STAGE.big`, and the 30-match pacing numbers are identical to v31 to the last digit.
+
+Lab: two new pacing metrics, measured in 10 extra matches per fighter on Kyllene (`--big <stage>`): `big_stall`, the share of match time in stretches of over 8 s with no hit and no KO, and `big_self_destructs`. v31 fails `big_stall` for Aethon (0.48) and warns for Hermes (0.2); v32 reads 0.04 and 0.01. So scores move again: **v31 re-measured 97.9 (all four), v32 99.0; Hermes and Aethon only 98.6.** The three standing warnings are unchanged.
+
+Clip: `cpu_cross` (scenarios can now name a stage): the CPU on the temple crosses the east chasm to a foe on the cliff. It gets across within 3 s on each of the first three seeds; v31 needed seeds 23, 33 and 36 to do it three times.
+

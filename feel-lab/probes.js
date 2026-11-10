@@ -153,11 +153,13 @@ LAB.match=function(level,capS){
   setup(current,{cpu:true,foe:current,dummyAway:false}); cpu.level=level;
   const out={kos:[],nan:0,stuck:0,frames:0,timeout:false};
   const lastHit=new Map([[H,-99],[D,-99]]); let t=0;
+  // stall: seconds spent in stretches of more than 8 s with no hit and no KO (two CPUs that cannot reach each other)
+  out.stall=0; let lastAny=0; const contact=()=>{ if (t-lastAny>8) out.stall+=t-lastAny; lastAny=t; };
   const oLH=landHit, oKB=koBurst;
-  landHit=function(T){ const d0=T.dmg; const r=oLH.apply(this,arguments); if (T.dmg>d0) lastHit.set(T,t); return r; };
+  landHit=function(T){ const d0=T.dmg; const r=oLH.apply(this,arguments); if (T.dmg>d0){ lastHit.set(T,t); contact(); } return r; };
   // KO slow motion: fired, fired on a hit that did not KO within 6 s, and KOs off a hit that got none
   out.fx=0; out.fxWrong=0; out.fxMissed=0; out.hitKOs=0; let lastFx=null, pend=[]; const fxAt=new Map([[H,-99],[D,-99]]);
-  koBurst=function(b){ out.kos.push({who:b===H?'P1':'P2',pct:Math.round(b.dmg),t:+t.toFixed(1),since:+(t-lastHit.get(b)).toFixed(1)});
+  koBurst=function(b){ contact(); out.kos.push({who:b===H?'P1':'P2',pct:Math.round(b.dmg),t:+t.toFixed(1),since:+(t-lastHit.get(b)).toFixed(1)});
     if (t-lastHit.get(b)<=4){ out.hitKOs++; if (t-fxAt.get(b)>6) out.fxMissed++; } pend=pend.filter(q=>q.o!==b); return oKB.apply(this,arguments); };
   const seen=new Map();
   playerInput=()=>cpuInput(H,DT);
@@ -170,6 +172,7 @@ LAB.match=function(level,capS){
         const st=F.mv||(F.stun>0?'stun':null)||(F.brk>0?'brk':null)||(F.lie?'lie':null)||(F.ledge?'ledge':null)||(F.holding?'hold':null)||(F.shielding?'shield':null)||F.helpless&&'helpless'||'free';
         const s=seen.get(F); if (!s||s.st!==st) seen.set(F,{st,t}); else if (st!=='free' && t-s.t>5){ out.stuck++; out.stuckWhat=(F===H?'P1 ':'P2 ')+(st.key||st); seen.set(F,{st,t}); } } }
     if (!(match.over>0)) out.timeout=true;
+    contact(); out.stall=+out.stall.toFixed(1);
   } finally { landHit=oLH; koBurst=oKB; playerInput=realPI; }
   out.secs=+(out.frames/60).toFixed(1); return out; };
 })();

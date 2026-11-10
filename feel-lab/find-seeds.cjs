@@ -8,6 +8,7 @@ const HTML=path.resolve(arg('html',path.join(__dirname,'../game/pixel-hermes.htm
 (async()=>{ const errors=[]; const b=await launch(); const page=await load(b,errors,HTML,['scenarios.js']);
   await page.evaluate(()=>{ stage.width=832; stage.height=468; });
   for (const name of ONLY){ const hits=await page.evaluate(([name,ch,MAX])=>{ const sc=LAB.scen[name], hits=[], realPI=playerInput, realCI=cpuInput; let now=1000;
+      { const st=sc.stage||'altar'; if (STAGE.id!==st){ loadStage(st); resetFighters(); } }
       for (let seed=1;seed<=MAX&&hits.length<3;seed++){ __seed(seed); now=1000; LAB.setup(ch,{foe:ch,cpu:true,dummyAway:false}); cpu.level=2; sc.setup&&sc.setup();
         try { for (let i=0;i<sc.frames;i++){ if (sc.input){ const s=sc.input(i)||{}; playerInput=()=>LAB.inp(s); } else playerInput=()=>realCI(H,1/60);
             step(simDt(1/60)); now+=1000/60; renderStage(now,1/60); if (sc.ok()){ hits.push(seed+' (f'+i+')'); break; } } } finally { playerInput=realPI; } }

@@ -409,6 +409,32 @@
    ],
    "why": "A kill should get its moment.",
    "source": "design"
+  },
+  "big_stall": {
+   "label": "Big map: share of match time with no hit for over 8 s",
+   "target": [
+    0,
+    0.1
+   ],
+   "warn": [
+    0,
+    0.2
+   ],
+   "why": "On Kyllene two CPUs stood on either side of a chasm, each stepping off and turning back, for up to a minute at a time (v31: Aethon 0.6, Hermes 0.3).",
+   "source": "design"
+  },
+  "big_self_destructs": {
+   "label": "Big map: share of KOs with no hit in the prior 4 s",
+   "target": [
+    0,
+    0.12
+   ],
+   "warn": [
+    0,
+    0.25
+   ],
+   "why": "The big map has pits inside the stage; a CPU that drops into them on its own is not a fight.",
+   "source": "design"
   }
  },
  "stability": {
