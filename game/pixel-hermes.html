@@ -2364,7 +2364,7 @@ function loadStage(id){
   return s;
 }
 // where fighter i starts: on the highest solid under its spawn x
-function spawnAt(i){ const x=STAGE.spawns[i]; let s=null; for (const q of SOLIDS) if (x>=q.l && x<=q.r && (!s||q.t<s.t)) s=q; s=s||SOLIDS[0]; return {x,y:s.t,plat:s}; }
+function spawnAt(i){ const x=STAGE.spawns[i]!==undefined?STAGE.spawns[i]:(STAGE.spawns[0]+STAGE.spawns[1])/2+(i%2?24:-24); let s=null; for (const q of SOLIDS) if (x>=q.l && x<=q.r && (!s||q.t<s.t)) s=q; s=s||SOLIDS[0]; return {x,y:s.t,plat:s}; }
 // moving platforms: sway on a sine; whoever stands on one rides along
 function stageStep(dt){ stageT+=dt;
   for (const p of PLATS){ const m=p.move; if (!m) continue;
@@ -2812,7 +2812,12 @@ const D=newFighter(D0);
 H.foe=D; D.foe=H;
 // every fighter in the match, in player order, and everyone a fighter can hit (two today; the list is what four players will grow from)
 const FS=[H,D];
-const foesOf=F=>FS.filter(o=>o!==F);
+// players 3 and 4: in FS only while a match has them. A fighter out of stocks in a match that goes on is `gone`: not stepped, drawn or hit
+const EX=[newFighter({ch:'kairos',x:100,face:1,plat:SOLIDS[0],col:'#1f7a4a',ko:'#7be0a0'}),newFighter({ch:'iris',x:316,face:-1,plat:SOLIDS[0],col:'#8a6a10',ko:'#ffd866'})];
+function setFighters(n){ FS.length=2; for (let i=2;i<n;i++) FS.push(EX[i-2]); }
+const foesOf=F=>FS.filter(o=>o!==F && !o.gone);
+// the opponent a fighter faces, grabs and (as a CPU) goes for: the nearest one still in, with a little loyalty to the current one
+function nearFoe(F){ let best=null, bd=Infinity; for (const o of FS){ if (o===F) continue; const d=(o.gone?1e6:0)+Math.abs(o.x-F.x)+Math.abs(o.y-F.y)*0.5-(o===F.foe?30:0); if (d<bd){ bd=d; best=o; } } return best; }
 let hitlag=0, shake=0, hitVictim=null, koFx=null, lastAdv=null;
 // feel tuning: multipliers on the Smash-calibrated defaults, changed live from the Tuning panel
 const TUNE_DEF={speed:1,grav:1,fall:1,run:1,jump:1,hitlag:1,kb:1,stun:1,shake:1}, TUNE={...TUNE_DEF}, VIEW={boxes:false,frames:false};
@@ -2832,13 +2837,15 @@ const cpu={on:true,level:1,p2:false};        // on: a real match (stocks, result
 function respawn(b){ Object.assign(b,FRESH(),{stale:[],buf:null,jbuf:null,x:respawnX(b),y:respawnY(b),vx:0,vy:0,ground:false,jumps:1,mv:null,dmg:0,helpless:false,stun:0,lag:0,squat:0,inv:2,used:{},flash:0}); }
 // a KO: burst of lines from where the fighter left the screen, aimed back at the stage
 function koBurst(b){ sfx('blast'); statKO(b); const x=clamp(b.x,6,VW-6), y=clamp(b.y-20,6,VH-30); kos.push({x,y,a:Math.atan2(VH/2-y,VW/2-x),t:0,col:b.ko}); shake=0.3;
-  if (cpu.on){ b.stocks--; if (b.stocks<=0){ b.stocks=0; match.over=3.5; match.winner=b.foe; } } else b.stocks=b.stocks>1?b.stocks-1:3;
+  if (cpu.on){ b.stocks--; if (b.stocks<=0){ b.stocks=0; const left=FS.filter(o=>o.stocks>0); if (left.length<=1){ match.over=3.5; match.winner=left[0]||b.foe; } else b.gone=true; } } else b.stocks=b.stocks>1?b.stocks-1:3;
   respawn(b); }
 function resetFighters(){
   kiReset();
   const base={...FRESH(),stale:[],buf:null,jbuf:null,vx:0,vy:0,ground:true,mv:null,used:{},helpless:false,lag:0,squat:0,stocks:3,dmg:0,stun:0,inv:0,flash:0,drop:0,glideT:0,ai:null};
   Object.assign(H,base,spawnAt(0),{face:1,jumps:FC(H).jumps});
   Object.assign(D,base,spawnAt(1),{face:-1,jumps:FC(D).jumps});
+  for (let i=2;i<FS.length;i++){ const F=FS[i]; Object.assign(F,base,spawnAt(i),{stale:[]}); F.face=F.x<(STAGE.spawns[0]+STAGE.spawns[1])/2?1:-1; F.jumps=FC(F).jumps; }
+  for (const F of FS){ F.gone=false; F.foe=nearFoe(F); }
   shots.length=0; ghosts.length=0; glints.length=0; match.over=0; match.winner=null;
 }
 
@@ -3073,12 +3080,12 @@ function grabLedge(F){
 function dropLedge(F){ const L=F.ledge; F.ledge=null; F.ledgeCool=0.67; F.ground=false; F.vy=0; F.x-=L.dir*2; }
 function edgeClamp(F,dt){ if (!F.ground) return; const lo=F.plat.soft||STAGE.blocks?F.plat.l:ALTAR.l, hi=F.plat.soft||STAGE.blocks?F.plat.r:ALTAR.r, nx=F.x+F.vx*dt;
   if (nx<lo+1||nx>hi-1){ F.vx=0; F.x=clamp(F.x,lo+1,hi-1); } }
-function meleeHits(F,M,foe){ const A=M.A, f=M.f;
+function meleeHits(F,M,foe){ const A=M.A, f=M.f, K=FS.length>2?x=>x+'@'+FS.indexOf(foe):x=>x;      // with more than two fighters a hitbox can land once on each of them
   if (M.smash) return;
-  for (let i=0;i<(A.hits||[]).length;i++){ const h=A.hits[i]; if (M.hit.has(i) || f<h.f[0] || f>h.f[1]) continue;
+  for (let i=0;i<(A.hits||[]).length;i++){ const h=A.hits[i]; if (M.hit.has(K(i)) || f<h.f[0] || f>h.f[1]) continue;
     if (A.stomp && M.plunge) continue;
     const hx=F.x+F.face*h.dx, hy=F.y+h.dy;
-    if (hitsBody(foe,hx,hy,h.r)){ M.hit.add(i); if (h.grp) A.hits.forEach((o,j)=>{ if (o.grp===h.grp) M.hit.add(j); });
+    if (hitsBody(foe,hx,hy,h.r)){ M.hit.add(K(i)); if (h.grp) A.hits.forEach((o,j)=>{ if (o.grp===h.grp) M.hit.add(K(j)); });
       landHit(foe,{...h,key:M.key,dmg:Math.round(h.dmg*M.mult*10)/10,kb:h.kb*M.mult},Math.sign(foe.x-F.x)||F.face,(hx+foe.x)/2,(hy+foe.y-30)/2,F,true);
       if (F.mv!==M) break; } }
 }
@@ -3246,7 +3253,7 @@ function fighterStep(F,I,dt){
       if (M.t<dt*1.5 && !F.ground) M.plunge=true;
       if (M.plunge && f>=A.stomp.f){
         if (!F.ground){ M.t=Math.min(M.t,(A.stomp.f+2)/60); F.vy=470; F.vx*=0.9; grav=0; M.pl=(M.pl||0)+dt;
-          if (!M.hit.has('spike') && hitsBody(foe,F.x,F.y,14)){ M.hit.add('spike'); landHit(foe,{dmg:10,kb:6,ang:-80},F.face,foe.x,foe.y-10,F,true); }
+          for (const T of foesOf(F)){ const k=FS.length>2?'spike@'+FS.indexOf(T):'spike'; if (!M.hit.has(k) && hitsBody(T,F.x,F.y,14)){ M.hit.add(k); landHit(T,{dmg:10,kb:6,ang:-80},F.face,T.x,T.y-10,F,true); } }
           if (M.pl>0.5 && F.mv){ F.mv=null; F.helpless=true; } }
         else if (!M.waved){ M.waved=true; M.t=(A.stomp.f+3)/60; wave(10); } }
       else if (!M.plunge && f>=A.stomp.f && !M.waved){ M.waved=true; wave(14); } }
@@ -3406,8 +3413,8 @@ function kiTick(dt){
   for (let i=PLATS.length-1;i>=0;i--){ const p=PLATS[i], T=p.temp; if (!T) continue; T.t+=dt;
     const other=FS.some(F=>F!==T.own && F.ground && F.plat===p);
     if (T.t>=T.life || other){ for (let j=0;j<8;j++) kpart(p.l+(p.r-p.l)*j/7,p.t,0,20,RB_COLS[j%6],0.4,200); dropPlat(p,i); } }
-  for (let i=puddles.length-1;i>=0;i--){ const q=puddles[i]; q.t+=dt; const T=q.own.foe;
-    if (T && T.ground && T.plat===q.plat && Math.abs(T.x-q.x)<q.w && Math.abs(T.vx)>40 && !T.mv && !T.lie && !intang(T) && !T.grabbedBy && T.stocks>0){
+  for (let i=puddles.length-1;i>=0;i--){ const q=puddles[i]; q.t+=dt;
+    for (const T of foesOf(q.own)) if (q.t<q.life && T.ground && T.plat===q.plat && Math.abs(T.x-q.x)<q.w && Math.abs(T.vx)>40 && !T.mv && !T.lie && !intang(T) && !T.grabbedBy && T.stocks>0){
       T.dmg+=2; T.vx=Math.sign(T.vx)*30; knockdown(T,0); q.t=q.life; sfx('splash');
       for (let j=0;j<8;j++) kpart(T.x,T.y-2,(j-3.5)*30,-80-Math.random()*60,j%2?'#9ad8e8':'#ffffff',0.35); }
     if (Math.random()<0.05) kpart(q.x+(Math.random()-0.5)*q.w*1.6,q.y-2,0,-30,'#9ad8e8',0.25,150);
@@ -3505,9 +3512,11 @@ function step(dt){
     clearPressed(); return; }
   shake=Math.max(0,shake-dt); stageStep(dt);
   if (match.over>0){ match.over-=dt; if (match.over<=0) resetFighters(); tickFx(dt); clearPressed(); return; }
+  for (const F of FS) F.foe=nearFoe(F);
   const PI=N?N[0]:simIn?(simIn.demo?cpuInput(H,dt):NO_INPUT):playerInput(), CI=N?N[1]:simIn&&simIn.lock?NO_INPUT:human2?player2Input():cpu.on?cpuInput(D,dt):NO_INPUT;   // simIn: the title-screen demo or the countdown
-  fighterStep(H,PI,dt*slowOf(H));
-  if (match.over<=0) fighterStep(D,CI,dt*slowOf(D));
+  if (!H.gone) fighterStep(H,PI,dt*slowOf(H));
+  if (match.over<=0 && !D.gone) fighterStep(D,CI,dt*slowOf(D));
+  for (let i=2;i<FS.length;i++){ const F=FS[i]; if (match.over<=0 && !F.gone) fighterStep(F,simIn&&simIn.lock?NO_INPUT:cpuInput(F,dt),dt*slowOf(F)); }      // players 3 and 4 are CPUs for now
   if (!cpu.on && D.ground && D.stun<=0 && !D.mv && !D.lie && !D.grabbedBy && !D.holding && !D.shielding && !(D.brk>0)) D.face=H.x<D.x?-1:1;      // the training dummy just turns to face you
   // projectiles hit every fighter but the one who threw them
   for (const s of shots){ const sdt=dt*slowAt(s.x,s.y); s.t+=sdt; if (s.upd) s.upd(s,sdt); s.vy+=s.g*sdt; s.x+=s.vx*sdt; s.y+=s.vy*sdt;
@@ -3519,7 +3528,8 @@ function step(dt){
   // fighters standing in each other get pushed apart
   const dashing=b=>b.mv&&b.mv.A.dash;
   const apart=b=>b.ledge||b.grabbedBy||b.holding;
-  if (!dashing(H) && !dashing(D) && !apart(H) && !apart(D) && H.stun<=0 && D.stun<=0){ const dx=D.x-H.x; if (Math.abs(dx)<14 && Math.abs(D.y-H.y)<20){ const push=(14-Math.abs(dx))*0.5*(dx>=0?1:-1); D.x+=push; H.x-=push; } }
+  for (let i=0;i<FS.length;i++) for (let j=i+1;j<FS.length;j++){ const a=FS[i], b=FS[j]; if (a.gone || b.gone) continue;
+    if (!dashing(a) && !dashing(b) && !apart(a) && !apart(b) && a.stun<=0 && b.stun<=0){ const dx=b.x-a.x; if (Math.abs(dx)<14 && Math.abs(b.y-a.y)<20){ const push=(14-Math.abs(dx))*0.5*(dx>=0?1:-1); b.x+=push; a.x-=push; } } }
   tickFx(dt);
   clearPressed();
 }
@@ -3845,7 +3855,7 @@ function drawFighter(F){
   // dodges, getups and fresh ledge grabs are untouchable: drawn see-through with a pale shimmer
   const ig=intang(F) && !(F.inv>0);
   if (ig) sg.globalAlpha=0.7;
-  drawBody(F, F===D&&D.ch===H.ch?altOf(hf.f):hf.f, jit, hf.flip, false, hf.rot);
+  drawBody(F, FS.indexOf(F)>0&&FS.slice(0,FS.indexOf(F)).some(o=>o.ch===F.ch)?altOf(hf.f):hf.f, jit, hf.flip, false, hf.rot);
   // hit flash: a white wash over the sprite, not a solid silhouette, so the victim keeps its outline against white bursts
   if (F.flash>0.04){ const a0=sg.globalAlpha; sg.globalAlpha=a0*0.45; drawBody(F,whiteOf(hf.f),jit,hf.flip,true,hf.rot); sg.globalAlpha=a0; }
   if (ig){ sg.globalAlpha=0.3+0.15*Math.sin(F.t*40); drawBody(F,tintOf(hf.f,'#e6f6ff'),jit,hf.flip,true,hf.rot); }
@@ -3854,7 +3864,7 @@ function drawFighter(F){
   if (F.brk>0 && F.ground) for (let i=0;i<3;i++){ const a=F.t*5+i*TAU/3, x=F.x+Math.cos(a)*10, y=F.y-57+Math.sin(a)*3; sg.fillStyle=Math.sin(a)>0?'#ffe58a':'#fff6e0';
     sg.fillRect(x-1.5,y-0.5,3,1); sg.fillRect(x-0.5,y-1.5,1,3); }
   if (F.shielding){ const r=Math.max(6,Math.round(8+20*F.shieldHP/SHIELD_MAX)); sg.globalAlpha=F.sstun>0?1:0.85;
-    sg.drawImage(shieldCv(r,F===H?'#6cc6ff':'#ff8a5a'),F.x-r-1,F.y-26-r-1,2*r+2,2*r+2); sg.globalAlpha=1; }
+    sg.drawImage(shieldCv(r,F===H?'#6cc6ff':F.ko||'#ff8a5a'),F.x-r-1,F.y-26-r-1,2*r+2,2*r+2); sg.globalAlpha=1; }
 }
 // shield bubble: dithered fill, solid rim, a highlight up front
 function shieldCv(r,col){ return cached('shd'+r+col,()=>{ const S=(2*r+2)*RES, cv=document.createElement('canvas'); cv.width=S; cv.height=S;
@@ -3902,7 +3912,7 @@ const cam={x:VW/2,y:VH/2,z:1};
 const ZMAX=1.38; let ZMIN=Math.max(VW/(CAMB.x1-CAMB.x0), VH/(CAMB.y1-CAMB.y0));
 function updateCam(dt){
   let x0=1e9, x1=-1e9, y0=1e9, y1=-1e9;
-  for (const b of FS){
+  for (const b of FS){ if (b.gone) continue;
     if (b.x<CAMB.x0-30||b.x>CAMB.x1+30||b.y<CAMB.y0-40||b.y>VH+60) continue;     // past the bounds: shown in a bubble instead
     const lx=clamp(b.vx*0.22,-60,60), ly=clamp(b.vy*0.16,-60,40);
     x0=Math.min(x0,b.x-34+Math.min(0,lx)); x1=Math.max(x1,b.x+34+Math.max(0,lx));
@@ -3940,10 +3950,11 @@ function renderStage(now,dt,o={}){
   stageDraw(STAGE.L.back,view,now);
   for (const p of puffs){ const r=Math.max(1,Math.round(p.r*(1-p.t/p.life))); sg.drawImage(puffCv(r),p.x-8,p.y-8,16,16); }
   kiDrawBack();
-  drawFighter(D);
+  for (let i=FS.length-1;i>1;i--) if (!FS[i].gone) drawFighter(FS[i]);
+  if (!D.gone) drawFighter(D);
   for (const g of ghosts){ sg.globalAlpha=0.5*(1-g.t/0.22); sg.save(); sg.translate(Math.round(g.x*RES)/RES,Math.round(g.y*RES)/RES); sg.scale(g.face,1); sg.drawImage(tintOf(g.f,'#8fb8ff'),-OX,-OY,SW,SH); sg.restore(); }
   sg.globalAlpha=1;
-  drawFighter(H);
+  if (!H.gone) drawFighter(H);
   for (const g of glints){ const k=g.t/0.22, r=g.r*(1-k), x=g.o.x+Math.cos(g.a)*r, y=g.o.y-32+Math.sin(g.a)*r*0.9; sg.fillStyle=k<0.5?'#ffe58a':'#ffffff'; sg.fillRect(x-0.75,y-0.75,1.5,1.5); }
   for (const F of FS) if (F.mv && F.mv.A.counter && F.mv.f>=F.mv.A.counter.f[0] && F.mv.f<=F.mv.A.counter.f[1]){
     const cx=F.x, cy=F.y-30, t=F.mv.t; for (let a=0;a<120;a++){ if ((a+Math.floor(t*50))%10>6) continue; const q=a/120*TAU, rr=1+0.06*Math.sin(t*30); sg.fillStyle=a%3?'#6cc6ff':'#ffffff'; sg.fillRect(cx+Math.cos(q)*26*rr-0.75,cy+Math.sin(q)*32*rr-0.75,1.5,1.5); } }
@@ -3975,15 +3986,16 @@ function renderStage(now,dt,o={}){
   const marker=(b,label,col)=>{ const [x,y0]=toScreen(b.x,b.y-66); if (y0<-10||x<-10||x>VW+10) return; const y=Math.max(2,y0);
     drawText(sg,textCanvas(label,{fill:col,outline:'#f3f1e6'}),x,y-5,'c');
     sg.fillStyle='#f3f1e6'; sg.fillRect(x-3,y,6,1); sg.fillStyle=col; sg.fillRect(x-2,y,4,1); sg.fillRect(x-1,y+1,2,1); };
-  marker(H,NET.on&&NET.me===0?'YOU':'P1','#163a8c'); marker(D,NET.on&&NET.me===1?'YOU':cpu.p2?'P2':cpu.on?'CPU':'DUMMY','#a8321c');
+  for (let i=2;i<FS.length;i++) if (!FS[i].gone) marker(FS[i],'P'+(i+1),FS[i].col);
+  if (!H.gone) marker(H,NET.on&&NET.me===0?'YOU':'P1','#163a8c'); if (!D.gone) marker(D,NET.on&&NET.me===1?'YOU':cpu.p2?'P2':cpu.on?'CPU':'DUMMY','#a8321c');
   // a fighter outside the view shows in a bubble at the screen edge, like Smash's magnifying glass
-  const bubble=(b,f,flip,col)=>{ const [sx,sy]=toScreen(b.x,b.y-28); const m=14;
+  const bubble=(b,f,flip,col)=>{ if (b.gone) return; const [sx,sy]=toScreen(b.x,b.y-28); const m=14;
     if (sx>-6&&sx<VW+6&&sy>-6&&sy<VH+6) return;
     const bx=clamp(sx,m+2,VW-m-2), by=clamp(sy,m+2,VH-m-2);
     sg.save(); sg.beginPath(); sg.arc(bx,by,m,0,TAU); sg.fillStyle='#f3ead0'; sg.fill(); sg.lineWidth=1.5; sg.strokeStyle=col; sg.stroke(); sg.clip();
     sg.translate(bx,by+12); sg.scale(((b.face>0)!==flip?1:-1)*0.45,0.45); sg.drawImage(f,-OX,-OY,SW,SH); sg.restore();
     const a=Math.atan2(sy-by,sx-bx); sg.fillStyle=col; for (let k=0;k<4;k++) sg.fillRect(bx+Math.cos(a)*(m+2+k)-0.75,by+Math.sin(a)*(m+2+k)-0.75,1.5,1.5); };
-  { const hf=heroFrame(); bubble(H,hf.f,hf.flip,'#163a8c'); { const df=heroFrame(D); bubble(D,df.f,df.flip,'#a8321c'); } }
+  { const hf=heroFrame(); bubble(H,hf.f,hf.flip,'#163a8c'); { const df=heroFrame(D); bubble(D,df.f,df.flip,'#a8321c'); } for (let i=2;i<FS.length;i++){ const xf=heroFrame(FS[i]); bubble(FS[i],xf.f,xf.flip,FS[i].col); } }
   const plate=(x,ch,b,col)=>{
     sg.drawImage(portraitCv(ch,col),x-13,206,26,26);
     drawText(sg,textCanvas(CHARS[ch].name.toUpperCase(),{fill:col,outline:'#f3f1e6'}),x+14,205);
@@ -3991,16 +4003,19 @@ function renderStage(now,dt,o={}){
     drawText(sg,textCanvas(dmg+'%',{cell:3,italic:0.28,big:true,fill:dmgColour(dmg),fill2:dmgColour(dmg+25),outline:'#0b1030',shadow:'#0b1030'}),x+13+jig,211+jig*0.5);
     for (let i=0;i<(flow.maxSt||3);i++) sg.drawImage(pipCv(PORTRAIT[ch].mat,i<b.stocks),x+15+i*6,226.5,6,6);
   };
-  plate(132,H.ch,H,'#163a8c'); plate(250,D.ch,D,'#a8321c');
+  const px=FS.length===2?[132,250]:FS.length===3?[72,190,308]:[40,138,236,334];
+  FS.forEach((F,i)=>plate(px[i],F.ch,F,F.col));
 }
 
 // ---- match flow: title, fighter select, countdown, pause, game end, results ---------------------------
 // lv 0-2 = CPU Easy/Normal/Hard, 3 = training dummy, 4 = a second player here, 5 = a friend online; time in minutes, 0 = no limit
-const MS_DEF={p1:'hermes',p2:'aethon',lv:1,stocks:3,time:0};
+const MS_DEF={p1:'hermes',p2:'aethon',lv:1,stocks:3,time:0,n:2,p3:'kairos',p4:'iris'};      // n: fighters in the match (2 to 4; no menu for it yet)
 const MS={...MS_DEF};
 try { Object.assign(MS,JSON.parse(localStorage.getItem('pxh-match')||'{}')); } catch(e){}
 if (!STAGES[MS.stage]) MS.stage='altar';
 { const q=new URLSearchParams(location.search).get('stage'); if (q && STAGES[q]) MS.stage=q; }
+// ?n=3 or ?n=4: a free-for-all with CPUs as players 3 and 4 (until the fighter screen has slots for them); not saved
+MS.n=2; { const q=+new URLSearchParams(location.search).get('n'); if (q>=2 && q<=4) MS.n=q|0; }
 loadStage(MS.stage); resetFighters();
 const msSave=()=>{ try { localStorage.setItem('pxh-match',JSON.stringify(MS)); } catch(e){} };
 const LV_NAMES=['EASY','NORMAL','HARD','DUMMY','PLAYER 2','ONLINE'], TIMES=[0,2,3,5,8], FIGHTERS=['hermes','aethon','kairos','iris'];
@@ -4009,12 +4024,13 @@ let simIn=null, netIn=null, gameT=0;      // simIn: the loop's input override fo
 const inMenu=()=>flow.s!=='play' && flow.s!=='ready';
 const newStats=()=>({kos:0,falls:0,sds:0,dealt:0,taken:0,combo:0,maxCombo:0});
 // damage and combos: a hit that lands while the foe is still in hitstun extends the combo
+const statOf=(S,F)=>{ const i=FS.indexOf(F), k='p'+(i+1); return i===0?S.p1:i<2?S.p2:S[k]||(S[k]=newStats()); };
 function statHit(A,T,dmg,pummel){ T.lastBy=A; T.lastHitT=gameT; const S=flow.stats; if (!S || !A || A===T) return;
-  const a=A===H?S.p1:S.p2, v=T===H?S.p1:S.p2; a.dealt+=dmg; v.taken+=dmg;
+  const a=statOf(S,A), v=statOf(S,T); a.dealt+=dmg; v.taken+=dmg;
   if (!pummel){ a.combo=T.stun>0?a.combo+1:1; a.maxCombo=Math.max(a.maxCombo,a.combo); } }
 // a KO counts for whoever last hit the fighter within 8 s; otherwise it is a self-destruct
-function statKO(b){ const S=flow.stats; if (!S) return; const v=b===H?S.p1:S.p2; v.falls++;
-  if (b.lastBy && b.lastBy!==b && gameT-b.lastHitT<8) (b.lastBy===H?S.p1:S.p2).kos++; else v.sds++; }
+function statKO(b){ const S=flow.stats; if (!S) return; const v=statOf(S,b); v.falls++;
+  if (b.lastBy && b.lastBy!==b && gameT-b.lastHitT<8) statOf(S,b.lastBy).kos++; else v.sds++; }
 // mirror match: the second fighter gets swapped colours (red and blue channels traded)
 const altCache=new WeakMap();
 function altOf(cv){ let a=altCache.get(cv); if (a) return a;
@@ -4027,14 +4043,15 @@ function syncSheet(){ if (sheetFor===current) return; sheetFor=current;
 // set the player's fighter directly (the other one becomes the foe); used by test scripts
 function selectChar(c){ current=c; H.ch=c; D.ch=otherOf(c); syncSheet(); resetFighters(); }
 function go(s){ flow.s=s; flow.t=0; flow.row=s==='select'?6:0; flow.cn=-1; }
-function toMenu(s){ flow.maxSt=3; flow.stats=null; resetFighters(); go(s); }
+function toMenu(s){ flow.maxSt=3; flow.stats=null; setFighters(2); resetFighters(); go(s); }
 function startMatch(sudden){
   const C=NET.on?NET.cfg:MS;      // online: the settings both players agreed on
   loadStage(C.stage);
   current=C.p1; H.ch=C.p1; D.ch=C.p2; cpu.on=C.lv!==3; cpu.p2=C.lv===4; cpu.level=Math.min(C.lv,2);
+  setFighters(NET.on||C.lv===3?2:clamp(C.n|0,2,4)); if (FS[2]) FS[2].ch=FIGHTERS.includes(C.p3)?C.p3:'kairos'; if (FS[3]) FS[3].ch=FIGHTERS.includes(C.p4)?C.p4:'iris';
   resetFighters(); koFx=null; hitlag=0; kos.length=0;
-  const st=sudden?1:cpu.on?C.stocks:3; H.stocks=D.stocks=st; flow.maxSt=st;
-  if (sudden){ H.dmg=D.dmg=300; } else { flow.stats={p1:newStats(),p2:newStats(),t:0}; syncSheet(); }
+  const st=sudden?1:cpu.on?C.stocks:3; for (const F of FS) F.stocks=st; flow.maxSt=st;
+  if (sudden){ for (const F of FS) F.dmg=300; } else { flow.stats={p1:newStats(),p2:newStats(),t:0}; syncSheet(); }
   flow.sudden=!!sudden; flow.clock=sudden||!cpu.on?0:C.time*60; flow.winner=null; go('ready');
 }
 // ---- input for menus (keyboard, controller, touch buttons share the pressed map) ----
@@ -4102,7 +4119,7 @@ function flowTick(P,dt){
     if (flow.clock>0){ flow.clock-=d; if (flow.clock<=0){ flow.clock=0; go('timeup'); sfx('game'); } }
     if (match.over>0 && flow.s==='play'){ go('game'); sfx('game'); } }
   else if (s==='game'){ step(simDt(dt)); if (match.over<=1.2 || flow.t>3.2) { flow.winner=match.winner; go('results'); } }
-  else if (s==='timeup'){ if (flow.t>1.6){ if (H.stocks===D.stocks) startMatch(true); else { flow.winner=H.stocks>D.stocks?H:D; go('results'); } } }
+  else if (s==='timeup'){ if (flow.t>1.6){ const r=FS.slice().sort((a,b)=>b.stocks-a.stocks); if (r[0].stocks===r[1].stocks) startMatch(true); else { flow.winner=r[0]; go('results'); } } }
 }
 // ---- online play ---------------------------------------------------------------------------------
 // Two machines run the same match in fixed 1/60 s steps and exchange only inputs (lockstep). A step runs when both
@@ -4328,10 +4345,10 @@ function drawFlow(){
 function drawResults(){
   const w=flow.winner, S=flow.stats, a=Math.min(1,flow.t/0.3);
   dim(0.82*a);
-  if (w){ const col=w===H?P1C:P2C;
+  if (w){ const col=w===H?P1C:w===D?P2C:w.col;
     sg.fillStyle='rgba(255,229,138,0.08)'; sg.fillRect(20,20,170,190);
     drawPose(w.ch,105,188,1,1,w===D&&D.ch===H.ch);
-    TX(w===H?'P1 WINS':(cpu.p2?'P2 WINS':cpu.on?'CPU WINS':'DUMMY WINS'),105,26,tBig(3,col,col),'c');
+    TX(w===H?'P1 WINS':FS.indexOf(w)>1?'P'+(FS.indexOf(w)+1)+' WINS':(cpu.p2?'P2 WINS':cpu.on?'CPU WINS':'DUMMY WINS'),105,26,tBig(3,col,col),'c');
     TX(CHARS[w.ch].name.toUpperCase(),105,194,tMd(GOLD),'c'); }
   if (!S) return;
   const X=206, c1=338, c2=390;

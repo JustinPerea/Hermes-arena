@@ -13,7 +13,7 @@ Play the current game: open `game/pixel-hermes.html` in a browser. It is one sel
 npx serve game        # then open http://localhost:3000/pixel-hermes.html
 ```
 
-Useful URL flags: `?stage=kyllene` picks a stage. Controls are listed on the page under the canvas (keyboard, mouse, controller and touch).
+Useful URL flags: `?stage=kyllene` picks a stage; `?n=4` (or `n=3`) adds CPUs as players 3 and 4 for a free-for-all (in progress: there is no menu for it yet). Controls are listed on the page under the canvas (keyboard, mouse, controller and touch).
 
 ## Repository layout
 
@@ -51,6 +51,7 @@ node clips.cjs              # GIFs + contact sheets into feel-lab/out/
 node find-seeds.cjs --only cpu_puddle --ch iris   # a seed where a dice-rolling clip scenario shows its move
 node clips.cjs --only cpu_cross --ch aethon       # a scenario can name its stage (this one is on Kyllene)
 node pvp.cjs                # two-player check: real key events and two stand-in controllers in Chrome
+node ffa.cjs                # four-CPU free-for-all check (--n 3, --seeds N)
 node net.cjs                # online check: two copies of the page kept in step under lag (--live adds the real room code and WebRTC path)
 node video.cjs --before old.html         # side-by-side before/after MP4
 ```
