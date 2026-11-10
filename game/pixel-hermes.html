@@ -1618,7 +1618,7 @@ Object.assign(KANIMS,{
     pose:i=>{ const a=1.1+(i%2)*0.9; return ov(K_BASE,{shF:1.55,elF:0.1,staff:a,grip:0.35,smear:[a-0.9,a],lean:0.16,footF:[7,ANK],glow:0.6,spark:i===1,orb:i}); },
     hits:[{f:[2,3],dx:30,dy:-32,r:14,dmg:1,kb:0.4,ang:70},{f:[10,11],dx:30,dy:-32,r:14,dmg:1,kb:0.4,ang:70}],
     desc:'Hold attack (or keep mashing) after jab 2: the staff ticks back and forth like the hands of a clock. Let go and the push comes out.'},
-  dashatk:{label:'Dash attack · Sandslide', n:8, total:40, dash:{f:[4,22],v:170}, edgeStop:true, sand:true, pose:track([
+  dashatk:{label:'Dash attack · Sandslide', n:8, total:40, dash:{f:[4,22],v:170}, sand:true, pose:track([
       [0,ov(kRun(2,8),{lean:0.3})],
       [0.15,ov(K_CROUCH,{lean:0.5,hip:[3,-11],footF:[12,-1],footB:[-6,ANK],shF:1.5,elF:0.1,staff:1.75,grip:0.3,cloak:-0.8,flare:0.4,spark:true})],
       [0.55,ov(K_CROUCH,{lean:0.48,hip:[3,-11],footF:[12,-1],footB:[-6,ANK],shF:1.5,elF:0.1,staff:1.75,grip:0.3,cloak:-0.7,flare:0.3})],
@@ -1951,7 +1951,7 @@ function defenceMoves(ch){
       desc:'Hold Shift on the ground. A bubble blocks every hit from either side, but it shrinks while held and with every hit it takes; at zero it breaks and you are left dizzy.'},
     spotdodge:{label:'Spot dodge', n:6, total:22, def:true, intang:[3,17], pose:track([[0,P('shield','guard')],[0.18,P('side','guard')],[0.75,P('side','guard')],[1,base]],6),
       desc:'Shield + down. A quick sidestep in place; untouchable on frames 3 to 17.'},
-    roll:{label:'Roll', n:8, total:30, def:true, intang:[4,15], slide:{f:[3,18],v:150}, edgeStop:true, turn:true, rot:spin,
+    roll:{label:'Roll', n:8, total:30, def:true, intang:[4,15], slide:{f:[3,18],v:150}, turn:true, rot:spin,
       pose:track([[0,P('crouch','tuck')],[0.14,P('tuck','tuck')],[0.86,P('tuck','tuck')],[1,base]],8),
       desc:'Shield + left or right. Rolls about two body lengths, untouchable on frames 4 to 15, and ends facing back the way you came.'},
     airdodge:{label:'Air dodge', n:6, total:32, def:true, air:true, adodge:true, intang:[3,19], yoff:AIR_Y,
@@ -1960,7 +1960,7 @@ function defenceMoves(ch){
     grab:{label:'Grab · '+N.grab, n:6, total:G.grab[1], def:true, grab:{f:[G.grab[0],G.grab[0]+2],dx:G.tether?gr/2+4:gr,r:G.tether?gr/2+2:10},
       pose:track([[0,base],[0.12,P('hold','pull')],[0.26,P('reach','reach')],[0.5,P('reach','reach')],[1,base]],6),
       desc:'Q, or attack while shielding. Grabs go straight through a shield.'},
-    dashgrab:{label:'Dash grab · '+N.dgrab, n:7, total:G.dgrab[1], def:true, grab:{f:[G.dgrab[0],G.dgrab[0]+2],dx:G.tether?gr/2+6:gr+3,r:G.tether?gr/2+3:11}, slide:{f:[0,G.dgrab[0]+2],v:120}, edgeStop:true,
+    dashgrab:{label:'Dash grab · '+N.dgrab, n:7, total:G.dgrab[1], def:true, grab:{f:[G.dgrab[0],G.dgrab[0]+2],dx:G.tether?gr/2+6:gr+3,r:G.tether?gr/2+3:11}, slide:{f:[0,G.dgrab[0]+2],v:120},
       pose:track([[0,ov(base,{lean:0.3})],[0.2,P('dreach','pull')],[0.3,P('dreach','reach')],[0.55,P('dreach','reach')],[1,base]],7),
       desc:'Grab while running: longer reach, more lag if it misses.'},
     hold:{label:'Holding', n:2, fps:3, pose:i=>P('hold','hold',{lean:0.14+i*0.03}),
@@ -1984,11 +1984,11 @@ function defenceMoves(ch){
       pose:track([[0,P('lie','lie')],[0.2,P('sit','limp')],[0.375,P('sit','swing',{hip:[3,-7],lean:0.1})],[0.45,P('sit','swing',{hip:[3,-7],lean:0.1,spark:false})],
         [0.5,P('sit','swing',{hip:[3,-7],lean:0.1})],[0.65,P('sit','swing',{hip:[3,-7],lean:0.1,spark:false})],[0.8,P('crouch','guard')],[1,base]],9),
       desc:'Attack while down: a low sweep in front and then behind as he gets up.'},
-    getuproll:{label:'Getup roll', n:8, total:30, def:true, intang:[1,20], slide:{f:[4,20],v:120}, edgeStop:true, turn:true, rot:spin,
+    getuproll:{label:'Getup roll', n:8, total:30, def:true, intang:[1,20], slide:{f:[4,20],v:120}, turn:true, rot:spin,
       pose:track([[0,P('lie','lie')],[0.15,P('tuck','tuck')],[0.86,P('tuck','tuck')],[1,base]],8), desc:'Left or right while down: rolls away and stands.'},
     tech:{label:'Tech', n:5, total:26, def:true, intang:[1,20], pose:track([[0,P('crouch','tuck')],[0.4,P('crouch','guard')],[1,base]],5),
       desc:'Shift within 20 frames before landing from a launch: no knockdown, straight back up.'},
-    techroll:{label:'Tech roll', n:8, total:40, def:true, intang:[1,20], slide:{f:[3,22],v:130}, edgeStop:true, turn:true, rot:spin,
+    techroll:{label:'Tech roll', n:8, total:40, def:true, intang:[1,20], slide:{f:[3,22],v:130}, turn:true, rot:spin,
       pose:track([[0,P('crouch','tuck')],[0.14,P('tuck','tuck')],[0.86,P('tuck','tuck')],[1,base]],8), desc:'Tech with left or right held: rolls out of the landing.'},
     hang:{label:'Ledge hang', n:2, fps:3, pose:i=>P('hang','hang',{headBob:-1-i*0.4}),
       desc:'Falling near the stage edge grabs it, briefly untouchable. Up or toward = climb, jump = ledge jump, attack = ledge attack, Shift = roll, down or away = let go.'},
@@ -3258,7 +3258,6 @@ function fighterStep(F,I,dt){
   // fast fall: down while falling (or at the top of a jump) drops much faster
   else if (I.p.down && !I.p.attack && !I.p.special && !F.ground && F.vy>-40 && !F.helpless && !F.ff && !(busy && (Av.special||Av.adodge))){
     F.ff=true; F.vy=Math.max(F.vy,FF_V); F.tumble=false; sparks.push({x:F.x,y:F.y-50,t:0,small:true}); }
-  if (busy && Av.edgeStop) edgeClamp(F,dt);
   const wasGround=F.ground, vy0=F.vy;
   if (physics(F,dt,grav,(F.ff||(busy&&Av.stomp)?480:CD.fall)*TUNE.fall)){ koBurst(F); return; }
   // ledges: falling (or rising in an up special) next to the stage edge grabs it

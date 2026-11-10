@@ -46,3 +46,13 @@ A CPU that hops puddles and backs out of slow fields is in the game (`cpuHazards
 
 Try it: `node lab.cjs --ch iris --set "CPU_LV[2].haz=0.9"`.
 
+## Q7. Aethon's frame-data warning is the band, not the game (open)
+
+The lab scores each move's startup against one band per move class, taken from Smash's cast as a whole: smashes 10-20 frames, aerials 4-13. Aethon has three moves outside them: forward smash 21, forward air 14, down air 19. That is 10 of 13 moves in band (77%, the bar is 80%), and it has been a warning since v18. Smash's own heavies sit outside these bands too (Bowser forward smash 22, Ganondorf 31, Donkey Kong 22), and the roster doc makes Aethon slow on purpose.
+
+- **Give heavies their own startup bands (recommended):** for a fighter with weight over 1, smashes 10-24 and aerials 4-20. The warning goes away and the game does not change. It is a change to the yardstick, so it needs your OK.
+- **Speed Aethon up by a frame:** forward smash 21 to 20 alone gets him to 85%. It passes the lab and makes him slightly less of a heavy.
+- **Leave it:** a standing warning that means nothing.
+
+His other standing warning, recovery 1.04 against a 0.9 ceiling, is what is left after Q3 (you chose the shorter glide; going lower means cutting one of his three jumps).
+
