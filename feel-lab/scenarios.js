@@ -53,9 +53,9 @@ S.cpu_stomp={frames:150, cpu:true, seed:4, setup(){ H.x=120; H.face=1; D.x=230; 
   input:i=>i<30?{ax:1}:{}, ok:()=>H.stun>0 && D.mv && D.mv.key==='dspec' && !D.mv.plunge};
 S.cpu_plunge={frames:170, cpu:true, seed:4, setup(){ H.x=208; H.face=1; H.dmg=D.dmg=30; Object.assign(D,{x:206,y:53,face:-1}); wait(0.2); },
   input:i=>({shieldHeld:i>70&&i<80}), ok:()=>D.mv && D.mv.key==='dspec' && D.mv.plunge && D.mv.hit.has('spike')};
-S.cpu_field={frames:200, every:3, cpu:true, seed:49, setup(){ H.x=152; H.face=1; D.x=204; D.face=-1; H.dmg=D.dmg=30; wait(0.4); },
+S.cpu_field={frames:200, every:3, cpu:true, seed:44, setup(){ H.x=152; H.face=1; D.x=204; D.face=-1; H.dmg=D.dmg=30; wait(0.4); },
   input:i=>i>=8&&i<24?{ax:1,atkHeld:true,p:{attack:i===8}}:{}, ok:()=>fields.some(q=>q.own===D) && slowOf(H)<1 && H.stun>0};
-S.cpu_puddle={frames:200, every:3, cpu:true, seed:1, setup(){ H.x=110; H.face=1; D.x=285; D.face=-1; H.dmg=D.dmg=30; wait(0.2); },
+S.cpu_puddle={frames:200, every:3, cpu:true, seed:3, setup(){ H.x=110; H.face=1; D.x=285; D.face=-1; H.dmg=D.dmg=30; wait(0.2); },
   input:i=>i<20?{}:{ax:1}, ok:()=>!!H.lie && H.dmg>30 && H.dmg<=32.5};
 S.cpu_stream={frames:170, cpu:true, seed:4, setup(){ H.x=208; H.face=1; H.dmg=D.dmg=30; Object.assign(D,{x:206,y:53,face:-1}); wait(0.2); },
   input:i=>({}), ok:()=>H.stun>0 && D.stale[D.stale.length-1]==='stream'};
