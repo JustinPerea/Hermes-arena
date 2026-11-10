@@ -2,7 +2,7 @@
 
 An original Smash-style platform fighter set in the world of the Nous Research Hermes mascot, built to run as a plugin for **Hermes Desktop**. All characters and stages are drawn procedurally in code: no image files ship with the game.
 
-The current direction is **pixel art** (`game/pixel-hermes.html`): four playable fighters (Hermes, Aethon, Kairos, Iris), two stages (Altar of the Agora and the big multi-storey Sanctuary of Kyllene), a CPU opponent or a second player on the same machine, full match flow (title, fighter select, 3-2-1-GO, pause, results), synthesized sound and gamepad support. `plugin/` builds it into a Hermes Desktop plugin. An earlier **cyanotype** (blue-ink engraving) engine lives in `cyanotype/`.
+The current direction is **pixel art** (`game/pixel-hermes.html`): four playable fighters (Hermes, Aethon, Kairos, Iris), two stages (Altar of the Agora and the big multi-storey Sanctuary of Kyllene), a CPU opponent, a second player on the same machine or a friend online (room code, direct browser-to-browser connection), full match flow (title, fighter select, 3-2-1-GO, pause, results), synthesized sound and gamepad support. `plugin/` builds it into a Hermes Desktop plugin. An earlier **cyanotype** (blue-ink engraving) engine lives in `cyanotype/`.
 
 ## Quick start
 
@@ -51,10 +51,11 @@ node clips.cjs              # GIFs + contact sheets into feel-lab/out/
 node find-seeds.cjs --only cpu_puddle --ch iris   # a seed where a dice-rolling clip scenario shows its move
 node clips.cjs --only cpu_cross --ch aethon       # a scenario can name its stage (this one is on Kyllene)
 node pvp.cjs                # two-player check: real key events and two stand-in controllers in Chrome
+node net.cjs                # online check: two copies of the page kept in step under lag (--live adds the real room code and WebRTC path)
 node video.cjs --before old.html         # side-by-side before/after MP4
 ```
 
-The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build, and use the installed Google Chrome when there is one. Last recorded score: 99.3 (v34, also with all four fighters). The lab's yardstick grew twice, so earlier scores in LOG.md are not comparable: since v31 it plays 30 CPU matches per fighter, and since v32 another 10 on the big map, Kyllene (`--big <stage>`), to check that the CPUs find each other there (v31 re-measured: 97.9 with all four).
+The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build, and use the installed Google Chrome when there is one. Last recorded score: 99.3 (v35, also with all four fighters). The lab's yardstick grew twice, so earlier scores in LOG.md are not comparable: since v31 it plays 30 CPU matches per fighter, and since v32 another 10 on the big map, Kyllene (`--big <stage>`), to check that the CPUs find each other there (v31 re-measured: 97.9 with all four).
 
 ## Hermes Desktop plugin (pixel game)
 

@@ -85,7 +85,7 @@ kbd{font-family:var(--label);font-size:11px;border:2px solid var(--ink);border-b
   <header>
     <div class="eyebrow">Hermes Arena · pixel style study</div>
     <h1>Pixel Hermes</h1>
-    <p class="lede">Pixel-art fighters and the Altar of the Agora, all drawn entirely in code. Press attack on the title screen, then pick both fighters, the opponent (a CPU level, a second player, or a training dummy that stands still), the number of stocks and a time limit. Every sprite and the whole stage are built at load time from ellipses, capsules, feathers and polygons rasterised onto a pixel grid, then shaded with five-tone ramps and a 4 × 4 dither. No image files. Everything, from fighters to columns to the damage readout, sits on the same fine pixel grid. Spar on the altar, or study each animation frame by frame below.</p>
+    <p class="lede">Pixel-art fighters and the Altar of the Agora, all drawn entirely in code. Press attack on the title screen, then pick both fighters, the opponent (a CPU level, a second player on this machine, a friend online, or a training dummy that stands still), the number of stocks and a time limit. Every sprite and the whole stage are built at load time from ellipses, capsules, feathers and polygons rasterised onto a pixel grid, then shaded with five-tone ramps and a 4 × 4 dither. No image files. Everything, from fighters to columns to the damage readout, sits on the same fine pixel grid. Spar on the altar, or study each animation frame by frame below.</p>
   </header>
 
   <section aria-label="Playable stage">
@@ -98,6 +98,7 @@ kbd{font-family:var(--label);font-size:11px;border:2px solid var(--ink);border-b
       <span><kbd>Enter</kbd>, <kbd>P</kbd> or <kbd>Esc</kbd> pause (Start on a controller); in menus the arrows choose, attack or <kbd>Enter</kbd> confirms, <kbd>K</kbd> or <kbd>Esc</kbd> goes back, and you can click</span>
       <span><kbd>M</kbd> sound on or off (volume in Tuning)</span>
       <span>Controller (Xbox or PlayStation layout): left stick or d-pad move, <kbd>A</kbd> attack, <kbd>B</kbd> special, <kbd>X</kbd>/<kbd>Y</kbd> jump, <kbd>LB</kbd>/<kbd>RB</kbd> grab, <kbd>LT</kbd>/<kbd>RT</kbd> shield. Flick the right stick for a smash attack on the ground (hold it to charge) or an aerial in the air. Press a button once to wake the controller <b id="padNote"></b></span>
+      <span>Online: pick <kbd>Online</kbd> as the opponent. One player hosts and gets a five-character room code; the other joins and types it. Both then play with the normal one-player controls. The host's stage, stocks and time limit are used; each player brings their own fighter. The two browsers connect directly, so each player can see the other's IP address, and a few strict networks will not connect.</span>
       <span>Two players: pick <kbd>Player 2</kbd> as the opponent on the fighter screen. During the match the keyboard is split. Player 1: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move, <kbd>F</kbd> attack, <kbd>G</kbd> special, <kbd>Space</kbd> jump, left <kbd>Shift</kbd> shield, <kbd>Q</kbd> grab (and the mouse). Player 2: arrow keys move, <kbd>J</kbd> attack, <kbd>K</kbd> special, <kbd>N</kbd> jump, <kbd>L</kbd> or right <kbd>Shift</kbd> shield, <kbd>U</kbd> grab. One controller connected is player 2's; with two, the first is player 1's. Either player can pause</span>
       <span><kbd>S</kbd> <kbd>↓</kbd> drop through a platform; in the air while falling, a fast fall</span>
       <span><kbd>Shift</kbd> shield (it shrinks while held and breaks at zero). From shield: <kbd>S</kbd> spot dodge, <kbd>A</kbd>/<kbd>D</kbd> roll, <kbd>Space</kbd> jump, attack or <kbd>Q</kbd> grab. <kbd>Shift</kbd> in the air is an air dodge (once per jump; hold a direction to dash that way)</span>
@@ -2774,10 +2775,11 @@ const keys2={}, pressed2={}, keyDown={};
 const KEYS_P1={KeyA:'left',KeyD:'right',KeyW:'up',KeyS:'down',Space:'jump',KeyF:'attack',KeyX:'attack',KeyG:'special',KeyC:'special',ShiftLeft:'shield',KeyQ:'grab'};
 const KEYS_P2={ArrowLeft:'left',ArrowRight:'right',ArrowUp:'up',ArrowDown:'down',KeyJ:'attack',KeyK:'special',KeyL:'shield',ShiftRight:'shield',KeyN:'jump',KeyU:'grab'};
 const KEYS_BOTH={Enter:'start',NumpadEnter:'start',KeyP:'start',Escape:'back'};
-const vsPlay=()=>cpu.p2 && (flow.s==='ready'||flow.s==='play'||flow.s==='game'||flow.s==='timeup');
+const vsPlay=()=>cpu.p2 && !NET.on && (flow.s==='ready'||flow.s==='play'||flow.s==='game'||flow.s==='timeup');
 function keyFor(code){ if (!vsPlay()) return [keys,pressed,KEYMAP[code]]; if (KEYS_P2[code]) return [keys2,pressed2,KEYS_P2[code]]; return [keys,pressed,KEYS_P1[code]||KEYS_BOTH[code]]; }
 function clearPressed(){ for (const k in pressed) delete pressed[k]; for (const k in pressed2) delete pressed2[k]; }
-addEventListener('keydown',e=>{ const [ks,ps,k]=keyFor(e.code); if(!k) return; if (e.target.closest && (e.target.closest('select') || (e.target.closest('button,summary,input') && (e.code==='Space'||e.code==='Enter')))) return; e.preventDefault(); if(!ks[k]) ps[k]=true; ks[k]=true; keyDown[e.code]=[ks,k]; });
+addEventListener('keydown',e=>{ if (flow.s==='online' && LOB.mode==='join' && !(e.target.closest && e.target.closest('input,select,textarea,button,summary')) && lobKey(e)) return;
+  const [ks,ps,k]=keyFor(e.code); if(!k) return; if (e.target.closest && (e.target.closest('select') || (e.target.closest('button,summary,input') && (e.code==='Space'||e.code==='Enter')))) return; e.preventDefault(); if(!ks[k]) ps[k]=true; ks[k]=true; keyDown[e.code]=[ks,k]; });
 // a key is let go in the map it went down in (the split can change while it is held)
 addEventListener('keyup',e=>{ const d=keyDown[e.code]; if (d){ d[0][d[1]]=false; delete keyDown[e.code]; } const k=KEYMAP[e.code]; if (k && !vsPlay()) keys[k]=false; });
 // mouse: left click attacks, right click specials (the held direction keys pick the move)
@@ -2803,8 +2805,9 @@ const FRESH=()=>({shieldHP:50,shielding:false,sstun:0,holding:null,grabbedBy:nul
   ledgeCool:0,ledgeFresh:true,techAt:-9,pfrz:0,crouch:false,dashT:0,dashDir:0,pivT:0,skid:0,skidTo:0,wallHit:0,wallV:0,sbuf:null,lastAx:0,sdrop:0,holdT:0,holdMax:0,hangT:0,vlie:false});
 function newFighter(o){ return Object.assign(FRESH(),{x:0,y:139,vx:0,vy:0,face:1,ground:true,plat:SOLIDS[0],jumps:2,squat:0,land:0,runT:0,idleT:0,drop:0,stretch:0,dmg:0,stocks:3,dmgShake:0,
   mv:null,used:{},helpless:false,lag:0,stun:0,flash:0,inv:0,puffT:0,glideT:0,t:0,bt:0,buf:null,jbuf:null,stale:[],diIn:null,boltStore:0,fieldCool:0},o); }
-const H=newFighter({ch:'hermes',x:142,face:1,plat:SOLIDS[0],col:'#163a8c',ko:'#6cc6ff'});
-const D=newFighter({ch:'aethon',x:276,face:-1,plat:SOLIDS[2],col:'#a8321c',ko:'#ff8a5a'});
+const H0={ch:'hermes',x:142,face:1,plat:SOLIDS[0],col:'#163a8c',ko:'#6cc6ff'}, D0={ch:'aethon',x:276,face:-1,plat:SOLIDS[2],col:'#a8321c',ko:'#ff8a5a'};
+const H=newFighter(H0);
+const D=newFighter(D0);
 H.foe=D; D.foe=H;
 let hitlag=0, shake=0, hitVictim=null, koFx=null, lastAdv=null;
 // feel tuning: multipliers on the Smash-calibrated defaults, changed live from the Tuning panel
@@ -3486,19 +3489,20 @@ function tickFx(dt){
 }
 function step(dt){
   gameT+=dt;
-  const human2=cpu.p2 && !simIn;      // the second fighter is a player (not during the title demo or the countdown)
-  if (hitlag>0){ hitlag-=dt/TUNE.hitlag; bufferPresses(H,simIn?NO_INPUT:playerInput(),0); if (human2) bufferPresses(D,player2Input(),0);
+  const N=simIn?null:netIn;           // online: both players' inputs for this frame
+  const human2=cpu.p2 && !simIn && !N;      // the second fighter is a player at this keyboard (not during the title demo or the countdown)
+  if (hitlag>0){ hitlag-=dt/TUNE.hitlag; bufferPresses(H,N?N[0]:simIn?NO_INPUT:playerInput(),0); if (N) bufferPresses(D,N[1],0); else if (human2) bufferPresses(D,player2Input(),0);
     // SDI: during hitlag the fighter who was hit can nudge themselves a few pixels per tap
     const V=hitVictim; if (V && V.stun>0){ let dx=0, dy=0;
-      if (V===H){ dx=(pressed.right?1:0)-(pressed.left?1:0); dy=(pressed.down?1:0)-(pressed.up?1:0); }
-      else if (human2){ dx=(pressed2.right?1:0)-(pressed2.left?1:0); dy=(pressed2.down?1:0)-(pressed2.up?1:0); }
+      const src=N?N[V===H?0:1].m:V===H?pressed:human2?pressed2:null;
+      if (src){ dx=(src.right?1:0)-(src.left?1:0); dy=(src.down?1:0)-(src.up?1:0); }
       else if (cpu.on && Math.random()<CPU_LV[cpu.level].di*0.12){ dx=V.x<208?1:-1; dy=-1; }
       if (dx||dy){ const oy=V.y; V.x+=dx*3; if (!(V.ground&&dy>0)) V.y+=dy*3;
         if (!V.ground && oy<=ALTAR.t && V.y>ALTAR.t && V.x>=ALTAR.l && V.x<=ALTAR.r) V.y=ALTAR.t; } }
     clearPressed(); return; }
   shake=Math.max(0,shake-dt); stageStep(dt);
   if (match.over>0){ match.over-=dt; if (match.over<=0) resetFighters(); tickFx(dt); clearPressed(); return; }
-  const PI=simIn?(simIn.demo?cpuInput(H,dt):NO_INPUT):playerInput(), CI=simIn&&simIn.lock?NO_INPUT:human2?player2Input():cpu.on?cpuInput(D,dt):NO_INPUT;   // simIn: the title-screen demo or the countdown
+  const PI=N?N[0]:simIn?(simIn.demo?cpuInput(H,dt):NO_INPUT):playerInput(), CI=N?N[1]:simIn&&simIn.lock?NO_INPUT:human2?player2Input():cpu.on?cpuInput(D,dt):NO_INPUT;   // simIn: the title-screen demo or the countdown
   fighterStep(H,PI,dt*slowOf(H));
   if (match.over<=0) fighterStep(D,CI,dt*slowOf(D));
   if (!cpu.on && D.ground && D.stun<=0 && !D.mv && !D.lie && !D.grabbedBy && !D.holding && !D.shielding && !(D.brk>0)) D.face=H.x<D.x?-1:1;      // the training dummy just turns to face you
@@ -3968,7 +3972,7 @@ function renderStage(now,dt,o={}){
   const marker=(b,label,col)=>{ const [x,y0]=toScreen(b.x,b.y-66); if (y0<-10||x<-10||x>VW+10) return; const y=Math.max(2,y0);
     drawText(sg,textCanvas(label,{fill:col,outline:'#f3f1e6'}),x,y-5,'c');
     sg.fillStyle='#f3f1e6'; sg.fillRect(x-3,y,6,1); sg.fillStyle=col; sg.fillRect(x-2,y,4,1); sg.fillRect(x-1,y+1,2,1); };
-  marker(H,'P1','#163a8c'); marker(D,cpu.p2?'P2':cpu.on?'CPU':'DUMMY','#a8321c');
+  marker(H,NET.on&&NET.me===0?'YOU':'P1','#163a8c'); marker(D,NET.on&&NET.me===1?'YOU':cpu.p2?'P2':cpu.on?'CPU':'DUMMY','#a8321c');
   // a fighter outside the view shows in a bubble at the screen edge, like Smash's magnifying glass
   const bubble=(b,f,flip,col)=>{ const [sx,sy]=toScreen(b.x,b.y-28); const m=14;
     if (sx>-6&&sx<VW+6&&sy>-6&&sy<VH+6) return;
@@ -3988,7 +3992,7 @@ function renderStage(now,dt,o={}){
 }
 
 // ---- match flow: title, fighter select, countdown, pause, game end, results ---------------------------
-// lv 0-2 = CPU Easy/Normal/Hard, 3 = training dummy; time in minutes, 0 = no limit
+// lv 0-2 = CPU Easy/Normal/Hard, 3 = training dummy, 4 = a second player here, 5 = a friend online; time in minutes, 0 = no limit
 const MS_DEF={p1:'hermes',p2:'aethon',lv:1,stocks:3,time:0};
 const MS={...MS_DEF};
 try { Object.assign(MS,JSON.parse(localStorage.getItem('pxh-match')||'{}')); } catch(e){}
@@ -3996,9 +4000,9 @@ if (!STAGES[MS.stage]) MS.stage='altar';
 { const q=new URLSearchParams(location.search).get('stage'); if (q && STAGES[q]) MS.stage=q; }
 loadStage(MS.stage); resetFighters();
 const msSave=()=>{ try { localStorage.setItem('pxh-match',JSON.stringify(MS)); } catch(e){} };
-const LV_NAMES=['EASY','NORMAL','HARD','DUMMY','PLAYER 2'], TIMES=[0,2,3,5,8], FIGHTERS=['hermes','aethon','kairos','iris'];
+const LV_NAMES=['EASY','NORMAL','HARD','DUMMY','PLAYER 2','ONLINE'], TIMES=[0,2,3,5,8], FIGHTERS=['hermes','aethon','kairos','iris'];
 const flow={s:'title',t:0,row:0,clock:0,goT:0,cn:-1,sudden:false,stats:null,winner:null,maxSt:3,hits:[]};
-let simIn=null, gameT=0;      // simIn: the loop's input override for step(); gameT: sim seconds, for KO credit
+let simIn=null, netIn=null, gameT=0;      // simIn: the loop's input override for step(); netIn: [P1, P2] inputs of an online frame; gameT: sim seconds, for KO credit
 const inMenu=()=>flow.s!=='play' && flow.s!=='ready';
 const newStats=()=>({kos:0,falls:0,sds:0,dealt:0,taken:0,combo:0,maxCombo:0});
 // damage and combos: a hit that lands while the foe is still in hitstun extends the combo
@@ -4022,25 +4026,27 @@ function selectChar(c){ current=c; H.ch=c; D.ch=otherOf(c); syncSheet(); resetFi
 function go(s){ flow.s=s; flow.t=0; flow.row=s==='select'?6:0; flow.cn=-1; }
 function toMenu(s){ flow.maxSt=3; flow.stats=null; resetFighters(); go(s); }
 function startMatch(sudden){
-  loadStage(MS.stage);
-  current=MS.p1; H.ch=MS.p1; D.ch=MS.p2; cpu.on=MS.lv!==3; cpu.p2=MS.lv===4; cpu.level=Math.min(MS.lv,2);
+  const C=NET.on?NET.cfg:MS;      // online: the settings both players agreed on
+  loadStage(C.stage);
+  current=C.p1; H.ch=C.p1; D.ch=C.p2; cpu.on=C.lv!==3; cpu.p2=C.lv===4; cpu.level=Math.min(C.lv,2);
   resetFighters(); koFx=null; hitlag=0; kos.length=0;
-  const st=sudden?1:cpu.on?MS.stocks:3; H.stocks=D.stocks=st; flow.maxSt=st;
+  const st=sudden?1:cpu.on?C.stocks:3; H.stocks=D.stocks=st; flow.maxSt=st;
   if (sudden){ H.dmg=D.dmg=300; } else { flow.stats={p1:newStats(),p2:newStats(),t:0}; syncSheet(); }
-  flow.sudden=!!sudden; flow.clock=sudden||!cpu.on?0:MS.time*60; flow.winner=null; go('ready');
+  flow.sudden=!!sudden; flow.clock=sudden||!cpu.on?0:C.time*60; flow.winner=null; go('ready');
 }
 // ---- input for menus (keyboard, controller, touch buttons share the pressed map) ----
 const cyc=(arr,v,d)=>arr[(arr.indexOf(v)+d+arr.length)%arr.length];
 function selChange(row,d){
   if (row===0) MS.p1=cyc(FIGHTERS,MS.p1,d);
-  else if (row===1) MS.p2=cyc(FIGHTERS,MS.p2,d);
-  else if (row===2) MS.lv=(MS.lv+d+5)%5;
+  else if (row===1){ if (MS.lv===5) return; MS.p2=cyc(FIGHTERS,MS.p2,d); }
+  else if (row===2) MS.lv=(MS.lv+d+6)%6;
   else if (row===3){ if (MS.lv===3) return; MS.stocks=clamp(MS.stocks+d,1,5); }
   else if (row===4){ if (MS.lv===3) return; MS.time=cyc(TIMES,MS.time,d); }
   else if (row===5){ MS.stage=cyc(STAGE_IDS,MS.stage,d); loadStage(MS.stage); resetFighters(); }
   else return;
   msSave(); sfx('menu'); }
 const OK=P=>P.attack||P.start||P.jump;
+const selGo=()=>{ if (MS.lv===5){ LOB.mode='menu'; LOB.note=''; go('online'); } else startMatch(); };
 function menuNav(P,n,horiz){ const back=horiz?P.left:P.up, fwd=horiz?P.right:P.down;
   if (back){ flow.row=(flow.row+n-1)%n; sfx('menu'); } if (fwd){ flow.row=(flow.row+1)%n; sfx('menu'); } }
 // the press that resumes is a menu press: it must not also be an attack (in a two-player match it could be the other player's key)
@@ -4053,7 +4059,10 @@ function flowInput(P){
     if (P.back||P.special){ sfx('menu'); go('title'); return; }
     menuNav(P,7,false);
     if (P.left) selChange(flow.row,-1); else if (P.right) selChange(flow.row,1);
-    if (OK(P)){ sfx('ok'); startMatch(); } }
+    if (OK(P)){ sfx('ok'); selGo(); } }
+  else if (s==='online'){
+    if (P.back||P.special){ sfx('menu'); if (LOB.mode==='menu') go('select'); else { const r=LOB.host?0:1; lobClose(); netEnd(); LOB.mode='menu'; LOB.note=''; flow.row=r; } return; }
+    if (LOB.mode==='menu'){ menuNav(P,2,false); if (OK(P)){ sfx('ok'); lobStart(flow.row===0); } } }
   else if (s==='play'){ if (P.start||P.back){ sfx('menu'); go('pause'); } }
   else if (s==='pause'){ if (P.back||P.special||P.start&&flow.t>0.1){ go('play'); clearPressed(); return; } menuNav(P,PAUSE_ITEMS.length,false);
     if (P.attack||P.jump){ sfx('ok'); PAUSE_ITEMS[flow.row][1](); } }
@@ -4061,12 +4070,23 @@ function flowInput(P){
     if (P.back||P.special){ toMenu('select'); return; } if (OK(P)){ sfx('ok'); RESULT_ITEMS[flow.row][1](); } }
 }
 // a click or tap on the stage in a menu: the hit areas drawn this frame
-stage.addEventListener('click',e=>{ if (!inMenu()) return; const r=stage.getBoundingClientRect(), x=(e.clientX-r.left)/r.width*VW, y=(e.clientY-r.top)/r.height*VH;
+stage.addEventListener('click',e=>{ if (!inMenu() || NET.on) return;      // online, menus take synced key and button presses only
+  const r=stage.getBoundingClientRect(), x=(e.clientX-r.left)/r.width*VW, y=(e.clientY-r.top)/r.height*VH;
   for (const h of flow.hits.slice().reverse()) if (x>=h.x && x<=h.x+h.w && y>=h.y && y<=h.y+h.h){ h.fn(); break; }
   stage.focus({preventScroll:true}); });
 // ---- one frame of the game: what runs depends on the screen ----
 function flowFrame(now,dt){
-  padPoll(); const P={...pressed}; if (pressed2.start) P.start=true; if (pressed2.back) P.back=true;      // either player can pause
+  lobFrame(dt);
+  if (NET.on) netFrame(dt);
+  else { padPoll(); const P={...pressed}; if (pressed2.start) P.start=true; if (pressed2.back) P.back=true;      // either player can pause
+    flowTick(P,dt); clearPressed(); }
+  if (flow.msg && (flow.msg.t-=dt)<=0) flow.msg=null;
+  if (flow.s!=='play') PAD.flick=null;
+  renderStage(now,dt,{hud:flow.s!=='title'&&flow.s!=='select'&&flow.s!=='online'});
+  drawFlow();
+}
+// one step of the match flow: menus from the presses in P, then the simulation for the screen we are on
+function flowTick(P,dt){
   flow.t+=dt; flowInput(P);
   const s=flow.s;
   if (s==='title'||s==='select'){         // CPU Hard vs CPU Hard plays behind the menus
@@ -4080,11 +4100,151 @@ function flowFrame(now,dt){
     if (match.over>0 && flow.s==='play'){ go('game'); sfx('game'); } }
   else if (s==='game'){ step(simDt(dt)); if (match.over<=1.2 || flow.t>3.2) { flow.winner=match.winner; go('results'); } }
   else if (s==='timeup'){ if (flow.t>1.6){ if (H.stocks===D.stocks) startMatch(true); else { flow.winner=H.stocks>D.stocks?H:D; go('results'); } } }
-  clearPressed();
-  if (flow.s!=='play') PAD.flick=null;
-  renderStage(now,dt,{hud:flow.s!=='title'&&flow.s!=='select'});
-  drawFlow();
 }
+// ---- online play ---------------------------------------------------------------------------------
+// Two machines run the same match in fixed 1/60 s steps and exchange only inputs (lockstep). A step runs when both
+// players' inputs for it have arrived; the local input is scheduled NET.delay steps ahead so it usually has. For that to
+// work a match must be a pure function of its inputs: fixed steps, its own seeded random numbers, default Tuning, and
+// fighters rebuilt from scratch at the start. Every 20 steps the two sides compare a summary of the state; a mismatch ends the match.
+// The connection is any object {send(obj), close()} whose owner calls netRecv(obj) for each message and netEnd() if it drops.
+const NET={on:false,link:null,me:0,delay:3,f:0,sent:0,loc:{},rem:{},ck:{},rck:{},ckAt:null,acc:0,stall:0,desync:null,cfg:null,rand:null,tune:null,pings:[],steps:0};
+const NET_DT=1/60, NET_M=['left','right','up','down','start','back','attack','jump','special'];
+function netRng(seed){ let s=(seed>>>0)||1; return ()=>{ s|=0; s=s+0x6D2B79F5|0; let t=Math.imul(s^s>>>15,1|s); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+// this machine's input for one step, as three small numbers: held keys, fresh presses, right-stick flick
+function netSample(){ const I=inputFrom(keys,pressed,PAD,true), p=pressed;
+  const h=(I.ax<0?1:0)|(I.ax>0?2:0)|(I.up?4:0)|(I.down?8:0)|(I.jumpHeld?16:0)|(I.atkHeld?32:0)|(I.shieldHeld?64:0)|(I.specHeld?128:0);
+  const q=(p.attack?1:0)|(p.special?2:0)|(p.jump?4:0)|(p.down?8:0)|(p.shield?16:0)|(p.grab?32:0)|(p.start?64:0)|(p.back?128:0)|(p.left?256:0)|(p.right?512:0)|(p.up?1024:0);
+  const c=I.c?(I.c.dir==='u'?1:I.c.dir==='d'?2:I.c.ax>0?3:4):0;
+  clearPressed(); return [h,q,c]; }
+// ...and back into the shape step() takes (m: the presses menus and hit nudges read)
+function netInput(r){ const h=r[0], q=r[1], c=r[2];
+  return {ax:(h&2?1:0)-(h&1?1:0), up:!!(h&4), down:!!(h&8), jumpHeld:!!(h&16), atkHeld:!!(h&32), shieldHeld:!!(h&64), specHeld:!!(h&128),
+    c:c===1?{dir:'u',ax:0}:c===2?{dir:'d',ax:0}:c===3?{dir:'f',ax:1}:c===4?{dir:'f',ax:-1}:null,
+    p:{attack:!!(q&1), special:!!(q&2), jump:!!(q&4), down:!!(q&8), shield:!!(q&16), grab:!!(q&32)},
+    m:{attack:!!(q&1), special:!!(q&2), jump:!!(q&4), down:!!(q&8), start:!!(q&64), back:!!(q&128), left:!!(q&256), right:!!(q&512), up:!!(q&1024)}}; }
+function netSum(){ const v=F=>[F.x,F.y,F.vx,F.vy,F.dmg,F.stun].map(n=>Math.round(n*64)).join(',')+','+F.stocks+','+(F.mv?F.mv.key+Math.floor(F.mv.f):'')+(F.ground?'g':'a');
+  return v(H)+'|'+v(D)+'|'+shots.length+'|'+flow.s; }
+function netCompare(f){ const a=NET.ck[f], b=NET.rck[f]; if (a===undefined || b===undefined) return; delete NET.ck[f]; delete NET.rck[f];
+  if (a!==b){ NET.desync={f,mine:a,theirs:b}; netEnd('OUT OF SYNC'); } }
+// both machines call this with the same settings
+function netStart(cfg){
+  Object.assign(NET,{on:true,cfg,delay:cfg.delay,f:0,sent:cfg.delay,loc:{},rem:{},ck:{},rck:{},ckAt:null,acc:0,stall:0,desync:null,steps:0,rand:netRng(cfg.seed),tune:{...TUNE}});
+  for (let i=0;i<cfg.delay;i++){ NET.loc[i]=[0,0,0]; NET.rem[i]=[0,0,0]; }
+  Object.assign(TUNE,TUNE_DEF);
+  for (const [F,o] of [[H,H0],[D,D0]]){ for (const k of Object.keys(F)) delete F[k]; Object.assign(F,newFighter(o)); }
+  H.foe=D; D.foe=H; hitlag=0; shake=0; hitVictim=null; koFx=null; lastAdv=null; gameT=0; simIn=null; flow.msg=null; clearPressed();
+  const r=Math.random; Math.random=NET.rand; try { startMatch(); } finally { Math.random=r; }
+}
+function netFrame(dt){
+  padPoll(); Object.assign(TUNE,TUNE_DEF);
+  NET.acc=Math.min(NET.acc+dt,NET_DT*4);
+  let ran=0;
+  while (NET.on && NET.acc>=NET_DT && ran<4){
+    if (NET.sent<=NET.f+NET.delay){ const r=netSample(), m={t:'in',f:NET.sent,r}; NET.loc[NET.sent]=r;
+      if (NET.ckAt!==null){ m.cf=NET.ckAt; m.ck=NET.ck[NET.ckAt]; NET.ckAt=null; }
+      NET.link.send(m); NET.sent++; }
+    const a=NET.loc[NET.f], b=NET.rem[NET.f]; if (!a || !b) break;
+    const mine=netInput(a), theirs=netInput(b), pair=NET.me===0?[mine,theirs]:[theirs,mine], P={};
+    for (const k of NET_M) if (mine.m[k] || theirs.m[k]) P[k]=true;
+    delete NET.loc[NET.f]; delete NET.rem[NET.f];
+    const r=Math.random; Math.random=NET.rand; netIn=pair;
+    try { flowTick(P,NET_DT); } finally { Math.random=r; netIn=null; }
+    if (NET.on && (flow.s==='select' || flow.s==='title')){ netEnd(); return; }      // a menu took both players out of the match
+    if (NET.on && NET.f%20===0){ NET.ck[NET.f]=netSum(); NET.ckAt=NET.f; netCompare(NET.f); }
+    NET.f++; NET.steps++; NET.acc-=NET_DT; ran++;
+  }
+  if (!NET.on) return;
+  if (ran) NET.stall=0; else { NET.stall+=dt; NET.acc=Math.min(NET.acc,NET_DT); if (NET.stall>10) netEnd('CONNECTION LOST'); }
+}
+function netRecv(m){
+  if (!m || !NET.link) return;
+  if (m.t==='in'){ if (NET.on && Number.isInteger(m.f) && m.f>=NET.f && m.f<NET.f+600 && Array.isArray(m.r) && !NET.rem[m.f]){ NET.rem[m.f]=[m.r[0]|0,m.r[1]|0,m.r[2]|0]; if (Number.isInteger(m.cf) && typeof m.ck==='string'){ NET.rck[m.cf]=m.ck; netCompare(m.cf); } } }
+  else if (m.t==='ping') NET.link.send({t:'pong',at:m.at});
+  else if (m.t==='pong' && NET.me===0 && !NET.on && !NET.hold){ NET.pings.push(performance.now()-m.at);
+    if (NET.pings.length<4) NET.link.send({t:'ping',at:performance.now()});
+    else { const rtt=Math.min(...NET.pings), delay=clamp(Math.ceil(rtt/2/(1000*NET_DT))+2,2,10);
+      NET.hold={p1:MS.p1,lv:4,stocks:MS.stocks,time:MS.time,stage:MS.stage,seed:(Math.random()*4294967295)>>>0,delay};
+      NET.link.send({t:'cfg',cfg:NET.hold}); } }
+  else if (m.t==='cfg' && NET.me===1 && !NET.on){ NET.link.send({t:'join',ch:MS.p1}); }                                   // guest: here is my fighter
+  else if (m.t==='join' && NET.hold){ const cfg={...NET.hold,p2:FIGHTERS.includes(m.ch)?m.ch:'hermes'}; NET.hold=null; NET.link.send({t:'go',cfg}); netStart(cfg); }
+  else if (m.t==='go' && NET.me===1 && !NET.on){ const c=m.cfg||{}; if (FIGHTERS.includes(c.p1) && FIGHTERS.includes(c.p2) && STAGES[c.stage]) netStart({...c,lv:4,stocks:clamp(c.stocks|0,1,5),time:TIMES.includes(c.time)?c.time:0,delay:clamp(c.delay|0,2,10),seed:c.seed>>>0}); }
+  else if (m.t==='bye') netEnd('OPPONENT LEFT',true);
+}
+// a connection is open: the host measures the delay, sends its settings, the guest answers with its fighter, and both start
+function netOpen(link,host){ netEnd(); NET.link=link; NET.me=host?0:1; NET.pings=[]; NET.hold=null; if (host) link.send({t:'ping',at:performance.now()}); }
+function netEnd(msg,quiet){
+  const L=NET.link, was=NET.on; if (!L && !was) return;
+  NET.link=null; NET.on=false; NET.hold=null;
+  if (L){ if (!quiet) try { L.send({t:'bye'}); } catch(e){} try { L.close(); } catch(e){} }
+  if (NET.tune){ Object.assign(TUNE,NET.tune); NET.tune=null; }
+  cpu.p2=false; if (msg) flow.msg={text:msg,t:5};
+  if (flow.s==='online'){ LOB.mode='menu'; LOB.note=msg||''; flow.row=LOB.host?0:1; }
+  else if (was && flow.s!=='select' && flow.s!=='title') toMenu('select');
+}
+// ---- online play: finding the other player ----------------------------------------------------------
+// The host gets a five-character room code and the guest types it. Both talk to a public signaling server (the free
+// PeerJS cloud, spoken to directly over a WebSocket in the message shape of the PeerJS client; it passes the WebRTC
+// setup messages between two ids and nothing else)
+// until a direct WebRTC data channel between the two browsers opens. From then on nothing goes through a server.
+// To use another PeerServer, change SIG.url.
+const SIG={url:'wss://0.peerjs.com/peerjs?key=peerjs',pre:'pxh1-',ice:[{urls:'stun:stun.l.google.com:19302'}],ab:'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'};
+const LOB={mode:'menu',code:'',note:'',host:false,ws:null,pc:null,dc:null,beat:0,peer:null,cid:'',q:[],t:0};
+const lobRand=n=>{ let s=''; for (let i=0;i<n;i++) s+=SIG.ab[Math.floor(Math.random()*SIG.ab.length)]; return s; };
+function lobPeerClose(){ const {pc,dc}=LOB; LOB.pc=LOB.dc=null; LOB.peer=null; LOB.q=[]; LOB.t=0;
+  if (dc){ dc.onopen=null; try { dc.close(); } catch(e){} } if (pc){ pc.onicecandidate=pc.onconnectionstatechange=pc.ondatachannel=null; try { pc.close(); } catch(e){} } }
+function lobClose(){ if (LOB.beat){ clearInterval(LOB.beat); LOB.beat=0; }
+  const ws=LOB.ws; LOB.ws=null; if (ws){ ws.onopen=ws.onmessage=ws.onclose=ws.onerror=null; try { ws.close(); } catch(e){} }
+  lobPeerClose(); }
+function lobFail(note){ lobClose(); LOB.note=note; if (LOB.host) LOB.mode='menu'; else LOB.code=''; }
+function lobStart(host){ lobClose(); netEnd(); LOB.host=host; LOB.note=''; LOB.code=host?lobRand(5):''; LOB.mode=host?'host':'join'; if (host) lobSignal(); }
+function lobKey(e){ if (e.metaKey || e.ctrlKey || e.altKey) return false;
+  if (e.key==='Backspace'){ if (!LOB.ws) LOB.code=LOB.code.slice(0,-1); e.preventDefault(); return true; }
+  if (e.key.length!==1) return false;
+  const c=e.key.toUpperCase(); if (!LOB.ws && !NET.link && LOB.code.length<5 && SIG.ab.includes(c)){ LOB.code+=c; LOB.note=''; sfx('menu'); if (LOB.code.length===5) lobSignal(); }
+  e.preventDefault(); return true; }
+function lobSignal(){
+  const host=LOB.host, room=SIG.pre+LOB.code, id=host?room:SIG.pre+'J'+lobRand(11); let ws;
+  LOB.note='CONNECTING'; LOB.t=0;
+  try { ws=LOB.ws=new WebSocket(SIG.url+'&id='+id+'&token='+lobRand(12)); } catch(e){ lobFail('ONLINE PLAY IS NOT AVAILABLE HERE'); return; }
+  // the public server only passes on messages shaped like the PeerJS client's: every payload names a data connection
+  const say=(type,dst,payload)=>{ if (ws.readyState===1) ws.send(JSON.stringify(payload?{type,dst,payload:{...payload,type:'data',connectionId:LOB.cid}}:{type})); };
+  const fail=()=>{ if (host){ lobPeerClose(); LOB.note='WAITING FOR YOUR FRIEND'; } else lobFail('COULD NOT CONNECT'); };
+  const peer=()=>{ let pc; try { pc=LOB.pc=new RTCPeerConnection({iceServers:SIG.ice}); } catch(e){ lobFail('ONLINE PLAY IS NOT AVAILABLE HERE'); return null; }
+    pc.onicecandidate=e=>{ if (e.candidate && LOB.pc===pc && LOB.peer) say('CANDIDATE',LOB.peer,{candidate:e.candidate}); };
+    pc.onconnectionstatechange=()=>{ if (pc.connectionState!=='failed') return; if (LOB.pc===pc) fail(); else if (NET.link && NET.link.pc===pc) netEnd('CONNECTION LOST',true); };
+    return pc; };
+  const chan=dc=>{ LOB.dc=dc; dc.onopen=()=>lobLinked(dc); };
+  const drain=()=>{ const pc=LOB.pc; if (pc) for (const c of LOB.q.splice(0)) pc.addIceCandidate(c).catch(()=>{}); };
+  ws.onerror=ws.onclose=()=>{ if (LOB.ws===ws) lobFail('COULD NOT REACH THE MATCH SERVER'); };
+  ws.onmessage=ev=>{ let m; try { m=JSON.parse(ev.data); } catch(e){ return; } if (LOB.ws!==ws || !m) return;
+    const p=m.payload||{};
+    if (m.type==='OPEN'){ LOB.beat=setInterval(()=>say('HEARTBEAT'),5000);
+      if (host) LOB.note='WAITING FOR YOUR FRIEND';
+      else { const pc=peer(); if (!pc) return; LOB.peer=room; LOB.cid='dc_'+lobRand(10).toLowerCase(); chan(pc.createDataChannel('pxh'));
+        pc.createOffer().then(o=>pc.setLocalDescription(o)).then(()=>{ if (LOB.pc===pc) say('OFFER',room,{sdp:pc.localDescription,label:LOB.cid,reliable:true,serialization:'binary',browser:'chrome'}); }).catch(()=>{ if (LOB.pc===pc) fail(); }); } }
+    else if (m.type==='ID-TAKEN'){ if (host){ lobClose(); LOB.code=lobRand(5); lobSignal(); } else lobFail('COULD NOT CONNECT'); }
+    else if (m.type==='ERROR') lobFail('THE MATCH SERVER IS BUSY');
+    else if (m.type==='EXPIRE'){ if (!host && LOB.pc && !LOB.pc.remoteDescription) lobFail('NO ROOM WITH THAT CODE'); }
+    else if (m.type==='OFFER' && host && !LOB.peer && p.sdp && typeof m.src==='string'){ const pc=peer(); if (!pc) return; LOB.peer=m.src; LOB.cid=String(p.connectionId||'dc_x').slice(0,40); LOB.t=0; LOB.note='FRIEND FOUND'; pc.ondatachannel=e=>chan(e.channel);
+      pc.setRemoteDescription(p.sdp).then(()=>{ drain(); return pc.createAnswer(); }).then(a=>pc.setLocalDescription(a)).then(()=>{ if (LOB.pc===pc) say('ANSWER',m.src,{sdp:pc.localDescription,browser:'chrome'}); }).catch(()=>{ if (LOB.pc===pc) fail(); }); }
+    else if (m.type==='ANSWER' && !host && m.src===LOB.peer && p.sdp && LOB.pc){ const pc=LOB.pc; pc.setRemoteDescription(p.sdp).then(()=>{ if (LOB.pc===pc) drain(); }).catch(()=>{ if (LOB.pc===pc) fail(); }); }
+    else if (m.type==='CANDIDATE' && m.src===LOB.peer && p.candidate && LOB.pc){ LOB.q.push(p.candidate); if (LOB.pc.remoteDescription) drain(); }
+  };
+}
+// the data channel is open: the signaling server is no longer needed, and the match connection takes over
+function lobLinked(dc){ if (LOB.dc!==dc) return; const pc=LOB.pc, host=LOB.host; LOB.pc=LOB.dc=null; lobClose(); LOB.note='CONNECTED'; LOB.t=0;
+  pc.onicecandidate=null;
+  const link={pc,dc,send(o){ if (dc.readyState==='open') dc.send(JSON.stringify(o)); },close(){ dc.onclose=dc.onmessage=null; try { dc.close(); } catch(e){} try { pc.close(); } catch(e){} }};
+  dc.onmessage=e=>{ if (NET.link!==link) return; let m; try { m=JSON.parse(e.data); } catch(x){ return; } netRecv(m); };
+  dc.onclose=()=>{ if (NET.link===link) netEnd('OPPONENT LEFT',true); };
+  netOpen(link,host); }
+// time limits on the online screen: a guest that cannot get through, a friend who started to join and vanished, a start that never comes
+function lobFrame(dt){ if (flow.s!=='online') return;
+  if (NET.link && !NET.on){ if ((LOB.t+=dt)>10) netEnd('COULD NOT CONNECT'); }
+  else if (LOB.ws && (LOB.peer || !LOB.host) && (LOB.t+=dt)>25){ if (LOB.host){ lobPeerClose(); LOB.note='WAITING FOR YOUR FRIEND'; } else lobFail('COULD NOT CONNECT'); } }
+// leave everything online (the plugin calls this when the page is taken down)
+function netQuit(){ lobClose(); netEnd(); }
+
 // ---- drawing the screens (design units, 416 x 234) ----
 const INK='#0b1030', CREAM='#f3f1e6', GOLD='#ffe58a', GOLD2='#ffb04a', P1C='#6cc6ff', P2C='#ff8a5a';
 const TX=(str,x,y,o,al)=>drawText(sg,textCanvas(str,o),x,y,al);
@@ -4110,10 +4270,11 @@ function drawFlow(){
     hitArea(0,0,VW,VH,()=>{ sfx('ok'); go('select'); }); return; }
   if (s==='select'){
     dim(0.74);
-    TX('CHOOSE YOUR FIGHTERS',VW/2,4,tMd(GOLD),'c');
+    TX(flow.msg?flow.msg.text:'CHOOSE YOUR FIGHTERS',VW/2,4,tMd(flow.msg?'#ff8a5a':GOLD),'c');
     for (const side of [0,1]){ const x0=side?218:30, w=168, y0=17, h=128, ch=side?MS.p2:MS.p1, on=flow.row===side;
       box(x0,y0,w,h,on);
-      TX(side?(MS.lv===4?'P2':MS.lv<3?'CPU':'DUMMY'):'P1',x0+6,y0+5,tMd(side?P2C:P1C));
+      TX(side?(MS.lv===5?'FRIEND':MS.lv===4?'P2':MS.lv<3?'CPU':'DUMMY'):MS.lv===5?'YOU':'P1',x0+6,y0+5,tMd(side?P2C:P1C));
+      if (side && MS.lv===5){ TX('YOUR FRIEND PICKS',x0+w/2,y0+52,tSm('#c3cce3'),'c'); TX('THEIR OWN FIGHTER',x0+w/2,y0+62,tSm('#c3cce3'),'c'); continue; }
       drawPose(ch,x0+w/2,y0+113,1,1,side&&MS.p1===MS.p2);
       TX(CHARS[ch].name.toUpperCase(),x0+w/2,y0+116,tMd(on?GOLD:CREAM),'c');
       TX('<',x0+6,y0+60,tMd(on?GOLD:'#8090c8')); TX('>',x0+w-13,y0+60,tMd(on?GOLD:'#8090c8'));
@@ -4122,11 +4283,29 @@ function drawFlow(){
     rows.forEach(([lab,val],i)=>{ const r=i+2, y=147+i*13, on=flow.row===r, off=dummy&&r>2&&r<5;
       box(104,y,208,13,on); TX(lab,110,y+2,tMd(off?'#6a76a8':'#c3cce3')); TX('<',226,y+2,tMd(on?GOLD:'#6a76a8')); TX(val,262,y+2,tMd(off?'#6a76a8':on?GOLD:CREAM),'c'); TX('>',292,y+2,tMd(on?GOLD:'#6a76a8'));
       hitArea(104,y,154,13,()=>{ flow.row=r; selChange(r,-1); }); hitArea(258,y,54,13,()=>{ flow.row=r; selChange(r,1); }); });
-    const on=flow.row===6; box(160,202,96,16,on,on?'rgba(120,70,10,0.96)':null); TX('FIGHT!',VW/2,203,{...tMd(GOLD),cell:2,italic:0.28},'c');
-    hitArea(160,202,96,16,()=>{ sfx('ok'); startMatch(); });
+    const on=flow.row===6; box(160,202,96,16,on,on?'rgba(120,70,10,0.96)':null); TX(MS.lv===5?'ONLINE':'FIGHT!',VW/2,203,{...tMd(GOLD),cell:2,italic:0.28},'c');
+    hitArea(160,202,96,16,()=>{ sfx('ok'); selGo(); });
     TX('ARROWS OR STICK CHOOSE    ATTACK OR ENTER FIGHTS    K OR ESC BACK',VW/2,224,tSm('#c3cce3'),'c');
     hitArea(0,0,60,18,()=>{ sfx('menu'); go('title'); }); TX('< BACK',6,6,tSm('#c3cce3')); return; }
+  if (s==='online'){ dim(0.92);
+    TX('PLAY ONLINE',VW/2,20,tBig(3),'c');
+    const bad=/^(NO |COULD|THE MATCH|ONLINE PLAY|OPPONENT|CONNECTION|OUT OF)/.test(LOB.note), dots=bad||!LOB.note?'':'...'.slice(0,1+Math.floor(flow.t*2)%3);
+    if (LOB.mode==='menu'){
+      [['HOST A MATCH','GET A ROOM CODE TO GIVE TO A FRIEND'],['JOIN A MATCH','TYPE THE ROOM CODE A FRIEND GAVE YOU']].forEach(([lab,sub],i)=>{ const y=62+i*36, on=flow.row===i;
+        box(98,y,220,28,on); TX(lab,VW/2,y+4,tMd(on?GOLD:CREAM),'c'); TX(sub,VW/2,y+19,tSm('#c3cce3'),'c'); hitArea(98,y,220,28,()=>{ sfx('ok'); flow.row=i; lobStart(i===0); }); });
+      if (LOB.note) TX(LOB.note,VW/2,140,tMd('#ff8a5a'),'c');
+      TX('YOU PLAY '+CHARS[MS.p1].name.toUpperCase()+'    THE HOST PICKS THE STAGE AND THE RULES',VW/2,162,tSm('#c3cce3'),'c'); }
+    else if (LOB.mode==='host'){
+      TX('ROOM CODE',VW/2,58,tMd('#c3cce3'),'c'); TX(LOB.code.split('').join(' '),VW/2,76,tBig(5),'c');
+      TX(LOB.note+dots,VW/2,128,tMd(CREAM),'c'); TX('GIVE THIS CODE TO YOUR FRIEND. THEY PICK ONLINE AND JOIN A MATCH',VW/2,146,tSm('#c3cce3'),'c'); }
+    else { TX('TYPE THE ROOM CODE',VW/2,58,tMd('#c3cce3'),'c');
+      for (let i=0;i<5;i++){ const x=133+i*31; box(x,76,26,30,i===LOB.code.length && !LOB.ws); if (LOB.code[i]) TX(LOB.code[i],x+13,81,{...tMd(GOLD),cell:3},'c'); }
+      if (LOB.note) TX(LOB.note+dots,VW/2,128,tMd(bad?'#ff8a5a':CREAM),'c'); else TX('LETTERS AND NUMBERS ON THE KEYBOARD',VW/2,128,tSm('#c3cce3'),'c'); }
+    TX('A DIRECT CONNECTION: YOUR FRIEND CAN SEE YOUR IP ADDRESS',VW/2,200,tSm('#8090c8'),'c');
+    TX('ESC OR K BACK',VW/2,224,tSm('#c3cce3'),'c');
+    hitArea(0,0,60,18,()=>{ pressed.back=true; }); TX('< BACK',6,6,tSm('#c3cce3')); return; }
   // in a match: the timer, the countdown and the banners
+  if (NET.on && NET.stall>0.5){ dim(0.45,94,22); TX('WAITING FOR THE OTHER PLAYER',VW/2,98,tMd('#ff8a5a'),'c'); }
   if (s!=='results' && (flow.clock>0 || s==='timeup')) TX(clockStr(flow.clock),VW/2,4,tMd(flow.clock<10.5?P2C:CREAM),'c');
   if (s==='ready' && !flow.sudden) TX(STAGE.full,VW/2,40,tMd(CREAM),'c');
   // two players: who has which controls, shown during the countdown

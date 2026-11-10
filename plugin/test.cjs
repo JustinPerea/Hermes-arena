@@ -33,6 +33,14 @@ const INSTRUMENT = () => {
   window.__acs = [];
   const AC = window.AudioContext;
   if (AC) window.AudioContext = function (...a) { const c = new AC(...a); window.__acs.push(c); return c; };
+  // online play: a stand-in signaling socket that opens at once, and a count of the interval timers still running
+  window.__ws = [];
+  window.WebSocket = function (url) { const w = this; w.url = url; w.readyState = 0; w.send = () => {}; w.close = () => { w.closed = true; w.readyState = 3; }; window.__ws.push(w);
+    Promise.resolve().then(() => { w.readyState = 1; if (w.onmessage) w.onmessage({ data: '{"type":"OPEN"}' }); }); };
+  window.__iv = new Set();
+  const si = window.setInterval, ci = window.clearInterval;
+  window.setInterval = function (f, ms) { const id = si.call(window, f, ms); window.__iv.add(id); return id; };
+  window.clearInterval = function (id) { window.__iv.delete(id); return ci.call(window, id); };
 };
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 const fps = async (page, ms = 1000) => {
@@ -128,6 +136,18 @@ async function partA(browser) {
   check('saved settings are read back after a remount', await inGame(page, root => root.getElementById('sOn').checked) === false);
   await page.evaluate(() => { unmountArena(); });
   check('listener count is back to the start after four mounts', await page.evaluate(() => window.__wl) === baseListeners);
+  // online: hosting opens a signaling socket and a heartbeat timer; an unmount has to close both
+  await page.evaluate(() => { window.__ws.length = 0; mountArena(); }); await sleep(500);
+  await page.evaluate(() => { arena.root.getElementById('stage').focus(); });
+  const press = async k => { await page.keyboard.down(k); await sleep(60); await page.keyboard.up(k); await sleep(70); };
+  await press('j'); for (let i = 0; i < 4; i++) await press('ArrowUp'); for (let i = 0; i < 4; i++) await press('ArrowRight'); await press('Enter');
+  check('ONLINE opens the online screen in the plugin', await page.evaluate(() => arena.state()) === 'online', await page.evaluate(() => arena.state()));
+  await press('Enter'); await sleep(300);
+  const host = await page.evaluate(() => ({ ws: window.__ws.length, open: window.__ws.filter(w => !w.closed).length, iv: window.__iv.size, url: window.__ws[0] ? window.__ws[0].url.split('?')[0] : '' }));
+  check('hosting opens one signaling socket and one heartbeat timer', host.ws === 1 && host.open === 1 && host.iv === 1, `${host.ws} socket(s) to ${host.url}, ${host.iv} timer(s)`);
+  await page.evaluate(() => { unmountArena(); });
+  const gone = await page.evaluate(() => ({ open: window.__ws.filter(w => !w.closed).length, iv: window.__iv.size }));
+  check('unmount closes the socket and stops the timer', gone.open === 0 && gone.iv === 0, `${gone.open} open, ${gone.iv} timer(s)`);
   check('no page errors', errors.length === 0, errors.join(' || '));
   await ctx.close();
 

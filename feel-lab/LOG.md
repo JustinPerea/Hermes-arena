@@ -285,3 +285,33 @@ Not checked: real controllers (the stand-ins answer `navigator.getGamepads()`), 
 
 Lab: unchanged, 99.3 (the lab never sets `p2`).
 
+## v35 (2026-11-10) Online play
+
+Justin meant online play when he asked for player against player (v34's local mode stays). He asked for whatever is free.
+
+OPPONENT on the fighter screen has a sixth choice, ONLINE. It opens a screen with HOST A MATCH and JOIN A MATCH. The host gets a five-character room code and gives it to a friend; the friend types it. Each player uses the normal one-player controls and brings their own fighter; the host's stage, stocks and time limit are used.
+
+How a match stays the same on both machines (lockstep):
+
+| Part | Notes |
+|---|---|
+| Fixed steps | An online match runs in 1/60 s steps, whatever the frame rate. `flowFrame` was split: `flowTick(P,dt)` is one step of menus plus simulation, and drawing stays outside it |
+| Only inputs are sent | Each step a machine sends its own input as three small numbers (held keys, fresh presses, right-stick flick), scheduled `NET.delay` steps ahead. A step runs when both inputs for it are there. The delay is set from four pings at the start: 2 steps on a fast line, at most 10 (167 ms) |
+| Same start | `netStart` rebuilds both fighters from scratch, resets the match state, forces default Tuning for the match (the player's own values come back afterwards) and seeds a random-number generator that is swapped in for `Math.random` during each step. Drawing keeps the ordinary `Math.random`, so effects that only draw cannot shift the match |
+| Menus too | Pause, resume, restart and the results screen take the merged presses of both players in the same step, so they happen on both machines together. Mouse clicks on menus are off during an online match |
+| Out-of-step check | Every 20 steps each side sends a summary of both fighters and compares it with the other's. A difference ends the match with OUT OF SYNC |
+| Waiting and dropping | "WAITING FOR THE OTHER PLAYER" after half a second without the other side's input; CONNECTION LOST after 10 s; OPPONENT LEFT when the other side leaves or closes the page |
+
+How two players find each other:
+
+| Part | Notes |
+|---|---|
+| Signaling | The free public PeerJS server (`0.peerjs.com`), spoken to directly over a WebSocket, with no library added. It passes the three WebRTC setup messages between the host's id (`pxh1-` plus the room code) and the guest's. It is a community service without an uptime promise; `SIG.url` in the game points to it and can point to any PeerServer |
+| What the server needs | It drops setup messages that are not shaped like the PeerJS client's (each payload must carry `type:'data'` and a `connectionId`); the published server source does not show that check. I found it by sending test messages to the server |
+| The match itself | A WebRTC data channel straight between the two browsers, with Google's public STUN server to find a path. The signaling socket is closed as soon as the channel opens |
+| Limits | No relay (TURN) server, because those cost money: two players behind strict networks (some offices, some mobile carriers) will not connect. Each player's IP address is visible to the other. The room code is typed on a keyboard, so a touch-only device can host but not join |
+
+Checks: `node net.cjs` joins two copies of the real page in Chrome through a stand-in connection that the script controls (21 checks with `--live`, 14 without). Both copies are driven with real key events. After every step each copy records every field of both fighters, the shots and the flow state, and the script compares the two records step by step: four matches of 25 s across all four fighters and both stages with 0, 60±20, 150±40 and 30±60 ms of lag showed no difference. It also checks pause from either side, leaving, and a dead line. `--live` runs the real path: a room code from the public server, a real WebRTC channel, a match over it, and a code nobody hosts being refused.
+
+Not checked: two machines on two networks. Both test pages run on this Mac, so getting through a home router, real latency, and two different computers computing the same floating-point results have not been tried. Both sides have to run the same build of the game. The lab score is unchanged (99.3).
+

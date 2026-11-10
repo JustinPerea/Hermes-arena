@@ -70,14 +70,14 @@ for (const sel of ['header', 'section aria-label="Animation sheet"', 'section ar
   if (!markup.includes('<' + sel) && !markup.includes(sel)) fail('markup the plugin layout relies on is missing: ' + sel);
 
 // ---- script: names the wrapper reaches for must exist ---------------------------
-for (const [re, what] of [[/\bconst SFX=\{/, 'const SFX'], [/\bconst flow=\{/, 'const flow'], [/\bfunction go\(s\)/, 'function go(s)'], [/flow\.s==='pause'|s==='pause'/, "the 'pause' screen"]])
+for (const [re, what] of [[/\bconst SFX=\{/, 'const SFX'], [/\bconst flow=\{/, 'const flow'], [/\bfunction go\(s\)/, 'function go(s)'], [/\bconst NET=\{/, 'const NET'], [/\bfunction netQuit\(\)/, 'function netQuit()'], [/flow\.s==='pause'|s==='pause'/, "the 'pause' screen"]])
   if (!re.test(script)) fail('the game script no longer has ' + what + ' (the plugin pauses the match through it)');
 // Every browser global the game uses must be one the wrapper provides or passes through on purpose.
 const KNOWN_DOC = new Set(['getElementById', 'querySelectorAll', 'querySelector', 'createElement']);
 for (const m of script.matchAll(/\bdocument\.([A-Za-z]+)/g)) if (!KNOWN_DOC.has(m[1])) fail('the game uses document.' + m[1] + ', which the plugin wrapper does not provide');
 const KNOWN_WIN = new Set(['devicePixelRatio', 'AudioContext', 'webkitAudioContext']);
 for (const m of script.matchAll(/\bwindow\.([A-Za-z]+)/g)) if (!KNOWN_WIN.has(m[1])) fail('the game uses window.' + m[1] + ', which the plugin wrapper has not been checked against');
-for (const name of ['setTimeout', 'setInterval', 'cancelAnimationFrame', 'removeEventListener', 'sessionStorage', 'history.', 'fetch(', 'import(', 'new Worker'])
+for (const name of ['setTimeout', 'cancelAnimationFrame', 'removeEventListener', 'sessionStorage', 'history.', 'fetch(', 'import(', 'new Worker'])
   if (script.includes(name)) fail('the game uses ' + name + ', which the plugin wrapper does not clean up or provide');
 const KNOWN_EVENTS = new Set(['resize', 'keydown', 'keyup', 'pointerdown', 'pointerup', 'blur', 'gamepadconnected', 'gamepaddisconnected']);
 for (const m of script.matchAll(/(^|[\s;{(])addEventListener\('([a-z]+)'/g)) if (!KNOWN_EVENTS.has(m[2])) fail('the game listens for window "' + m[2] + '", which the plugin wrapper does not route');
@@ -91,9 +91,10 @@ const PXH_HTML = ${JSON.stringify(markup)};
 const PXH_PLAY_LAYOUT = ${JSON.stringify(!FULL)};
 const PXH_LIVE = new Set();
 
-function pxhGame(document, addEventListener, requestAnimationFrame, localStorage, location) {
+function pxhGame(document, addEventListener, requestAnimationFrame, localStorage, location, setInterval, clearInterval) {
 ${script}
-  return { audio: () => SFX.ctx, pause() { if (flow.s === 'play') go('pause'); }, state: () => flow.s };
+  // pause: in an online match the pause has to happen on both machines, so it goes in as a Start press
+  return { audio: () => SFX.ctx, pause() { if (flow.s === 'play') { if (NET.on) pressed.start = true; else go('pause'); } }, state: () => flow.s, quit: () => netQuit() };
 }
 
 // Mount the game in \`host\` (any element with a size). Returns { destroy(), pause(), state() }.
@@ -149,7 +150,11 @@ function createPixelArena(host, env) {
   };
 
   let game;
-  try { game = pxhGame(doc, on, raf, store, { search: env.search || '' }); }
+  // The game's only timer is the heartbeat to the signaling server while it waits for an online opponent.
+  const timers = new Set();
+  const every = (fn, ms) => { const id = W.setInterval(() => { if (!dead) fn(); }, ms); timers.add(id); return id; };
+  const unevery = id => { W.clearInterval(id); timers.delete(id); };
+  try { game = pxhGame(doc, on, raf, store, { search: env.search || '' }, every, unevery); }
   catch (err) { mount.remove(); throw err; }
 
   const stage = root.getElementById('stage');
@@ -186,7 +191,9 @@ function createPixelArena(host, env) {
     state: () => game.state(),
     destroy() {
       if (dead) return;
+      try { game.quit(); } catch (err) {}      // leave an online match, close the signaling socket
       dead = true;
+      for (const id of timers) W.clearInterval(id);
       PXH_LIVE.delete(arena);
       for (const f of undo) f();
       if (ro) ro.disconnect();
