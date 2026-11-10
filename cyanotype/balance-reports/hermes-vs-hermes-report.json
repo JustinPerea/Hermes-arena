@@ -1,0 +1,768 @@
+{
+ "matchup": [
+  "hermes",
+  "hermes"
+ ],
+ "failures": [
+  "Doc vs code: 2 move mismatches and 0 physics mismatches"
+ ],
+ "rules": [
+  {
+   "name": "Side special is once per airtime",
+   "ok": true,
+   "detail": "first: special_s, second: nothing, still airborne: true"
+  },
+  {
+   "name": "Side special comes back on landing",
+   "ok": true
+  },
+  {
+   "name": "Up special is once per airtime",
+   "ok": true
+  },
+  {
+   "name": "Being hit gives specials back",
+   "ok": true
+  },
+  {
+   "name": "Full smash charge = 1.4x damage",
+   "ok": true,
+   "detail": "16.0% -> 22.4%"
+  },
+  {
+   "name": "Full smash charge launches harder",
+   "ok": true,
+   "detail": "launch 10.2 -> 15.8"
+  },
+  {
+   "name": "Gravity is halved in hitstun",
+   "ok": true,
+   "detail": "dvy 0.360 vs gravity 0.72"
+  },
+  {
+   "name": "Shieldstun scales with damage",
+   "ok": true,
+   "detail": "ftilt 9%: 9 frames, rule says 9"
+  },
+  {
+   "name": "A launched fighter has only air jumps",
+   "ok": true,
+   "detail": "jumpsUsed 1"
+  },
+  {
+   "name": "Fresh ledge grab is safe, then hittable after 30 frames",
+   "ok": true,
+   "detail": "invuln 30"
+  },
+  {
+   "name": "Ledge regrab gives no invulnerability or jump",
+   "ok": true
+  },
+  {
+   "name": "Armor absorbs a weak hit (damage taken, no flinch)",
+   "ok": true,
+   "detail": "{\"state\":\"move\",\"move\":\"ftilt\",\"dmg\":2}"
+  },
+  {
+   "name": "Armor does not hold against a hit over its threshold",
+   "ok": true
+  },
+  {
+   "name": "Counter strike = 1.2x absorbed, 8% to 18%",
+   "ok": true,
+   "detail": "absorbed 2/9/16 -> 8/11/18"
+  },
+  {
+   "name": "Counters do not catch projectiles",
+   "ok": true
+  },
+  {
+   "name": "Trip knocks down with no launch",
+   "ok": true
+  },
+  {
+   "name": "Losing a stock respawns the fighter",
+   "ok": true
+  },
+  {
+   "name": "Last stock gone ends the match with a winner",
+   "ok": true,
+   "detail": "stocks 0, KOs by P1 2"
+  },
+  {
+   "name": "Training (infinite stocks) never ends",
+   "ok": true
+  }
+ ],
+ "ko": {
+  "rows": [
+   {
+    "attacker": "hermes",
+    "move": "fsmash",
+    "label": "Herald's Strike",
+    "kind": "smash",
+    "victim": "hermes",
+    "center": 91,
+    "hit": {
+     "f": [
+      15,
+      17
+     ],
+     "at": "tip",
+     "off": [
+      8,
+      0
+     ],
+     "r": 11,
+     "dmg": 16,
+     "kb": 9,
+     "ang": 35
+    },
+    "centerCharged": 43,
+    "ledge": 57,
+    "ledgeCharged": 18
+   },
+   {
+    "attacker": "hermes",
+    "move": "dsmash",
+    "label": "Split Talaria",
+    "kind": "smash",
+    "victim": "hermes",
+    "center": 98,
+    "hit": {
+     "f": [
+      17,
+      19
+     ],
+     "at": "footB",
+     "off": [
+      -3,
+      -2
+     ],
+     "r": 10,
+     "dmg": 13,
+     "kb": 8,
+     "ang": 160
+    },
+    "centerCharged": 50,
+    "ledge": 62,
+    "ledgeCharged": 24
+   },
+   {
+    "attacker": "hermes",
+    "move": "usmash",
+    "label": "Whirlwind Rotor",
+    "kind": "smash",
+    "victim": "hermes",
+    "center": 112,
+    "hit": {
+     "f": [
+      20,
+      23
+     ],
+     "at": "handF",
+     "off": [
+      6,
+      -6
+     ],
+     "r": 25,
+     "dmg": 8,
+     "kb": 8,
+     "ang": 90
+    },
+    "centerCharged": 59,
+    "ledge": 110,
+    "ledgeCharged": 58
+   },
+   {
+    "attacker": "hermes",
+    "move": "dash_attack",
+    "label": "Courier's Slide",
+    "kind": "ground",
+    "victim": "hermes",
+    "center": 188,
+    "hit": {
+     "f": [
+      6,
+      9
+     ],
+     "at": "footF",
+     "off": [
+      2,
+      -2
+     ],
+     "r": 9,
+     "dmg": 8,
+     "kb": 6,
+     "ang": 70
+    },
+    "ledge": 185
+   },
+   {
+    "attacker": "hermes",
+    "move": "special_u",
+    "label": "Talaria Rise",
+    "kind": "special",
+    "victim": "hermes",
+    "center": 170,
+    "hit": {
+     "f": [
+      24,
+      26
+     ],
+     "at": "tip",
+     "r": 12,
+     "dmg": 6,
+     "kb": 6,
+     "ang": 85
+    },
+    "ledge": 168
+   },
+   {
+    "attacker": "hermes",
+    "move": "bair",
+    "label": "Winged Mule Kick",
+    "kind": "aerial",
+    "victim": "hermes",
+    "center": 136,
+    "hit": {
+     "f": [
+      7,
+      10
+     ],
+     "at": "footF",
+     "r": 10,
+     "dmg": 13,
+     "kb": 7,
+     "ang": 145
+    },
+    "ledge": 92
+   },
+   {
+    "attacker": "hermes",
+    "move": "uair",
+    "label": "Sky Somersault",
+    "kind": "aerial",
+    "victim": "hermes",
+    "center": 169,
+    "hit": {
+     "f": [
+      10,
+      12
+     ],
+     "at": "footF",
+     "r": 10,
+     "dmg": 8,
+     "kb": 6,
+     "ang": 90
+    },
+    "ledge": 167
+   },
+   {
+    "attacker": "hermes",
+    "move": "fair",
+    "label": "Messenger's Chop",
+    "kind": "aerial",
+    "victim": "hermes",
+    "center": 179,
+    "hit": {
+     "f": [
+      10,
+      13
+     ],
+     "at": "mid",
+     "r": 10,
+     "dmg": 12,
+     "kb": 6,
+     "ang": 40
+    },
+    "ledge": 124
+   },
+   {
+    "attacker": "hermes",
+    "move": "throw_b",
+    "label": "Whirlwind Fling",
+    "kind": "throw",
+    "victim": "hermes",
+    "center": 132,
+    "hit": {
+     "f": [
+      20,
+      20
+     ],
+     "at": [
+      -59.07538101126097,
+      -81.32195080630565
+     ],
+     "r": 12,
+     "dmg": 10,
+     "kb": 7,
+     "ang": 150
+    },
+    "ledge": 90
+   },
+   {
+    "attacker": "hermes",
+    "move": "throw_u",
+    "label": "Skyward Toss",
+    "kind": "throw",
+    "victim": "hermes",
+    "center": 143,
+    "hit": {
+     "f": [
+      16,
+      16
+     ],
+     "at": [
+      15.284725242022915,
+      -134.79003324775883
+     ],
+     "r": 12,
+     "dmg": 7,
+     "kb": 7,
+     "ang": 90
+    },
+    "ledge": 141
+   },
+   {
+    "attacker": "hermes",
+    "move": "throw_f",
+    "label": "Gust Palm",
+    "kind": "throw",
+    "victim": "hermes",
+    "center": 173,
+    "hit": {
+     "f": [
+      12,
+      12
+     ],
+     "at": [
+      59.35114397859083,
+      -64.49685423136248
+     ],
+     "r": 12,
+     "dmg": 8,
+     "kb": 6,
+     "ang": 35
+    },
+    "ledge": 121
+   }
+  ],
+  "verdicts": [
+   {
+    "attacker": "hermes",
+    "move": "fsmash",
+    "center": 91,
+    "ok": true
+   }
+  ]
+ },
+ "doc": {
+  "moves": [
+   {
+    "fighter": "Hermes",
+    "slot": "Up air",
+    "field": "Damage",
+    "doc": "4 + 8",
+    "code": "4 / 6 / 8"
+   },
+   {
+    "fighter": "Hermes",
+    "slot": "Up air",
+    "field": "KB",
+    "doc": "6",
+    "code": "2 / 5 / 6"
+   }
+  ],
+  "names": [],
+  "physics": [],
+  "missing": [
+   "Aethon: in the doc, not in the code yet",
+   "Kairos: in the doc, not in the code yet",
+   "Iris: in the doc, not in the code yet"
+  ]
+ },
+ "frames": {
+  "rows": [
+   {
+    "fighter": "hermes",
+    "move": "dsmash",
+    "label": "Split Talaria",
+    "kind": "smash",
+    "startup": 11,
+    "active": "11-13, 17-19",
+    "total": 46,
+    "cancel": null,
+    "landLag": null,
+    "damage": 13,
+    "kb": 8,
+    "shield": -17
+   },
+   {
+    "fighter": "hermes",
+    "move": "usmash",
+    "label": "Whirlwind Rotor",
+    "kind": "smash",
+    "startup": 12,
+    "active": "12-14, 16-18, 20-23",
+    "total": 50,
+    "cancel": null,
+    "landLag": null,
+    "damage": 8,
+    "kb": 8,
+    "shield": -22
+   },
+   {
+    "fighter": "hermes",
+    "move": "fsmash",
+    "label": "Herald's Strike",
+    "kind": "smash",
+    "startup": 15,
+    "active": "15-17",
+    "total": 52,
+    "cancel": null,
+    "landLag": null,
+    "damage": 16,
+    "kb": 9,
+    "shield": -22
+   },
+   {
+    "fighter": "hermes",
+    "move": "jab1",
+    "label": "Messenger's Flurry 1",
+    "kind": "ground",
+    "startup": 3,
+    "active": "3-4",
+    "total": 16,
+    "cancel": 10,
+    "landLag": null,
+    "damage": 2,
+    "kb": 1,
+    "shield": -3
+   },
+   {
+    "fighter": "hermes",
+    "move": "pummel",
+    "label": "Knob Jab",
+    "kind": "ground",
+    "startup": 4,
+    "active": "4",
+    "total": 16,
+    "cancel": null,
+    "landLag": null,
+    "damage": 1.5,
+    "kb": 0,
+    "shield": null
+   },
+   {
+    "fighter": "hermes",
+    "move": "jab2",
+    "label": "Messenger's Flurry 2",
+    "kind": "ground",
+    "startup": 4,
+    "active": "4-5",
+    "total": 18,
+    "cancel": 11,
+    "landLag": null,
+    "damage": 2,
+    "kb": 1,
+    "shield": -3
+   },
+   {
+    "fighter": "hermes",
+    "move": "dtilt",
+    "label": "Scything Sweep",
+    "kind": "ground",
+    "startup": 5,
+    "active": "5-7",
+    "total": 20,
+    "cancel": null,
+    "landLag": null,
+    "damage": 6,
+    "kb": 3,
+    "shield": -8
+   },
+   {
+    "fighter": "hermes",
+    "move": "jab3",
+    "label": "Messenger's Flurry 3",
+    "kind": "ground",
+    "startup": 6,
+    "active": "6-9",
+    "total": 30,
+    "cancel": null,
+    "landLag": null,
+    "damage": 4,
+    "kb": 5,
+    "shield": -19
+   },
+   {
+    "fighter": "hermes",
+    "move": "dash_attack",
+    "label": "Courier's Slide",
+    "kind": "ground",
+    "startup": 6,
+    "active": "6-16",
+    "total": 34,
+    "cancel": null,
+    "landLag": null,
+    "damage": 8,
+    "kb": 6,
+    "shield": -20
+   },
+   {
+    "fighter": "hermes",
+    "move": "utilt",
+    "label": "Caduceus Arc",
+    "kind": "ground",
+    "startup": 6,
+    "active": "6-12",
+    "total": 28,
+    "cancel": null,
+    "landLag": null,
+    "damage": 7,
+    "kb": 5,
+    "shield": -14
+   },
+   {
+    "fighter": "hermes",
+    "move": "grab",
+    "label": "Swift Snatch",
+    "kind": "ground",
+    "startup": 7,
+    "active": "7-9",
+    "total": 30,
+    "cancel": null,
+    "landLag": null,
+    "damage": 0,
+    "kb": 0,
+    "shield": null
+   },
+   {
+    "fighter": "hermes",
+    "move": "ftilt",
+    "label": "Twin Serpent Thrust",
+    "kind": "ground",
+    "startup": 7,
+    "active": "7-9",
+    "total": 26,
+    "cancel": null,
+    "landLag": null,
+    "damage": 9,
+    "kb": 5,
+    "shield": -10
+   },
+   {
+    "fighter": "hermes",
+    "move": "dash_grab",
+    "label": "Running Snatch",
+    "kind": "ground",
+    "startup": 9,
+    "active": "9-11",
+    "total": 36,
+    "cancel": null,
+    "landLag": null,
+    "damage": 0,
+    "kb": 0,
+    "shield": null
+   },
+   {
+    "fighter": "hermes",
+    "move": "getup_attack",
+    "label": "Rising Sweep",
+    "kind": "ground",
+    "startup": 14,
+    "active": "14-16, 20-22",
+    "total": 34,
+    "cancel": null,
+    "landLag": null,
+    "damage": 6,
+    "kb": 4,
+    "shield": -7
+   },
+   {
+    "fighter": "hermes",
+    "move": "ledge_attack",
+    "label": "Lip Vault",
+    "kind": "ground",
+    "startup": 18,
+    "active": "18-21",
+    "total": 32,
+    "cancel": null,
+    "landLag": null,
+    "damage": 8,
+    "kb": 5,
+    "shield": -6
+   },
+   {
+    "fighter": "hermes",
+    "move": "special_u",
+    "label": "Talaria Rise",
+    "kind": "special",
+    "startup": 6,
+    "active": "6-8, 12-14, 18-20, 24-26",
+    "total": 42,
+    "cancel": null,
+    "landLag": 14,
+    "damage": 6,
+    "kb": 6,
+    "shield": -7
+   },
+   {
+    "fighter": "hermes",
+    "move": "special_d_hit",
+    "label": "Psychopomp Guard strike",
+    "kind": "special",
+    "startup": 6,
+    "active": "6-9",
+    "total": 34,
+    "cancel": null,
+    "landLag": null,
+    "damage": 12,
+    "kb": 8,
+    "shield": -16
+   },
+   {
+    "fighter": "hermes",
+    "move": "special_s",
+    "label": "Swift Courier",
+    "kind": "special",
+    "startup": 8,
+    "active": "8-18",
+    "total": 38,
+    "cancel": null,
+    "landLag": 12,
+    "damage": 7,
+    "kb": 5,
+    "shield": -4
+   },
+   {
+    "fighter": "hermes",
+    "move": "nair",
+    "label": "Cyclone Wheel",
+    "kind": "aerial",
+    "startup": 5,
+    "active": "5-18",
+    "total": 36,
+    "cancel": null,
+    "landLag": 7,
+    "damage": 8,
+    "kb": 5,
+    "shield": 1
+   },
+   {
+    "fighter": "hermes",
+    "move": "uair",
+    "label": "Sky Somersault",
+    "kind": "aerial",
+    "startup": 5,
+    "active": "5-6, 10-12",
+    "total": 34,
+    "cancel": null,
+    "landLag": 8,
+    "damage": 8,
+    "kb": 6,
+    "shield": 0
+   },
+   {
+    "fighter": "hermes",
+    "move": "bair",
+    "label": "Winged Mule Kick",
+    "kind": "aerial",
+    "startup": 7,
+    "active": "7-10",
+    "total": 30,
+    "cancel": null,
+    "landLag": 9,
+    "damage": 13,
+    "kb": 7,
+    "shield": 3
+   },
+   {
+    "fighter": "hermes",
+    "move": "fair",
+    "label": "Messenger's Chop",
+    "kind": "aerial",
+    "startup": 10,
+    "active": "10-13",
+    "total": 38,
+    "cancel": null,
+    "landLag": 12,
+    "damage": 13,
+    "kb": 6,
+    "shield": 0
+   },
+   {
+    "fighter": "hermes",
+    "move": "dair",
+    "label": "Talaria Stomp",
+    "kind": "aerial",
+    "startup": 14,
+    "active": "14-17",
+    "total": 40,
+    "cancel": null,
+    "landLag": 18,
+    "damage": 12,
+    "kb": 6,
+    "shield": -6
+   },
+   {
+    "fighter": "hermes",
+    "move": "throw_f",
+    "label": "Gust Palm",
+    "kind": "throw",
+    "startup": 12,
+    "active": "12",
+    "total": 34,
+    "cancel": null,
+    "landLag": null,
+    "damage": 8,
+    "kb": 6,
+    "shield": null
+   },
+   {
+    "fighter": "hermes",
+    "move": "throw_u",
+    "label": "Skyward Toss",
+    "kind": "throw",
+    "startup": 16,
+    "active": "16",
+    "total": 40,
+    "cancel": null,
+    "landLag": null,
+    "damage": 7,
+    "kb": 7,
+    "shield": null
+   },
+   {
+    "fighter": "hermes",
+    "move": "throw_b",
+    "label": "Whirlwind Fling",
+    "kind": "throw",
+    "startup": 20,
+    "active": "20",
+    "total": 40,
+    "cancel": null,
+    "landLag": null,
+    "damage": 10,
+    "kb": 7,
+    "shield": null
+   },
+   {
+    "fighter": "hermes",
+    "move": "throw_d",
+    "label": "Sandal Stamp",
+    "kind": "throw",
+    "startup": 22,
+    "active": "22",
+    "total": 40,
+    "cancel": null,
+    "landLag": null,
+    "damage": 7,
+    "kb": 5,
+    "shield": null
+   }
+  ],
+  "flags": []
+ }
+}

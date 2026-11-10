@@ -1,0 +1,1552 @@
+{
+ "source": "https://claude.ai/artifact/ArGC6mWVGJoAti2wCLNwsa",
+ "title": "Hermes Arena: roster and move sets",
+ "rev": 338,
+ "snapshot": "2026-11-09",
+ "tables": [
+  {
+   "section": "Archetypes",
+   "rows": [
+    [
+     "Axis",
+     "What it means",
+     "Hermes",
+     "Aethon",
+     "Kairos",
+     "Iris"
+    ],
+    [
+     "Ground speed",
+     "Walk, run, dash, how fast he closes distance",
+     "5",
+     "2",
+     "1",
+     "3"
+    ],
+    [
+     "Air mobility",
+     "Air speed, air acceleration, how freely he drifts",
+     "3",
+     "1",
+     "2",
+     "5"
+    ],
+    [
+     "Endurance",
+     "Weight: how late he dies",
+     "3",
+     "5",
+     "2",
+     "1"
+    ],
+    [
+     "Range",
+     "Reach of normals plus projectiles",
+     "2",
+     "3",
+     "5",
+     "3"
+    ],
+    [
+     "Recovery",
+     "Distance and safety getting back to the stage",
+     "3",
+     "3",
+     "5",
+     "4"
+    ],
+    [
+     "Kill power",
+     "Knockback on smashes, throws and strong aerials",
+     "2",
+     "4",
+     "3",
+     "2"
+    ],
+    [
+     "Total",
+     "",
+     "18",
+     "18",
+     "18",
+     "18"
+    ]
+   ]
+  },
+  {
+   "section": "Physics values",
+   "rows": [
+    [
+     "Field",
+     "Hermes",
+     "Aethon",
+     "Kairos",
+     "Iris"
+    ],
+    [
+     "weight",
+     "0.92",
+     "1.08",
+     "0.86",
+     "0.84"
+    ],
+    [
+     "walk",
+     "3.6",
+     "3.0",
+     "2.8",
+     "3.4"
+    ],
+    [
+     "run",
+     "9.0",
+     "7.2",
+     "6.4",
+     "7.8"
+    ],
+    [
+     "runAccel",
+     "1.3",
+     "1.0",
+     "0.9",
+     "1.2"
+    ],
+    [
+     "traction",
+     "0.85",
+     "0.90",
+     "0.80",
+     "0.80"
+    ],
+    [
+     "airSpeed",
+     "5.8",
+     "5.0",
+     "5.2",
+     "6.8"
+    ],
+    [
+     "airAccel",
+     "0.60",
+     "0.45",
+     "0.50",
+     "0.85"
+    ],
+    [
+     "airDrag",
+     "0.05",
+     "0.05",
+     "0.04",
+     "0.04"
+    ],
+    [
+     "gravity",
+     "0.72",
+     "0.78",
+     "0.52",
+     "0.60"
+    ],
+    [
+     "fall (max fall speed)",
+     "12.5",
+     "13.5",
+     "9.5",
+     "11.0"
+    ],
+    [
+     "fastFall",
+     "18",
+     "19",
+     "14",
+     "17"
+    ],
+    [
+     "jump",
+     "16.6",
+     "15.5",
+     "15.0",
+     "16.0"
+    ],
+    [
+     "shortHop (fraction of jump)",
+     "0.58",
+     "0.58",
+     "0.60",
+     "0.60"
+    ],
+    [
+     "airJump",
+     "15.0",
+     "13.0 (each)",
+     "14.0",
+     "15.5"
+    ],
+    [
+     "jumps",
+     "2",
+     "3",
+     "2",
+     "2"
+    ],
+    [
+     "Hurtbox w x h (px)",
+     "46 x 126",
+     "54 x 138",
+     "44 x 132",
+     "40 x 112"
+    ],
+    [
+     "Unique movement",
+     "none",
+     "Glide",
+     "Slow float",
+     "Air dash (side special)"
+    ]
+   ]
+  },
+  {
+   "section": "Move template",
+   "rows": [
+    [
+     "#",
+     "Slot",
+     "Input",
+     "Job in the kit"
+    ],
+    [
+     "1",
+     "Jab (1-2-3)",
+     "Attack, tapped",
+     "Fastest ground option; breaks pressure up close"
+    ],
+    [
+     "2",
+     "Dash attack",
+     "Attack while running",
+     "Punish or approach from a run"
+    ],
+    [
+     "3",
+     "Forward tilt",
+     "Attack + forward",
+     "Spacing poke at mid range"
+    ],
+    [
+     "4",
+     "Up tilt",
+     "Attack + up",
+     "Anti-air and juggle starter"
+    ],
+    [
+     "5",
+     "Down tilt",
+     "Attack + down",
+     "Low poke, often a combo starter"
+    ],
+    [
+     "6",
+     "Forward smash",
+     "Attack + forward, held to charge",
+     "Main kill move on the ground"
+    ],
+    [
+     "7",
+     "Up smash",
+     "Attack + up, held",
+     "Kill move against foes above"
+    ],
+    [
+     "8",
+     "Down smash",
+     "Attack + down, held",
+     "Hits both sides; punishes rolls"
+    ],
+    [
+     "9",
+     "Neutral air",
+     "Attack in the air",
+     "Fast, safe all-round aerial"
+    ],
+    [
+     "10",
+     "Forward air",
+     "Attack + forward in the air",
+     "Main aerial poke or approach"
+    ],
+    [
+     "11",
+     "Back air",
+     "Attack + back in the air",
+     "Strong aerial, usually a kill move"
+    ],
+    [
+     "12",
+     "Up air",
+     "Attack + up in the air",
+     "Juggle tool"
+    ],
+    [
+     "13",
+     "Down air",
+     "Attack + down in the air",
+     "Spike or landing tool"
+    ],
+    [
+     "14",
+     "Grab",
+     "Grab",
+     "Beats shields"
+    ],
+    [
+     "15",
+     "Dash grab",
+     "Grab while running",
+     "Longer, slower grab"
+    ],
+    [
+     "16",
+     "Pummel",
+     "Attack while holding",
+     "Small damage before a throw"
+    ],
+    [
+     "17",
+     "Forward throw",
+     "Forward while holding",
+     "Sends foe offstage"
+    ],
+    [
+     "18",
+     "Back throw",
+     "Back while holding",
+     "Usually the kill throw"
+    ],
+    [
+     "19",
+     "Up throw",
+     "Up while holding",
+     "Sets up juggles"
+    ],
+    [
+     "20",
+     "Down throw",
+     "Down while holding",
+     "Usually a combo starter"
+    ],
+    [
+     "21",
+     "Getup attack",
+     "Attack while lying down",
+     "Clears space around a knocked-down fighter"
+    ],
+    [
+     "22",
+     "Ledge attack",
+     "Attack while hanging",
+     "Safe-ish way back onto the stage"
+    ],
+    [
+     "23",
+     "Neutral special",
+     "Special",
+     "Signature tool, usually a projectile"
+    ],
+    [
+     "24",
+     "Side special",
+     "Special + forward",
+     "Movement or approach; horizontal recovery"
+    ],
+    [
+     "25",
+     "Up special",
+     "Special + up",
+     "Main recovery; ends in helpless fall unless noted"
+    ],
+    [
+     "26",
+     "Down special",
+     "Special + down",
+     "Utility: counter, trap, field or spike"
+    ]
+   ]
+  },
+  {
+   "section": "Hermes, the Messenger",
+   "rows": [
+    [
+     "Slot",
+     "Name",
+     "What it does",
+     "Startup",
+     "Total",
+     "Damage",
+     "KB",
+     "Angle"
+    ],
+    [
+     "Jab",
+     "Messenger's Flurry",
+     "Butt-end poke, backhand rising swipe, then a pinwheel twirl that ends in a gust",
+     "3",
+     "16 / 18 / 30",
+     "2 + 2 + 4",
+     "1 / 1 / 5",
+     "70 / 75 / 35"
+    ],
+    [
+     "Dash attack",
+     "Courier's Slide",
+     "Feet-first slide with the heel wing flared; weaker late hit",
+     "6",
+     "34",
+     "8 (late 5)",
+     "6 (late 3)",
+     "70 (late 60)"
+    ],
+    [
+     "Forward tilt",
+     "Twin Serpent Thrust",
+     "Step-in thrust; the staff's two snakes lunge past the knob",
+     "7",
+     "26",
+     "9",
+     "5",
+     "30"
+    ],
+    [
+     "Up tilt",
+     "Caduceus Arc",
+     "Wide overhead arc from front to back",
+     "6",
+     "28",
+     "7",
+     "5",
+     "90"
+    ],
+    [
+     "Down tilt",
+     "Scything Sweep",
+     "Low sweep at ankle height from the crouch",
+     "5",
+     "20",
+     "6",
+     "3",
+     "15"
+    ],
+    [
+     "Forward smash",
+     "Herald's Strike",
+     "Two-handed lunge; staff wings and snakes flare in a blast of wind",
+     "15",
+     "52",
+     "16",
+     "9",
+     "35"
+    ],
+    [
+     "Up smash",
+     "Whirlwind Rotor",
+     "Whirls the staff overhead like a rotor; whirlwind multi-hit, then a burst",
+     "12",
+     "50",
+     "3 + 3 + 8",
+     "2 / 2 / 8",
+     "95 / 95 / 90"
+    ],
+    [
+     "Down smash",
+     "Split Talaria",
+     "Low split: winged sandal slices in front, then behind",
+     "11",
+     "46",
+     "12 front, 13 back",
+     "7 / 8",
+     "20 / 160"
+    ],
+    [
+     "Neutral air",
+     "Cyclone Wheel",
+     "Cartwheel spin with cloak flaring; strong early, weak late. Land lag 7",
+     "5",
+     "36",
+     "8 (late 4)",
+     "5 (late 2.5)",
+     "45 (late 50)"
+    ],
+    [
+     "Forward air",
+     "Messenger's Chop",
+     "Big overhead chop; the knob at full reach spikes, the hand is a weak spot. Land lag 12",
+     "10",
+     "38",
+     "12 (knob 13, hand 10)",
+     "6 (hand 5)",
+     "40 (knob -60)"
+    ],
+    [
+     "Back air",
+     "Winged Mule Kick",
+     "Mule kick with the winged heel; the knee is a weak spot on the same frames. Land lag 9",
+     "7",
+     "30",
+     "13 (knee 9)",
+     "7 (knee 5)",
+     "145"
+    ],
+    [
+     "Up air",
+     "Sky Somersault",
+     "Bicycle flip: one heel, then the other overhead. Land lag 8",
+     "5",
+     "34",
+     "4 + 8",
+     "6",
+     "90"
+    ],
+    [
+     "Down air",
+     "Talaria Stomp",
+     "Hangs, then drives both sandals straight down. Land lag 18",
+     "14",
+     "40",
+     "12",
+     "6",
+     "-90 (spike)"
+    ],
+    [
+     "Grab",
+     "Swift Snatch",
+     "Quick stepping snatch with the free hand",
+     "7",
+     "30",
+     "",
+     "",
+     ""
+    ],
+    [
+     "Dash grab",
+     "Running Snatch",
+     "Low skidding lunge, reaching far",
+     "9",
+     "36",
+     "",
+     "",
+     ""
+    ],
+    [
+     "Pummel",
+     "Knob Jab",
+     "Jabs the staff knob into the gut",
+     "4",
+     "16",
+     "1.5",
+     "0",
+     ""
+    ],
+    [
+     "Forward throw",
+     "Gust Palm",
+     "Lets go and palms a burst of wind into the chest",
+     "12",
+     "34",
+     "8",
+     "6",
+     "35"
+    ],
+    [
+     "Back throw",
+     "Whirlwind Fling",
+     "Whirls the foe around his back and flings them",
+     "20",
+     "40",
+     "10",
+     "7",
+     "150"
+    ],
+    [
+     "Up throw",
+     "Skyward Toss",
+     "Heaves overhead, then knocks them skyward with the staff",
+     "16",
+     "40",
+     "7",
+     "7",
+     "90"
+    ],
+    [
+     "Down throw",
+     "Sandal Stamp",
+     "Slams flat, hops and stamps with a sandal",
+     "22",
+     "40",
+     "7",
+     "5",
+     "70"
+    ],
+    [
+     "Getup attack",
+     "Rising Sweep",
+     "Low sweep in front, then whirls to sweep behind; intangible on frames 0 to 13",
+     "14",
+     "34",
+     "6 + 6",
+     "4",
+     "30 / 150"
+    ],
+    [
+     "Ledge attack",
+     "Lip Vault",
+     "Vaults over the lip into a low sweep",
+     "18",
+     "32",
+     "8",
+     "5",
+     "28"
+    ],
+    [
+     "Neutral special",
+     "Zephyr Letter",
+     "Flicks the staff and sends a winged letter straight ahead at 8 px per frame for up to 70 frames (560 px). In the air he also floats: half gravity on frames 6 to 20, land lag 10",
+     "14",
+     "40",
+     "5",
+     "3",
+     "30"
+    ],
+    [
+     "Side special",
+     "Swift Courier",
+     "Becomes a streak of wind that dashes through foes, leaving afterimages; usable in the air once per airtime. Land lag 12",
+     "8",
+     "38",
+     "7",
+     "5",
+     "40"
+    ],
+    [
+     "Up special",
+     "Talaria Rise",
+     "Heel wings beat and rocket him straight up in a spiral of wind; three small hits, then a launcher. Ends in helpless fall, land lag 14",
+     "6",
+     "42",
+     "2 + 2 + 2 + 6",
+     "1.5 / 6",
+     "88 / 85"
+    ],
+    [
+     "Down special",
+     "Psychopomp Guard",
+     "Counter stance, staff raised in both hands. A melee hit landing on frames 6 to 26 freezes the attacker for 26 frames and is answered with a strike (startup 6, 34 frames, intangible 0 to 9)",
+     "6 (counter)",
+     "40",
+     "1.2 x absorbed, 8 to 18",
+     "8",
+     "40"
+    ]
+   ]
+  },
+  {
+   "section": "Aethon, the Winged Hoplite",
+   "rows": [
+    [
+     "Slot",
+     "Name",
+     "What it does",
+     "Startup",
+     "Total",
+     "Damage",
+     "KB",
+     "Angle"
+    ],
+    [
+     "Jab",
+     "Shield-Spear-Shove",
+     "Shield punch, short spear jab, then a two-handed shield shove",
+     "5",
+     "18 / 20 / 32",
+     "2 + 2 + 5",
+     "1 / 1 / 6",
+     "70 / 70 / 40"
+    ],
+    [
+     "Dash attack",
+     "Phalanx Charge",
+     "Runs shield-first into the foe; armor against hits under 5% on frames 5 to 9",
+     "8",
+     "38",
+     "10",
+     "7",
+     "40"
+    ],
+    [
+     "Forward tilt",
+     "Spear Thrust",
+     "Long straight thrust; his longest normal",
+     "10",
+     "30",
+     "10",
+     "6",
+     "30"
+    ],
+    [
+     "Up tilt",
+     "Spear Arc",
+     "Swings the spear overhead from front to back",
+     "9",
+     "32",
+     "9",
+     "6",
+     "90"
+    ],
+    [
+     "Down tilt",
+     "Ankle Spear",
+     "Crouching low poke; trips foes under 40%",
+     "8",
+     "24",
+     "7",
+     "4",
+     "10"
+    ],
+    [
+     "Forward smash",
+     "Dory Lunge",
+     "Full stepping lunge with the spear; the tip does more",
+     "20",
+     "60",
+     "16 (tip 18)",
+     "9.5",
+     "33"
+    ],
+    [
+     "Up smash",
+     "Skyward Spear",
+     "Plants his feet and thrusts the spear straight up",
+     "16",
+     "54",
+     "17",
+     "9.5",
+     "88"
+    ],
+    [
+     "Down smash",
+     "Shield Quake",
+     "Slams the shield rim into the floor; shockwave both sides",
+     "15",
+     "52",
+     "14",
+     "8",
+     "25"
+    ],
+    [
+     "Neutral air",
+     "Aspis Spin",
+     "Spins with the shield held out like a disc. Land lag 9",
+     "7",
+     "36",
+     "9 (late 6)",
+     "5.5",
+     "45"
+    ],
+    [
+     "Forward air",
+     "Falling Spear",
+     "Forward downward spear arc. Land lag 15",
+     "13",
+     "40",
+     "14",
+     "6.5",
+     "40"
+    ],
+    [
+     "Back air",
+     "Wing Buffet",
+     "Both wings beat hard behind him. Land lag 10",
+     "9",
+     "32",
+     "12",
+     "7",
+     "145"
+    ],
+    [
+     "Up air",
+     "Spear Lift",
+     "Thrusts the spear straight up. Land lag 9",
+     "7",
+     "34",
+     "11",
+     "6.5",
+     "85"
+    ],
+    [
+     "Down air",
+     "Shield Drop",
+     "Drops with the shield under his feet; spikes on the first 4 active frames. Land lag 22",
+     "18",
+     "44",
+     "14",
+     "6.5",
+     "-80 (spike)"
+    ],
+    [
+     "Grab",
+     "Shield-Arm Clutch",
+     "Short reach: he grabs with the shield arm",
+     "8",
+     "32",
+     "",
+     "",
+     ""
+    ],
+    [
+     "Dash grab",
+     "Charging Clutch",
+     "Lunging grab out of the run",
+     "10",
+     "38",
+     "",
+     "",
+     ""
+    ],
+    [
+     "Pummel",
+     "Rim Strike",
+     "Knocks the shield rim into the foe",
+     "4",
+     "18",
+     "2",
+     "0",
+     ""
+    ],
+    [
+     "Forward throw",
+     "Shield Shove",
+     "Pushes the foe off with the shield",
+     "14",
+     "36",
+     "9",
+     "6.5",
+     "35"
+    ],
+    [
+     "Back throw",
+     "Hip Toss",
+     "Turns and hurls the foe behind him; his kill throw",
+     "18",
+     "42",
+     "11",
+     "7.5",
+     "150"
+    ],
+    [
+     "Up throw",
+     "Wing Lift",
+     "Hoists the foe up and launches them with a wingbeat",
+     "16",
+     "40",
+     "8",
+     "7",
+     "90"
+    ],
+    [
+     "Down throw",
+     "Pin and Stomp",
+     "Pins under the shield and stomps; low knockback for combos",
+     "20",
+     "40",
+     "6",
+     "4",
+     "75"
+    ],
+    [
+     "Getup attack",
+     "Bronze Sweep",
+     "Spear sweep in front, then the shield behind",
+     "14",
+     "36",
+     "7 + 7",
+     "4",
+     "30 / 150"
+    ],
+    [
+     "Ledge attack",
+     "Shield Climb",
+     "Climbs up behind the shield and shoves",
+     "18",
+     "34",
+     "9",
+     "5",
+     "30"
+    ],
+    [
+     "Neutral special",
+     "Javelin Cast",
+     "Hold to aim higher and throw farther; a javelin from his quiver flies in an arc. One on screen at a time",
+     "18",
+     "46",
+     "8 to 15",
+     "5 to 8",
+     "35"
+    ],
+    [
+     "Side special",
+     "Aspis Rush",
+     "Shield charge with armor against hits under 7% on frames 6 to 12; once per airtime",
+     "10",
+     "44",
+     "9",
+     "6.5",
+     "40"
+    ],
+    [
+     "Up special",
+     "Wingbeat Ascent",
+     "Three steerable wingbeats upward, each a small hit; once per airtime. Flows into a glide instead of helpless fall",
+     "9",
+     "54",
+     "3 + 3 + 5",
+     "6",
+     "80"
+    ],
+    [
+     "Down special",
+     "Phalanx Stomp",
+     "On the ground: shield slam whose shockwave runs along the floor both ways. In the air: plunges straight down, spiking early, then a shockwave on landing; the plunge stops after 30 frames and he falls helpless",
+     "12",
+     "46",
+     "10 (air spike 12)",
+     "6 / 7",
+     "30 (air -85)"
+    ]
+   ]
+  },
+  {
+   "section": "Kairos, the Hooded Sage",
+   "rows": [
+    [
+     "Slot",
+     "Name",
+     "What it does",
+     "Startup",
+     "Total",
+     "Damage",
+     "KB",
+     "Angle"
+    ],
+    [
+     "Jab",
+     "Second Hand",
+     "Two staff pokes, then a rapid flurry of clock-hand flashes ending in a push",
+     "4",
+     "18 / 20 / 36",
+     "2 + 2 + (1 x 4) + 3",
+     "1 / 1 / 5",
+     "70 / 70 / 40"
+    ],
+    [
+     "Dash attack",
+     "Sandslide",
+     "Skids forward on a stream of sand",
+     "8",
+     "40",
+     "7",
+     "5",
+     "60"
+    ],
+    [
+     "Forward tilt",
+     "Gnomon Sweep",
+     "Long staff sweep; the orrery tip hits harder",
+     "9",
+     "30",
+     "6 (tip 10)",
+     "5.5",
+     "35"
+    ],
+    [
+     "Up tilt",
+     "Rising Dial",
+     "A half-circle of light like a sundial face sweeps over his head; strong anti-air",
+     "8",
+     "32",
+     "8",
+     "5.5",
+     "85"
+    ],
+    [
+     "Down tilt",
+     "Sand Trail",
+     "Low sweep that leaves a short-lived trail of sand",
+     "7",
+     "24",
+     "5",
+     "3",
+     "15"
+    ],
+    [
+     "Forward smash",
+     "Meridian",
+     "Extends a blade of light from the staff tip; very long reach",
+     "20",
+     "58",
+     "14 (tip 17)",
+     "9.5",
+     "35"
+    ],
+    [
+     "Up smash",
+     "Zenith",
+     "Raises the staff and calls a pillar of light above him",
+     "16",
+     "54",
+     "16",
+     "9",
+     "90"
+    ],
+    [
+     "Down smash",
+     "Equinox",
+     "Two orbs burst out at floor level on both sides",
+     "14",
+     "50",
+     "13",
+     "7.5",
+     "25"
+    ],
+    [
+     "Neutral air",
+     "Orrery",
+     "Rings orbit around his body; multi-hit with a final push. Land lag 9",
+     "7",
+     "40",
+     "(1 x 4) + 4",
+     "5",
+     "45"
+    ],
+    [
+     "Forward air",
+     "Staff Arc",
+     "Forward arc of the staff. Land lag 11",
+     "10",
+     "38",
+     "10",
+     "5.5",
+     "45"
+    ],
+    [
+     "Back air",
+     "Recoil",
+     "Backward palm blast of light; his kill aerial. Land lag 11",
+     "9",
+     "36",
+     "12",
+     "7",
+     "145"
+    ],
+    [
+     "Up air",
+     "Hour Hand",
+     "Sweeps the staff above him like a clock hand. Land lag 9",
+     "8",
+     "36",
+     "9",
+     "6",
+     "85"
+    ],
+    [
+     "Down air",
+     "Falling Sand",
+     "Pours a stream of sand downward; the last hit spikes. Land lag 16",
+     "12",
+     "44",
+     "(2 x 3) + 5",
+     "5.5",
+     "-70 (last hit)"
+    ],
+    [
+     "Grab",
+     "Chain of Hours",
+     "Tether grab: a chain of light reaches out about twice a normal grab. Long whiff lag",
+     "12",
+     "50",
+     "",
+     "",
+     ""
+    ],
+    [
+     "Dash grab",
+     "Dash tether",
+     "Same tether out of a run, slightly longer",
+     "14",
+     "56",
+     "",
+     "",
+     ""
+    ],
+    [
+     "Pummel",
+     "Tick",
+     "Taps the foe with the orrery",
+     "4",
+     "16",
+     "1.5",
+     "0",
+     ""
+    ],
+    [
+     "Forward throw",
+     "Push of Ages",
+     "Pushes the foe away with a burst of sand",
+     "14",
+     "36",
+     "7",
+     "6",
+     "40"
+    ],
+    [
+     "Back throw",
+     "Turnabout",
+     "Spins the foe behind him",
+     "18",
+     "40",
+     "8",
+     "6.5",
+     "145"
+    ],
+    [
+     "Up throw",
+     "Sundial",
+     "Launches the foe up on a column of light; his kill throw",
+     "20",
+     "44",
+     "9",
+     "7.5",
+     "90"
+    ],
+    [
+     "Down throw",
+     "Stopped Clock",
+     "Freezes the foe on the floor for 20 frames, then pops them up",
+     "24",
+     "46",
+     "6",
+     "4",
+     "80"
+    ],
+    [
+     "Getup attack",
+     "Dial Sweep",
+     "Staff sweep in front, then behind",
+     "15",
+     "36",
+     "6 + 6",
+     "4",
+     "30 / 150"
+    ],
+    [
+     "Ledge attack",
+     "Sand Edge",
+     "Climbs up and sweeps sand along the edge",
+     "20",
+     "34",
+     "7",
+     "5",
+     "30"
+    ],
+    [
+     "Neutral special",
+     "Hour Bolt",
+     "Charges an orb of light. He can store the charge by shielding and fire it later. Uncharged is fast and weak; full charge takes 90 frames",
+     "12",
+     "38",
+     "4 to 20",
+     "3 to 9",
+     "35"
+    ],
+    [
+     "Side special",
+     "Orrery Ring",
+     "Throws a spinning ring that travels forward, slows, then flies back to him. Hits going out and coming back; one on screen",
+     "14",
+     "42",
+     "6 out, 4 back",
+     "4 / 3",
+     "45"
+    ],
+    [
+     "Up special",
+     "Stepped Moment",
+     "Vanishes and reappears a fixed distance away in any of 8 directions; intangible while gone, small hit on arrival. Ends in helpless fall",
+     "8",
+     "44",
+     "6",
+     "5",
+     "70"
+    ],
+    [
+     "Down special",
+     "Stilled Instant",
+     "Places a circle about two body-heights wide where fighters and projectiles move at half speed for 150 frames. One at a time; 240 frame cooldown",
+     "16",
+     "40",
+     "",
+     "",
+     ""
+    ]
+   ]
+  },
+  {
+   "section": "Iris, the Rainbow Herald",
+   "rows": [
+    [
+     "Slot",
+     "Name",
+     "What it does",
+     "Startup",
+     "Total",
+     "Damage",
+     "KB",
+     "Angle"
+    ],
+    [
+     "Jab",
+     "Flutter",
+     "Two quick palm strikes, then a flurry of wing flicks; fastest jab on the roster",
+     "2",
+     "14 / 16 / 28",
+     "2 + 2 + 3",
+     "1 / 1 / 4.5",
+     "70 / 70 / 40"
+    ],
+    [
+     "Dash attack",
+     "Rainbow Dive",
+     "Low streaking dive that leaves a short colored trail",
+     "6",
+     "32",
+     "7",
+     "5",
+     "55"
+    ],
+    [
+     "Forward tilt",
+     "Ribbon Lash",
+     "Whips the ribbon forward",
+     "6",
+     "24",
+     "7",
+     "4.5",
+     "35"
+    ],
+    [
+     "Up tilt",
+     "Arc of Color",
+     "Sweeps the ribbon overhead in a rainbow arc; combo starter",
+     "5",
+     "24",
+     "6",
+     "5",
+     "95"
+    ],
+    [
+     "Down tilt",
+     "Low Sweep",
+     "Quick leg sweep that pops foes up for aerials",
+     "4",
+     "18",
+     "5",
+     "2.5",
+     "80"
+    ],
+    [
+     "Forward smash",
+     "Prism Burst",
+     "Thrusts the pitcher forward and throws a bright splash",
+     "13",
+     "46",
+     "14",
+     "9.5",
+     "38"
+    ],
+    [
+     "Up smash",
+     "Rainbow Fountain",
+     "A column of water bursts upward; multi-hit then a launch",
+     "12",
+     "48",
+     "(2 x 3) + 7",
+     "8",
+     "90"
+    ],
+    [
+     "Down smash",
+     "Split Spectrum",
+     "Both wings slash at floor level, front and back",
+     "9",
+     "40",
+     "11",
+     "7",
+     "30"
+    ],
+    [
+     "Neutral air",
+     "Halo Spin",
+     "Wings spin around her in a ring; strong early, weak late. Land lag 6",
+     "3",
+     "30",
+     "7 (late 4)",
+     "4.5",
+     "50"
+    ],
+    [
+     "Forward air",
+     "Ribbon Cascade",
+     "Three quick ribbon arcs in front. Land lag 8",
+     "6",
+     "34",
+     "2 + 2 + 5",
+     "5.5",
+     "40"
+    ],
+    [
+     "Back air",
+     "Wing Lash",
+     "One wing slashes hard behind her; her kill aerial. Land lag 8",
+     "6",
+     "28",
+     "11",
+     "6.5",
+     "145"
+    ],
+    [
+     "Up air",
+     "Scissor Kick",
+     "Fast overhead scissor kick; her main juggle tool. Land lag 6",
+     "4",
+     "26",
+     "8",
+     "5.5",
+     "85"
+    ],
+    [
+     "Down air",
+     "Raindrop",
+     "Drops a heavy splash below her; small spiking sweet spot in the center. Land lag 14",
+     "12",
+     "36",
+     "8 (center 10)",
+     "6.5",
+     "60 (center -90)"
+    ],
+    [
+     "Grab",
+     "Ribbon Catch",
+     "Short reach",
+     "6",
+     "28",
+     "",
+     "",
+     ""
+    ],
+    [
+     "Dash grab",
+     "Diving Catch",
+     "Quick dash grab",
+     "8",
+     "34",
+     "",
+     "",
+     ""
+    ],
+    [
+     "Pummel",
+     "Splash",
+     "Flicks water in the foe's face",
+     "3",
+     "14",
+     "1",
+     "0",
+     ""
+    ],
+    [
+     "Forward throw",
+     "Send Off",
+     "Spins and releases the foe forward",
+     "12",
+     "32",
+     "6",
+     "5",
+     "40"
+    ],
+    [
+     "Back throw",
+     "Over the Arc",
+     "Carries the foe over her head along a small rainbow and drops them behind",
+     "16",
+     "38",
+     "8",
+     "6",
+     "140"
+    ],
+    [
+     "Up throw",
+     "Updraft",
+     "Tosses the foe straight up; combo throw",
+     "12",
+     "32",
+     "5",
+     "5.5",
+     "88"
+    ],
+    [
+     "Down throw",
+     "Puddle Slam",
+     "Slams the foe into a splash; low launch for an aerial follow-up",
+     "16",
+     "36",
+     "5",
+     "4",
+     "75"
+    ],
+    [
+     "Getup attack",
+     "Spectrum Sweep",
+     "Wing sweep front and back",
+     "12",
+     "32",
+     "5 + 5",
+     "4",
+     "30 / 150"
+    ],
+    [
+     "Ledge attack",
+     "Rainbow Flip",
+     "Flips up and kicks low",
+     "16",
+     "30",
+     "7",
+     "4.5",
+     "30"
+    ],
+    [
+     "Neutral special",
+     "Prism Shards",
+     "Fans out three small shards of light at high, middle and low angles; in the air the first use also stalls her fall",
+     "9",
+     "32",
+     "3 each",
+     "3",
+     "35"
+    ],
+    [
+     "Side special",
+     "Rainbow Arc",
+     "Air dash along a curved rainbow path, bending up or down with the stick; the trail hits. She can cancel into any aerial from frame 20. Once per airtime, like every side special",
+     "6",
+     "36",
+     "7",
+     "5",
+     "45"
+    ],
+    [
+     "Up special",
+     "Bridge of Heaven",
+     "Rises along a steep, steerable rainbow and leaves a thin platform at its end for 180 frames. The platform vanishes as soon as any other fighter stands on it. One bridge at a time. Ends in helpless fall",
+     "7",
+     "46",
+     "6",
+     "5.5",
+     "80"
+    ],
+    [
+     "Down special",
+     "Styx Pour",
+     "Tips the pitcher. On the ground it leaves a puddle for 240 frames that trips foes who run through it; in the air a falling stream spikes on its first hit",
+     "14",
+     "42",
+     "4 (air 8)",
+     "3 (air 6)",
+     "80 (air -80)"
+    ]
+   ]
+  },
+  {
+   "section": "Readability in any art style",
+   "rows": [
+    [
+     "Fighter",
+     "Height and build",
+     "Silhouette hook",
+     "Weapon read",
+     "Accent idea"
+    ],
+    [
+     "Hermes",
+     "1.0, lean runner",
+     "Winged helmet and wing-like feather cloak",
+     "Short staff with wings and twin snakes",
+     "Gold trim"
+    ],
+    [
+     "Aethon",
+     "1.1, broad and heavy",
+     "Big round shield and large back wings",
+     "Spear longer than his body",
+     "Bronze"
+    ],
+    [
+     "Kairos",
+     "1.05, tall and narrow",
+     "Deep hood, long robe to the floor",
+     "Staff with orbiting rings at the top",
+     "Sand or amber glow"
+    ],
+    [
+     "Iris",
+     "0.9, small and light",
+     "Wide multicolored wings and a trailing ribbon",
+     "Pitcher held in one hand",
+     "The rainbow itself"
+    ]
+   ]
+  },
+  {
+   "section": "Decisions",
+   "rows": [
+    [
+     "Question",
+     "Decision"
+    ],
+    [
+     "Proper names for every move?",
+     "Yes. Every move now has a name."
+    ],
+    [
+     "Aethon's armor",
+     "Keep it, as long as overall balance holds. The review narrowed it to hits under 5% (dash attack) and under 7% (side special)."
+    ],
+    [
+     "Kairos's tether grab",
+     "Keep it; judge it once the balance evals run."
+    ],
+    [
+     "Iris's bridge in 4-player",
+     "The bridge vanishes when any other fighter stands on it."
+    ],
+    [
+     "Stilled Instant in 4-player",
+     "Try it as is: it slows everyone inside."
+    ],
+    [
+     "Balance pass",
+     "Build balance evals first, and start with only 2 fighters."
+    ],
+    [
+     "Next fighter",
+     "Aethon, against Hermes."
+    ]
+   ]
+  }
+ ]
+}

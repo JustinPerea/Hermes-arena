@@ -1,0 +1,8 @@
+node_modules/
+cyanotype/dist/
+dist/
+feel-lab/out/
+feel-lab/videos/
+*.mp4
+*.gif
+.DS_Store

@@ -1,0 +1,1 @@
+window.NOUS_BUILD = { name: 'Nous Hermes · fighter build', tagline: 'the Hermes Desktop mascot at heroic proportions (about 6 heads), printed as a cyanotype', leg: 1, torso: 1, head: 1.08, staff: 1, mantle: 1 };

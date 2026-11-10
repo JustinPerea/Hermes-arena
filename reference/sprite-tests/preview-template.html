@@ -1,0 +1,106 @@
+<title>Hermes Sprite Tests</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Layout: plate grid, one row per animation, the two styles side by side like a museum comparison plate */
+:root{
+  --bg:#f3f0e8; --panel:#fbf9f3; --ink:#1d2a44; --muted:#5d6678; --rule:#d8d2c3; --accent:#1f4fa4; --stage:#ece6d8; --base:#b9ae96;
+  --display:"Cormorant SC",Georgia,serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141922;--panel:#1b212c;--ink:#e6e1d4;--muted:#9aa3b3;--rule:#2d3544;--accent:#8fb0f0;--stage:#e9e3d4;--base:#a99e86;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141922;--panel:#1b212c;--ink:#e6e1d4;--muted:#9aa3b3;--rule:#2d3544;--accent:#8fb0f0;--stage:#e9e3d4;--base:#a99e86;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4vw,42px);margin:0;letter-spacing:.02em;text-wrap:balance}
+.lede{color:var(--muted);max-width:68ch;margin:4px 0 0}
+.controls{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;font-size:13px;color:var(--muted)}
+.controls label{display:flex;gap:6px;align-items:center}
+.controls input[type=range]{width:120px;accent-color:var(--accent)}
+button{font:inherit;font-size:13px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);padding:5px 12px;border-radius:4px;cursor:pointer}
+button[aria-pressed=true]{border-color:var(--accent);color:var(--accent)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.head{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(0,1fr);gap:14px;font-family:var(--display);font-size:20px;font-weight:700}
+.row{display:grid;grid-template-columns:110px minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:stretch;border-top:1px solid var(--rule);padding-top:14px}
+.rl{font-family:var(--display);font-size:20px;font-weight:700}
+.rl small{display:block;font-family:var(--mono);font-size:11px;font-weight:400;color:var(--muted);letter-spacing:0}
+.cell{background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:10px;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;min-width:0}
+canvas{width:100%;height:auto;aspect-ratio:16/10;background:var(--stage);border-radius:2px;display:block}
+.strip{display:flex;gap:4px;overflow-x:auto}
+.strip img{height:64px;width:auto;background:var(--stage);border-radius:2px;padding:2px;cursor:pointer;border:1px solid transparent}
+.strip img.on{border-color:var(--accent)}
+.note{font-size:13px;color:var(--muted);margin:0}
+.sheets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sheets figure{margin:0;display:grid;gap:4px}
+.sheets img{background:var(--stage);border-radius:2px}
+.sheets figcaption{font-family:var(--mono);font-size:11px;color:var(--muted)}
+h2{font-family:var(--display);font-size:24px;margin:10px 0 0}
+@media (max-width:720px){.head{display:none}.row{grid-template-columns:1fr}.sheets{grid-template-columns:1fr 1fr}}
+</style>
+<div class="wrap">
+  <header>
+    <h1>Hermes Sprite Tests</h1>
+    <p class="lede">Six sheets from GPT Image 2.6 (via Krea), each generated from Justin's reference sheet for that style, then sliced into frames. Frames are lined up on a shared baseline by the head and torso so you can judge how much the figure drifts between frames.</p>
+  </header>
+  <div class="controls">
+    <label for="spd">Speed <input id="spd" type="range" min="0.25" max="2" step="0.25" value="1"> <span id="spdv">1x</span></label>
+    <button id="onion" aria-pressed="false">Onion skin</button>
+    <button id="raw" aria-pressed="false">Align by box centre</button>
+    <button id="pause" aria-pressed="false">Pause</button>
+  </div>
+  <div class="head"><span></span><span>Classic messenger</span><span>Masked herald</span></div>
+  <div id="rows"></div>
+  <h2>Source sheets</h2>
+  <div class="sheets" id="sheets"></div>
+</div>
+<script>
+/*DATA*/
+const ANIMS=[{k:'idle',label:'Idle',fps:[5],note:'4 frames, ping-pong'},{k:'run',label:'Run',fps:[11],note:'6 frames, loop'},{k:'jab',label:'Jab',fps:[9],note:'3 frames + hold'}];
+const STY=['classic','masked'];
+let speed=1,onion=false,raw=false,paused=false;
+const rows=document.getElementById('rows'),players=[];
+for(const a of ANIMS){
+  const r=document.createElement('div');r.className='row';
+  r.innerHTML=`<div class="rl">${a.label}<small>${a.note}</small></div>`;
+  for(const s of STY){
+    const fr=SPR[`${s}-${a.k}`];
+    const c=document.createElement('div');c.className='cell';
+    const cv=document.createElement('canvas');cv.width=960;cv.height=600;
+    cv.setAttribute('aria-label',`${s} ${a.label} animation`);
+    const st=document.createElement('div');st.className='strip';
+    const imgs=fr.map((f,i)=>{const im=new Image();im.src=f.src;im.alt=`${s} ${a.k} frame ${i+1}`;im.onclick=()=>{p.lock=p.lock===i?null:i;sync()};st.appendChild(im);return im});
+    c.append(cv,st);r.appendChild(c);
+    const p={a,s,fr,imgs,cv,ctx:cv.getContext('2d'),t:0,lock:null};
+    function sync(){imgs.forEach((im,i)=>im.classList.toggle('on',p.lock===i))}
+    players.push(p);
+  }
+  rows.appendChild(r);
+}
+function seq(p){const n=p.fr.length;
+  if(p.a.k==='idle')return [0,1,2,3,2,1].filter(i=>i<n);
+  if(p.a.k==='jab')return [0,0,1,1,1,2,2,0,0,0];
+  return [...Array(n).keys()];}
+// common scale per style: fit the tallest frame of that style into the canvas
+const scale={};for(const s of STY){let m=0;for(const a of ANIMS)for(const f of SPR[`${s}-${a.k}`])m=Math.max(m,f.h);scale[s]=500/m;}
+function draw(p,idx,alpha){const f=p.fr[idx],im=p.imgs[idx],k=scale[p.s],ctx=p.ctx;
+  if(!im.complete)return;
+  const baseY=560,cx=raw?480-(f.w*k)/2:480-f.ax*k;
+  const x=raw?cx:cx,y=baseY-f.foot*k;
+  ctx.globalAlpha=alpha;ctx.drawImage(im,x,y,f.w*k,f.h*k);ctx.globalAlpha=1;}
+let last=performance.now();
+function frame(now){const dt=Math.min(.1,Math.max(0,(now-last)/1000));last=now;
+  for(const p of players){const ctx=p.ctx;ctx.clearRect(0,0,960,600);
+    ctx.strokeStyle='#b9ae96';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(40,560);ctx.lineTo(920,560);ctx.stroke();
+    ctx.strokeStyle='rgba(31,79,164,.25)';ctx.setLineDash([6,6]);ctx.beginPath();ctx.moveTo(480,20);ctx.lineTo(480,560);ctx.stroke();ctx.setLineDash([]);
+    const sq=seq(p);if(!paused)p.t+=dt*p.a.fps[0]*speed;
+    const i=Math.floor(p.t)%sq.length,cur=p.lock??sq[i];
+    if(onion&&p.lock==null){const prev=sq[(i-1+sq.length)%sq.length];if(prev!==cur)draw(p,prev,.25);}
+    draw(p,cur,1);}
+  requestAnimationFrame(frame);}
+requestAnimationFrame(frame);
+const tog=(id,fn)=>{const b=document.getElementById(id);b.onclick=()=>{const v=b.getAttribute('aria-pressed')!=='true';b.setAttribute('aria-pressed',v);fn(v)}};
+tog('onion',v=>onion=v);tog('raw',v=>raw=v);tog('pause',v=>paused=v);
+const spd=document.getElementById('spd');spd.oninput=()=>{speed=+spd.value;document.getElementById('spdv').textContent=speed+'x'};
+const sh=document.getElementById('sheets');
+for(const s of STY)for(const a of ANIMS){const f=document.createElement('figure');f.innerHTML=`<img alt="${s} ${a.k} sheet" src="${SPR['sheet-'+s+'-'+a.k]}"><figcaption>${s}-${a.k}.png</figcaption>`;sh.appendChild(f)}
+if(matchMedia('(prefers-reduced-motion: reduce)').matches){paused=true;document.getElementById('pause').setAttribute('aria-pressed','true')}
+</script>

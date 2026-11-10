@@ -1,0 +1,429 @@
+{
+ "_about": "Measurable feel targets for Hermes Arena. Each metric is measured per fighter by lab.cjs. 'target' is the pass band, 'warn' the outer band (warn = half credit). Bands come from Smash Ultimate frame data scaled to this stage, or from Justin's notes. Change a band only with a reason in LOG.md.",
+ "movement": {
+  "jumpsquat_f": {
+   "label": "Jumpsquat (frames from press to airborne)",
+   "target": [
+    3,
+    3
+   ],
+   "warn": [
+    2,
+    5
+   ],
+   "why": "Ultimate: 3 f for every fighter. Longer feels sluggish.",
+   "source": "SSBU"
+  },
+  "fullhop_air_f": {
+   "label": "Full hop airtime (f)",
+   "target": [
+    42,
+    58
+   ],
+   "warn": [
+    36,
+    66
+   ],
+   "why": "Ultimate mid-weights: ~45-55 f. Too long feels floaty, too short twitchy.",
+   "source": "SSBU"
+  },
+  "shorthop_air_f": {
+   "label": "Short hop airtime (f)",
+   "target": [
+    28,
+    38
+   ],
+   "warn": [
+    24,
+    44
+   ],
+   "why": "Room for one aerial plus its landing; Ultimate ~30-36 f.",
+   "source": "SSBU"
+  },
+  "hop_ratio": {
+   "label": "Short hop height / full hop height",
+   "target": [
+    0.45,
+    0.62
+   ],
+   "warn": [
+    0.38,
+    0.7
+   ],
+   "why": "Short hop must feel clearly lower (Ultimate ~0.5).",
+   "source": "SSBU"
+  },
+  "fullhop_vs_sideplat": {
+   "label": "Full hop apex / side platform height",
+   "target": [
+    1.2,
+    2.0
+   ],
+   "warn": [
+    1.05,
+    2.4
+   ],
+   "why": "A full hop should comfortably reach the side platforms.",
+   "source": "stage"
+  },
+  "dj_vs_topplat": {
+   "label": "Full hop + double jump apex / top platform height",
+   "target": [
+    1.1,
+    1.8
+   ],
+   "warn": [
+    1.0,
+    2.2
+   ],
+   "why": "Two jumps should reach the top platform.",
+   "source": "stage"
+  },
+  "cross_f": {
+   "label": "Run across the altar (f)",
+   "target": [
+    70,
+    105
+   ],
+   "warn": [
+    60,
+    120
+   ],
+   "why": "Ultimate mid-speed runners cross a battlefield-sized stage in ~1.2-1.7 s; scaled to this altar.",
+   "source": "SSBU scaled"
+  },
+  "ff_ratio": {
+   "label": "Fast fall speed / normal fall speed",
+   "target": [
+    1.45,
+    1.75
+   ],
+   "warn": [
+    1.3,
+    1.9
+   ],
+   "why": "Ultimate fast fall is 1.6x.",
+   "source": "SSBU"
+  },
+  "turn_f": {
+   "label": "Run turnaround (f until moving the other way)",
+   "target": [
+    6,
+    14
+   ],
+   "warn": [
+    3,
+    20
+   ],
+   "why": "Skid makes runs committal but not sticky.",
+   "source": "SSBU"
+  },
+  "buffer_delay_f": {
+   "label": "Buffered follow-up delay after the cancel frame (f)",
+   "target": [
+    0,
+    1
+   ],
+   "warn": [
+    0,
+    2
+   ],
+   "why": "A press made early must fire on the first free frame.",
+   "source": "SSBU"
+  }
+ },
+ "air": {
+  "air_speed_ratio": {
+   "label": "Top air speed / run speed",
+   "target": [
+    0.6,
+    0.8
+   ],
+   "warn": [
+    0.5,
+    0.9
+   ],
+   "why": "Smash fighters drift slower than they run (Mario 0.69); full run speed in the air makes recoveries and approaches too free.",
+   "source": "SSBU"
+  },
+  "air_turn_f": {
+   "label": "Air drift reversal (f to half speed the other way)",
+   "target": [
+    10,
+    26
+   ],
+   "warn": [
+    6,
+    34
+   ],
+   "why": "Responsive but with momentum; Mario ~18 f.",
+   "source": "SSBU"
+  },
+  "air_stop_f": {
+   "label": "Air friction: f until drift falls to 20% after letting go",
+   "target": [
+    15,
+    45
+   ],
+   "warn": [
+    8,
+    70
+   ],
+   "why": "Letting go of the stick should slow the drift; with no air friction you keep flying sideways.",
+   "source": "SSBU"
+  },
+  "recovery_h": {
+   "label": "Horizontal recovery from stage level (share of stage width)",
+   "target": [
+    0.55,
+    0.9
+   ],
+   "warn": [
+    0.45,
+    1.05
+   ],
+   "why": "Battlefield proportions: mid-weights recover from ~0.6-0.75 stage widths; from the blast line (1.14) means nobody can be edge-guarded.",
+   "source": "SSBU scaled"
+  },
+  "recovery_v": {
+   "label": "Vertical recovery below the ledge (body heights)",
+   "target": [
+    2.5,
+    4
+   ],
+   "warn": [
+    2,
+    4.5
+   ],
+   "why": "Up special plus jumps should save you from a low launch but not from the bottom blast line.",
+   "source": "SSBU scaled"
+  }
+ },
+ "combat": {
+  "hitlag10_f": {
+   "label": "Hitlag on a 10% hit (f)",
+   "target": [
+    10,
+    14
+   ],
+   "warn": [
+    8,
+    16
+   ],
+   "why": "Ultimate: 0.65 f per % plus a base. Sells impact.",
+   "source": "SSBU"
+  },
+  "fsmash_ko": {
+   "label": "Forward smash KO % (uncharged, centre)",
+   "target": [
+    95,
+    140
+   ],
+   "warn": [
+    80,
+    165
+   ],
+   "why": "Ultimate mid-weight fsmash at centre ~100-130%.",
+   "source": "SSBU"
+  },
+  "usmash_ko": {
+   "label": "Up smash KO % (uncharged, centre)",
+   "target": [
+    100,
+    150
+   ],
+   "warn": [
+    85,
+    175
+   ],
+   "why": "",
+   "source": "SSBU"
+  },
+  "dsmash_ko": {
+   "label": "Down smash KO % (uncharged, centre)",
+   "target": [
+    100,
+    155
+   ],
+   "warn": [
+    85,
+    180
+   ],
+   "why": "",
+   "source": "SSBU"
+  },
+  "bthrow_ko": {
+   "label": "Back throw KO % at the ledge",
+   "target": [
+    130,
+    200
+   ],
+   "warn": [
+    110,
+    240
+   ],
+   "why": "Throws kill late; a back throw at the edge is the best one.",
+   "source": "SSBU"
+  },
+  "tumble_ftilt": {
+   "label": "Damage where forward tilt starts to tumble (%)",
+   "target": [
+    40,
+    100
+   ],
+   "warn": [
+    25,
+    130
+   ],
+   "why": "Low % hits should keep the foe close; mid % starts real launches.",
+   "source": "SSBU"
+  },
+  "utilt_chain": {
+   "label": "Up tilt true-combo hits on itself from 0%",
+   "target": [
+    2,
+    4
+   ],
+   "warn": [
+    1,
+    5
+   ],
+   "why": "Juggles at low %, but no infinites.",
+   "source": "SSBU"
+  },
+  "max_chain": {
+   "label": "Longest true combo of one repeated ground move (any %)",
+   "target": [
+    1,
+    4
+   ],
+   "warn": [
+    1,
+    6
+   ],
+   "why": "Over 6 is an infinite.",
+   "source": "design"
+  },
+  "dthrow_adv20": {
+   "label": "Down throw frame advantage at 20% (f)",
+   "target": [
+    8,
+    30
+   ],
+   "warn": [
+    3,
+    40
+   ],
+   "why": "Down throw is the combo starter at low %.",
+   "source": "SSBU"
+  },
+  "framedata_inband": {
+   "label": "Moves inside their frame-data band (%)",
+   "target": [
+    80,
+    100
+   ],
+   "warn": [
+    65,
+    100
+   ],
+   "why": "See FRAME_BANDS in lab.cjs: startup and shield advantage per move class.",
+   "source": "SSBU"
+  }
+ },
+ "pacing": {
+  "sec_per_stock": {
+   "label": "Seconds per stock (CPU Hard mirror)",
+   "target": [
+    25,
+    70
+   ],
+   "warn": [
+    18,
+    95
+   ],
+   "why": "Ultimate 1v1 stocks last roughly 40-60 s.",
+   "source": "SSBU"
+  },
+  "ko_pct": {
+   "label": "Average damage at KO (%)",
+   "target": [
+    90,
+    160
+   ],
+   "warn": [
+    70,
+    190
+   ],
+   "why": "",
+   "source": "SSBU"
+  },
+  "timeout_rate": {
+   "label": "Share of matches that hit the 4 min cap",
+   "target": [
+    0,
+    0.1
+   ],
+   "warn": [
+    0,
+    0.25
+   ],
+   "why": "Stalemates mean KOs are too hard to land.",
+   "source": "design"
+  },
+  "self_destructs": {
+   "label": "Share of KOs with no hit in the prior 4 s",
+   "target": [
+    0,
+    0.12
+   ],
+   "warn": [
+    0,
+    0.25
+   ],
+   "why": "CPU falling off on its own is not a fight.",
+   "source": "design"
+  }
+ },
+ "stability": {
+  "page_errors": {
+   "label": "Page errors",
+   "target": [
+    0,
+    0
+   ],
+   "warn": [
+    0,
+    0
+   ],
+   "why": "",
+   "source": ""
+  },
+  "nan_frames": {
+   "label": "Frames with NaN positions",
+   "target": [
+    0,
+    0
+   ],
+   "warn": [
+    0,
+    0
+   ],
+   "why": "",
+   "source": ""
+  },
+  "stuck": {
+   "label": "Fighters stuck in one state > 5 s",
+   "target": [
+    0,
+    0
+   ],
+   "warn": [
+    0,
+    0
+   ],
+   "why": "",
+   "source": ""
+  }
+ }
+}

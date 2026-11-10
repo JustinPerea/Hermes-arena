@@ -1,0 +1,1 @@
+window.NOUS_BUILD = { name: 'Nous Hermes · mascot build', tagline: 'closer to the mascot: big helmet, compact body (about 4 heads), printed as a cyanotype', leg: 0.74, torso: 0.92, head: 1.5, staff: 0.92, mantle: 0.8 };
