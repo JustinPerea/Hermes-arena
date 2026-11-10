@@ -58,6 +58,8 @@ Installed next to three other plugins and driven with the `agent-desktop` CLI:
 - Switching to another app pauses the match and shows "Click to play".
 - Overwriting `plugin.js` hot-reloads it: the old game is taken down and one fresh game is mounted (a match in progress is lost, as with any reload).
 
-Not tried there: a controller, touch, the Tuning panel, and online play (added in v35, after this install; the app has to allow a WebSocket to `0.peerjs.com` and WebRTC, which its renderer settings suggest but nobody has tried).
+Online play (v35 build, app v0.23.1, same day): the app hosted a room and got its code from the signaling server, a headless Chrome page on the same Mac joined with that code, and the match ran over the WebRTC channel for 707 steps with no stall and no out-of-step report. When the Chrome page left, the app showed OPPONENT LEFT on the fighter screen. Both ends were on one machine, so this does not show a connection between two networks.
 
-To repeat it: keys reach the app only while it is the front app, so key presses need `agent-desktop press --headed --app Hermes <key>`; check first that the canvas (accessible name "Playable Altar of the Agora stage...") has the `focused` state, and do not send Enter.
+Not tried there: a controller, touch, the Tuning panel, and joining a room from inside the app.
+
+To repeat it: keys reach the app only while it is the front app, so key presses need `agent-desktop press --headed --app Hermes <key>`; check first that the canvas (accessible name "Playable Altar of the Agora stage...") has the `focused` state, and do not send Enter. Check the focus before every batch of keys: `agent-desktop click` takes only the element ref (no `--app`), and a click that fails leaves the keys going to whatever page the app is showing.
