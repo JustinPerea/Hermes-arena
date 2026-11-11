@@ -315,3 +315,17 @@ Checks: `node net.cjs` joins two copies of the real page in Chrome through a sta
 
 Not checked: two machines on two networks. Both test pages run on this Mac, so getting through a home router, real latency, and two different computers computing the same floating-point results have not been tried. Both sides have to run the same build of the game. The lab score is unchanged (99.3).
 
+## v36 (2026-11-10) Find a match
+
+Justin asked for a match finder, so nobody has to pass a code around. The online screen now starts with FIND A MATCH, above HOST and JOIN.
+
+| Part | Notes |
+|---|---|
+| How players meet | Every copy looks in the same six room names on the signaling server (`pxh1-Q<NET.ver>-0` to `-5`). A finder offers to join each name in turn. When nobody holds a name (the server answers EXPIRE, after about 5 s), the finder takes the name and waits there as the host. Two finders who take the same empty name at once: the second gets ID-TAKEN and joins the first |
+| Busy hosts | A host that is already connecting someone does not answer; the finder moves to the next name after 7 s. A host's name is freed as soon as its match connects |
+| Waiting players on different names | A host waiting on a name past the first goes back to the start every 20 s, so two waiting players always end up together |
+| Versions | The version is in the room names, so only copies that play identically meet |
+| Rules | Whoever was waiting first is the host, so their stage, stocks and time limit are used. The screen says so |
+
+Checks: `net.cjs --live` now has two pages pick FIND A MATCH 1.5 s apart; they were paired in 3 s and the match stayed in step (24 checks). The plugin test reaches HOST one row lower. Not checked: three or more players looking at once, or a stranger squatting one of the names (finders skip a name that does not answer).
+

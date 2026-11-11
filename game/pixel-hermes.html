@@ -98,7 +98,7 @@ kbd{font-family:var(--label);font-size:11px;border:2px solid var(--ink);border-b
       <span><kbd>Enter</kbd>, <kbd>P</kbd> or <kbd>Esc</kbd> pause (Start on a controller); in menus the arrows choose, attack or <kbd>Enter</kbd> confirms, <kbd>K</kbd> or <kbd>Esc</kbd> goes back, and you can click</span>
       <span><kbd>M</kbd> sound on or off (volume in Tuning)</span>
       <span>Controller (Xbox or PlayStation layout): left stick or d-pad move, <kbd>A</kbd> attack, <kbd>B</kbd> special, <kbd>X</kbd>/<kbd>Y</kbd> jump, <kbd>LB</kbd>/<kbd>RB</kbd> grab, <kbd>LT</kbd>/<kbd>RT</kbd> shield. Flick the right stick for a smash attack on the ground (hold it to charge) or an aerial in the air. Press a button once to wake the controller <b id="padNote"></b></span>
-      <span>Online: pick <kbd>Online</kbd> as the opponent. One player hosts and gets a five-character room code; the other joins and types it. Both then play with the normal one-player controls. The host's stage, stocks and time limit are used; each player brings their own fighter. The two browsers connect directly, so each player can see the other's IP address, and a few strict networks will not connect.</span>
+      <span>Online: pick <kbd>Online</kbd> as the opponent. <kbd>Find a match</kbd> pairs you with anyone else looking right now. To play a particular friend, one of you hosts and gets a five-character room code and the other joins and types it. Both then play with the normal one-player controls. The host's stage, stocks and time limit are used; each player brings their own fighter. The two browsers connect directly, so each player can see the other's IP address, and a few strict networks will not connect.</span>
       <span>Two players: pick <kbd>Player 2</kbd> as the opponent on the fighter screen. During the match the keyboard is split. Player 1: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move, <kbd>F</kbd> attack, <kbd>G</kbd> special, <kbd>Space</kbd> jump, left <kbd>Shift</kbd> shield, <kbd>Q</kbd> grab (and the mouse). Player 2: arrow keys move, <kbd>J</kbd> attack, <kbd>K</kbd> special, <kbd>N</kbd> jump, <kbd>L</kbd> or right <kbd>Shift</kbd> shield, <kbd>U</kbd> grab. One controller connected is player 2's; with two, the first is player 1's. Either player can pause</span>
       <span><kbd>S</kbd> <kbd>↓</kbd> drop through a platform; in the air while falling, a fast fall</span>
       <span><kbd>Shift</kbd> shield (it shrinks while held and breaks at zero). From shield: <kbd>S</kbd> spot dodge, <kbd>A</kbd>/<kbd>D</kbd> roll, <kbd>Space</kbd> jump, attack or <kbd>Q</kbd> grab. <kbd>Shift</kbd> in the air is an air dodge (once per jump; hold a direction to dash that way)</span>
@@ -4081,8 +4081,8 @@ function flowInput(P){
     if (P.left) selChange(flow.row,-1); else if (P.right) selChange(flow.row,1);
     if (OK(P)){ sfx('ok'); selGo(); } }
   else if (s==='online'){
-    if (P.back||P.special){ sfx('menu'); if (LOB.mode==='menu') go('select'); else { const r=LOB.host?0:1; lobClose(); netEnd(); LOB.mode='menu'; LOB.note=''; flow.row=r; } return; }
-    if (LOB.mode==='menu'){ menuNav(P,2,false); if (OK(P)){ sfx('ok'); lobStart(flow.row===0); } } }
+    if (P.back||P.special){ sfx('menu'); if (LOB.mode==='menu') go('select'); else { const r=LOB.row||0; lobClose(); netEnd(); LOB.find=null; LOB.mode='menu'; LOB.note=''; flow.row=r; } return; }
+    if (LOB.mode==='menu'){ menuNav(P,3,false); if (OK(P)){ sfx('ok'); if (flow.row===0) lobFind(0); else lobStart(flow.row===1); } } }
   else if (s==='play'){ if (P.start||P.back){ sfx('menu'); go('pause'); } }
   else if (s==='pause'){ if (P.back||P.special||P.start&&flow.t>0.1){ go('play'); clearPressed(); return; } menuNav(P,PAUSE_ITEMS.length,false);
     if (P.attack||P.jump){ sfx('ok'); PAUSE_ITEMS[flow.row][1](); } }
@@ -4201,7 +4201,7 @@ function netEnd(msg,quiet){
   if (L){ if (!quiet) try { L.send({t:'bye'}); } catch(e){} try { L.close(); } catch(e){} }
   if (NET.tune){ Object.assign(TUNE,NET.tune); NET.tune=null; }
   cpu.p2=false; if (msg) flow.msg={text:msg,t:5};
-  if (flow.s==='online'){ LOB.mode='menu'; LOB.note=msg||''; flow.row=LOB.host?0:1; }
+  if (flow.s==='online'){ LOB.find=null; LOB.mode='menu'; LOB.note=msg||''; flow.row=LOB.row||0; }
   else if (was && flow.s!=='select' && flow.s!=='title') toMenu('select');
 }
 // ---- online play: finding the other player ----------------------------------------------------------
@@ -4211,15 +4211,24 @@ function netEnd(msg,quiet){
 // until a direct WebRTC data channel between the two browsers opens. From then on nothing goes through a server.
 // To use another PeerServer, change SIG.url.
 const SIG={url:'wss://0.peerjs.com/peerjs?key=peerjs',pre:'pxh1-',ice:[{urls:'stun:stun.l.google.com:19302'}],ab:'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'};
-const LOB={mode:'menu',code:'',note:'',host:false,ws:null,pc:null,dc:null,beat:0,peer:null,cid:'',q:[],t:0};
+const LOB={mode:'menu',row:0,find:null,code:'',note:'',host:false,ws:null,pc:null,dc:null,beat:0,peer:null,cid:'',q:[],t:0};
 const lobRand=n=>{ let s=''; for (let i=0;i<n;i++) s+=SIG.ab[Math.floor(Math.random()*SIG.ab.length)]; return s; };
 function lobPeerClose(){ const {pc,dc}=LOB; LOB.pc=LOB.dc=null; LOB.peer=null; LOB.q=[]; LOB.t=0;
   if (dc){ dc.onopen=null; try { dc.close(); } catch(e){} } if (pc){ pc.onicecandidate=pc.onconnectionstatechange=pc.ondatachannel=null; try { pc.close(); } catch(e){} } }
 function lobClose(){ if (LOB.beat){ clearInterval(LOB.beat); LOB.beat=0; }
   const ws=LOB.ws; LOB.ws=null; if (ws){ ws.onopen=ws.onmessage=ws.onclose=ws.onerror=null; try { ws.close(); } catch(e){} }
   lobPeerClose(); }
-function lobFail(note){ lobClose(); LOB.note=note; if (LOB.host) LOB.mode='menu'; else LOB.code=''; }
-function lobStart(host){ lobClose(); netEnd(); LOB.host=host; LOB.note=''; LOB.code=host?lobRand(5):''; LOB.mode=host?'host':'join'; if (host) lobSignal(); }
+function lobFail(note){ lobClose(); LOB.note=note; if (LOB.host || LOB.find){ LOB.find=null; LOB.mode='menu'; } else LOB.code=''; }
+function lobStart(host){ lobClose(); netEnd(); LOB.find=null; LOB.row=host?1:2; LOB.host=host; LOB.note=''; LOB.code=host?lobRand(5):''; LOB.mode=host?'host':'join'; if (host) lobSignal(); }
+// FIND A MATCH: no code to pass around. Everyone looking uses a short list of public room names for this game version
+// (pxh1-Q<ver>-0 to -5). A finder offers to join each name in turn; a name nobody holds (the server answers EXPIRE) it takes
+// over and waits there as the host. A host on a name past the first goes back to the start every 20 s, so two waiting
+// players on different names find each other. Only players with the same NET.ver ever meet.
+const FIND_SLOTS=6;
+function lobFind(slot,bounce){ lobClose(); netEnd(); LOB.row=0; LOB.mode='find'; LOB.host=false; LOB.find={slot,t:0,bounce:bounce||0,ft:LOB.find?LOB.find.ft:0};
+  LOB.code='Q'+NET.ver+'-'+slot; lobSignal(); }
+function lobFindHost(){ lobClose(); LOB.host=true; LOB.find.t=0; lobSignal(); }
+function lobFindNext(){ lobFind((LOB.find.slot+1)%FIND_SLOTS); }
 function lobKey(e){ if (e.metaKey || e.ctrlKey || e.altKey) return false;
   if (e.key==='Backspace'){ if (!LOB.ws) LOB.code=LOB.code.slice(0,-1); e.preventDefault(); return true; }
   if (e.key.length!==1) return false;
@@ -4231,7 +4240,7 @@ function lobSignal(){
   try { ws=LOB.ws=new WebSocket(SIG.url+'&id='+id+'&token='+lobRand(12)); } catch(e){ lobFail('ONLINE PLAY IS NOT AVAILABLE HERE'); return; }
   // the public server only passes on messages shaped like the PeerJS client's: every payload names a data connection
   const say=(type,dst,payload)=>{ if (ws.readyState===1) ws.send(JSON.stringify(payload?{type,dst,payload:{...payload,type:'data',connectionId:LOB.cid}}:{type})); };
-  const fail=()=>{ if (host){ lobPeerClose(); LOB.note='WAITING FOR YOUR FRIEND'; } else lobFail('COULD NOT CONNECT'); };
+  const fail=()=>{ if (host){ lobPeerClose(); LOB.note='WAITING FOR YOUR FRIEND'; } else if (LOB.find) lobFindNext(); else lobFail('COULD NOT CONNECT'); };
   const peer=()=>{ let pc; try { pc=LOB.pc=new RTCPeerConnection({iceServers:SIG.ice}); } catch(e){ lobFail('ONLINE PLAY IS NOT AVAILABLE HERE'); return null; }
     pc.onicecandidate=e=>{ if (e.candidate && LOB.pc===pc && LOB.peer) say('CANDIDATE',LOB.peer,{candidate:e.candidate}); };
     pc.onconnectionstatechange=()=>{ if (pc.connectionState!=='failed') return; if (LOB.pc===pc) fail(); else if (NET.link && NET.link.pc===pc) netEnd('CONNECTION LOST',true); };
@@ -4245,17 +4254,18 @@ function lobSignal(){
       if (host) LOB.note='WAITING FOR YOUR FRIEND';
       else { const pc=peer(); if (!pc) return; LOB.peer=room; LOB.cid='dc_'+lobRand(10).toLowerCase(); chan(pc.createDataChannel('pxh'));
         pc.createOffer().then(o=>pc.setLocalDescription(o)).then(()=>{ if (LOB.pc===pc) say('OFFER',room,{sdp:pc.localDescription,label:LOB.cid,reliable:true,serialization:'binary',browser:'chrome'}); }).catch(()=>{ if (LOB.pc===pc) fail(); }); } }
-    else if (m.type==='ID-TAKEN'){ if (host){ lobClose(); LOB.code=lobRand(5); lobSignal(); } else lobFail('COULD NOT CONNECT'); }
+    else if (m.type==='ID-TAKEN'){ if (LOB.find && host){ if (LOB.find.bounce<2) lobFind(LOB.find.slot,LOB.find.bounce+1); else lobFindNext(); }      // someone took the name first: join them instead
+      else if (host){ lobClose(); LOB.code=lobRand(5); lobSignal(); } else lobFail('COULD NOT CONNECT'); }
     else if (m.type==='ERROR') lobFail('THE MATCH SERVER IS BUSY');
-    else if (m.type==='EXPIRE'){ if (!host && LOB.pc && !LOB.pc.remoteDescription) lobFail('NO ROOM WITH THAT CODE'); }
+    else if (m.type==='EXPIRE'){ if (!host && LOB.pc && !LOB.pc.remoteDescription){ if (LOB.find) lobFindHost(); else lobFail('NO ROOM WITH THAT CODE'); } }
     else if (m.type==='OFFER' && host && !LOB.peer && p.sdp && typeof m.src==='string'){ const pc=peer(); if (!pc) return; LOB.peer=m.src; LOB.cid=String(p.connectionId||'dc_x').slice(0,40); LOB.t=0; LOB.note='FRIEND FOUND'; pc.ondatachannel=e=>chan(e.channel);
       pc.setRemoteDescription(p.sdp).then(()=>{ drain(); return pc.createAnswer(); }).then(a=>pc.setLocalDescription(a)).then(()=>{ if (LOB.pc===pc) say('ANSWER',m.src,{sdp:pc.localDescription,browser:'chrome'}); }).catch(()=>{ if (LOB.pc===pc) fail(); }); }
-    else if (m.type==='ANSWER' && !host && m.src===LOB.peer && p.sdp && LOB.pc){ const pc=LOB.pc; pc.setRemoteDescription(p.sdp).then(()=>{ if (LOB.pc===pc) drain(); }).catch(()=>{ if (LOB.pc===pc) fail(); }); }
+    else if (m.type==='ANSWER' && !host && m.src===LOB.peer && p.sdp && LOB.pc){ const pc=LOB.pc; LOB.t=0; pc.setRemoteDescription(p.sdp).then(()=>{ if (LOB.pc===pc) drain(); }).catch(()=>{ if (LOB.pc===pc) fail(); }); }
     else if (m.type==='CANDIDATE' && m.src===LOB.peer && p.candidate && LOB.pc){ LOB.q.push(p.candidate); if (LOB.pc.remoteDescription) drain(); }
   };
 }
 // the data channel is open: the signaling server is no longer needed, and the match connection takes over
-function lobLinked(dc){ if (LOB.dc!==dc) return; const pc=LOB.pc, host=LOB.host; LOB.pc=LOB.dc=null; lobClose(); LOB.note='CONNECTED'; LOB.t=0;
+function lobLinked(dc){ if (LOB.dc!==dc) return; LOB.find=null; const pc=LOB.pc, host=LOB.host; LOB.pc=LOB.dc=null; lobClose(); LOB.note='CONNECTED'; LOB.t=0;
   pc.onicecandidate=null;
   const link={pc,dc,send(o){ if (dc.readyState==='open') dc.send(JSON.stringify(o)); },close(){ dc.onclose=dc.onmessage=null; try { dc.close(); } catch(e){} try { pc.close(); } catch(e){} }};
   dc.onmessage=e=>{ if (NET.link!==link) return; let m; try { m=JSON.parse(e.data); } catch(x){ return; } netRecv(m); };
@@ -4264,6 +4274,10 @@ function lobLinked(dc){ if (LOB.dc!==dc) return; const pc=LOB.pc, host=LOB.host;
 // time limits on the online screen: a guest that cannot get through, a friend who started to join and vanished, a start that never comes
 function lobFrame(dt){ if (flow.s!=='online') return;
   if (NET.link && !NET.on){ if ((LOB.t+=dt)>10) netEnd('COULD NOT CONNECT'); }
+  else if (LOB.find){ const F=LOB.find; F.ft+=dt; F.t+=dt;
+    if (!LOB.host){ if ((LOB.t+=dt)>(LOB.pc && LOB.pc.remoteDescription?15:7)) lobFindNext(); }      // a host that does not answer is busy with someone else
+    else if (LOB.peer){ if ((LOB.t+=dt)>20){ lobPeerClose(); LOB.note='WAITING FOR YOUR FRIEND'; } }
+    else if (F.slot>0 && F.t>20) lobFind(0); }
   else if (LOB.ws && (LOB.peer || !LOB.host) && (LOB.t+=dt)>25){ if (LOB.host){ lobPeerClose(); LOB.note='WAITING FOR YOUR FRIEND'; } else lobFail('COULD NOT CONNECT'); } }
 // leave everything online (the plugin calls this when the page is taken down)
 function netQuit(){ lobClose(); netEnd(); }
@@ -4314,10 +4328,15 @@ function drawFlow(){
     TX('PLAY ONLINE',VW/2,20,tBig(3),'c');
     const bad=/^(NO |COULD|THE MATCH|ONLINE PLAY|OPPONENT|CONNECTION|OUT OF|DIFFERENT)/.test(LOB.note), dots=bad||!LOB.note?'':'...'.slice(0,1+Math.floor(flow.t*2)%3);
     if (LOB.mode==='menu'){
-      [['HOST A MATCH','GET A ROOM CODE TO GIVE TO A FRIEND'],['JOIN A MATCH','TYPE THE ROOM CODE A FRIEND GAVE YOU']].forEach(([lab,sub],i)=>{ const y=62+i*36, on=flow.row===i;
-        box(98,y,220,28,on); TX(lab,VW/2,y+4,tMd(on?GOLD:CREAM),'c'); TX(sub,VW/2,y+19,tSm('#c3cce3'),'c'); hitArea(98,y,220,28,()=>{ sfx('ok'); flow.row=i; lobStart(i===0); }); });
-      if (LOB.note) TX(LOB.note,VW/2,140,tMd('#ff8a5a'),'c');
-      TX('YOU PLAY '+CHARS[MS.p1].name.toUpperCase()+'    THE HOST PICKS THE STAGE AND THE RULES',VW/2,162,tSm('#c3cce3'),'c'); }
+      [['FIND A MATCH','PLAY ANYONE WHO IS LOOKING RIGHT NOW'],['HOST A MATCH','GET A ROOM CODE TO GIVE TO A FRIEND'],['JOIN A MATCH','TYPE THE ROOM CODE A FRIEND GAVE YOU']].forEach(([lab,sub],i)=>{ const y=50+i*32, on=flow.row===i;
+        box(98,y,220,27,on); TX(lab,VW/2,y+4,tMd(on?GOLD:CREAM),'c'); TX(sub,VW/2,y+18,tSm('#c3cce3'),'c'); hitArea(98,y,220,27,()=>{ sfx('ok'); flow.row=i; if (i===0) lobFind(0); else lobStart(i===1); }); });
+      if (LOB.note) TX(LOB.note,VW/2,150,tMd('#ff8a5a'),'c');
+      TX('YOU PLAY '+CHARS[MS.p1].name.toUpperCase()+'    THE HOST PICKS THE STAGE AND THE RULES',VW/2,168,tSm('#c3cce3'),'c'); }
+    else if (LOB.mode==='find'){ const found=LOB.note==='FRIEND FOUND'||LOB.note==='CONNECTED'||!!NET.link, ft=Math.floor(LOB.find?LOB.find.ft:0);
+      TX(found?'OPPONENT FOUND':'LOOKING FOR AN OPPONENT'+'...'.slice(0,1+Math.floor(flow.t*2)%3),VW/2,78,tMd(found?GOLD:CREAM),'c');
+      if (!found) TX(Math.floor(ft/60)+':'+String(ft%60).padStart(2,'0'),VW/2,96,tMd('#c3cce3'),'c');
+      TX('ANYONE WHO PICKS FIND A MATCH NOW CAN BE YOUR OPPONENT',VW/2,124,tSm('#c3cce3'),'c');
+      TX('IF YOU ARE THE FIRST ONE WAITING, YOUR STAGE AND RULES ARE USED',VW/2,136,tSm('#c3cce3'),'c'); }
     else if (LOB.mode==='host'){
       TX('ROOM CODE',VW/2,58,tMd('#c3cce3'),'c'); TX(LOB.code.split('').join(' '),VW/2,76,tBig(5),'c');
       TX(LOB.note+dots,VW/2,128,tMd(CREAM),'c'); TX('GIVE THIS CODE TO YOUR FRIEND. THEY PICK ONLINE AND JOIN A MATCH',VW/2,146,tSm('#c3cce3'),'c'); }

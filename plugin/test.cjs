@@ -142,7 +142,7 @@ async function partA(browser) {
   const press = async k => { await page.keyboard.down(k); await sleep(60); await page.keyboard.up(k); await sleep(70); };
   await press('j'); for (let i = 0; i < 4; i++) await press('ArrowUp'); for (let i = 0; i < 4; i++) await press('ArrowRight'); await press('Enter');
   check('ONLINE opens the online screen in the plugin', await page.evaluate(() => arena.state()) === 'online', await page.evaluate(() => arena.state()));
-  await press('Enter'); await sleep(300);
+  await press('ArrowDown'); await press('Enter'); await sleep(300);
   const host = await page.evaluate(() => ({ ws: window.__ws.length, open: window.__ws.filter(w => !w.closed).length, iv: window.__iv.size, url: window.__ws[0] ? window.__ws[0].url.split('?')[0] : '' }));
   check('hosting opens one signaling socket and one heartbeat timer', host.ws === 1 && host.open === 1 && host.iv === 1, `${host.ws} socket(s) to ${host.url}, ${host.iv} timer(s)`);
   await page.evaluate(() => { unmountArena(); });

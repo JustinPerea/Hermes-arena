@@ -94,10 +94,10 @@ const DIGEST=()=>{ window.__dig={}; window.__sent=0;
     await A.evaluate(()=>{ toMenu('select'); }); await B.evaluate(()=>{ toMenu('select'); MS.p1='kairos'; }); await both(()=>{ window.__dig={}; flow.msg=null; });
     for (const p of pages){ for (let i=0;i<4;i++) await tap(p,'ArrowUp'); for (let i=0;i<7 && (await p.evaluate(()=>MS.lv))!==5;i++) await tap(p,'ArrowRight'); await tap(p,'Enter'); }
     check('ONLINE on the fighter screen opens the online screen',await until(()=>flow.s==='online' && LOB.mode==='menu',3000));
-    await tap(A,'Enter'); const hosted=await A.evaluate(()=>new Promise(r=>{ const t0=performance.now(); (function w(){ if (LOB.note==='WAITING FOR YOUR FRIEND') return r(LOB.code); if (performance.now()-t0>15000) return r(''); requestAnimationFrame(w); })(); }));
+    await tap(A,'ArrowDown'); await tap(A,'Enter'); const hosted=await A.evaluate(()=>new Promise(r=>{ const t0=performance.now(); (function w(){ if (LOB.note==='WAITING FOR YOUR FRIEND') return r(LOB.code); if (performance.now()-t0>15000) return r(''); requestAnimationFrame(w); })(); }));
     check('hosting gets a room code from the signaling server',/^[A-Z2-9]{5}$/.test(hosted),hosted?'a five-character code':await A.evaluate(()=>LOB.mode+' / '+LOB.note));
     if (SHOT) await A.screenshot({path:SHOT.replace(/(\.\w+)$/,'-room$1'),clip:await A.evaluate(()=>{ const r=document.getElementById('stage').getBoundingClientRect(); return {x:r.left,y:r.top+scrollY,width:r.width,height:r.height}; })});
-    await tap(B,'ArrowDown'); await tap(B,'Enter'); for (const ch of hosted.toLowerCase()) await tap(B,ch,40);
+    await tap(B,'ArrowDown'); await tap(B,'ArrowDown'); await tap(B,'Enter'); for (const ch of hosted.toLowerCase()) await tap(B,ch,40);
     const joined=await until(()=>NET.on && flow.s==='play',30000);
     check('typing the code joins and the match starts over WebRTC',joined,joined?'delay '+await A.evaluate(()=>NET.delay)+' steps':(await both(()=>LOB.mode+' / '+LOB.note+' / '+flow.s)).join(' | '));
     if (joined){ s=await both(()=>({h:H.ch,d:D.ch,ws:!!LOB.ws,beat:LOB.beat,kind:NET.link.dc?NET.link.dc.label:''}));
@@ -106,6 +106,13 @@ const DIGEST=()=>{ window.__dig={}; window.__sent=0;
       check('same state at every step over the real connection',c.n>300 && c.bad===null && q[0].on && q[1].on,c.bad===null?`${c.n} steps`:`first difference at step ${c.bad}: ${c.where}`);
       await B.evaluate(()=>netQuit());
       check('the guest leaving ends it for the host',await until(()=>!NET.on && !NET.link && flow.s==='select',6000) && (await A.evaluate(()=>flow.msg&&flow.msg.text))==='OPPONENT LEFT'); }
+    // FIND A MATCH: two players who both pick it end up in one match, with no code typed
+    await both(()=>{ netQuit(); flow.msg=null; if (flow.s!=='select') toMenu('select'); MS.lv=5; go('online'); LOB.mode='menu'; flow.row=0; window.__dig={}; });
+    await tap(A,'Enter'); await new Promise(r=>setTimeout(r,1500)); await tap(B,'Enter');
+    const t1=Date.now(), found=await until(()=>NET.on && flow.s==='play',45000);
+    check('FIND A MATCH pairs two players without a code',found,found?`in ${((Date.now()-t1)/1000).toFixed(0)} s`:(await both(()=>LOB.mode+' / '+(LOB.find&&LOB.find.slot)+' / '+LOB.host+' / '+LOB.note+' / '+flow.s)).join(' | '));
+    if (found){ await mash(6); const c=await compare(); check('the found match stays in step',c.bad===null && c.n>100,c.bad===null?c.n+' steps':'step '+c.bad); }
+    await both(()=>netQuit()); await both(()=>{ if (flow.s!=='select') toMenu('select'); });
     await B.evaluate(()=>{ flow.msg=null; if (flow.s!=='select') toMenu('select'); MS.lv=5; go('online'); lobStart(false); }); for (const ch of 'zzzz9') await tap(B,ch,40);
     const none=await B.evaluate(()=>new Promise(r=>{ const t0=performance.now(); (function w(){ if (!LOB.ws && LOB.note && LOB.note!=='CONNECTING') return r(LOB.note); if (performance.now()-t0>30000) return r('still '+LOB.note); requestAnimationFrame(w); })(); }));
     check('a code nobody is hosting is refused',none==='NO ROOM WITH THAT CODE',none);
