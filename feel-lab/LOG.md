@@ -329,3 +329,15 @@ Justin asked for a match finder, so nobody has to pass a code around. The online
 
 Checks: `net.cjs --live` now has two pages pick FIND A MATCH 1.5 s apart; they were paired in 3 s and the match stayed in step (24 checks). The plugin test reaches HOST one row lower. Not checked: three or more players looking at once, or a stranger squatting one of the names (finders skip a name that does not answer).
 
+## v37 (2026-11-10) Full screen
+
+Justin asked for a full-screen mode after reading the Hermes plugin guide. Gameplay is unchanged, so `NET.ver` stays 1 and v36 and v37 can still play each other online.
+
+| Part | Notes |
+|---|---|
+| Entering | A small button in the stage's top right corner, or F11 (fn F11 on most Mac keyboards, where plain F11 shows the desktop). F alone stays player 1's attack in two-player mode |
+| Layout | The stage frame goes full screen, not the page: the canvas is the largest 16:9 that fits, centred on the night-blue backdrop, drawn at the screen's pixel density like the windowed stage |
+| Esc | In full screen, Esc only leaves full screen. Chrome takes that Esc itself; when a browser passes it on, the game swallows it (and for 250 ms after leaving), so the match does not also pause |
+| Plugin | The frame sits in the plugin's shadow root, so the game asks `stage.getRootNode()` for the full-screen element. The wrapper's key loop now stops when a listener calls `stopImmediatePropagation`, as a window would, and an unmount in full screen leaves full screen |
+
+Checks: the plugin test enters full screen with the button, checks the canvas fills the screen at 16:9 with the keys still on the game, leaves with F11, and unmounts in full screen (50 checks). By hand in headless Chrome at 1440x900 and 1000x800: canvas 1440x810 and 1000x563, Esc leaves without pausing. Feel lab quick 99, pvp 28, net 15, ffa 8. Not checked: Hermes Desktop itself, and Safari.

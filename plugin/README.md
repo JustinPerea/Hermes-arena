@@ -4,7 +4,7 @@ Turns `game/pixel-hermes.html` into a Hermes Desktop plugin without changing the
 
 ```
 node plugin/build.mjs                              # writes plugin/dist/ (ignored by git)
-NODE_PATH=$(npm root -g) node plugin/test.cjs      # 46 checks in Chrome; add --shot out.png for screenshots
+NODE_PATH=$(npm root -g) node plugin/test.cjs      # 50 checks in Chrome; add --shot out.png for screenshots
 ```
 
 | Output | What it is |
@@ -34,6 +34,7 @@ The game is written as a page script: it finds its elements with `document.getEl
 - **Play layout.** The plugin shows the stage, the controls list, Tuning and the touch buttons. The page header, the animation sheet and the design notes are hidden, and the sheet's tiles stop redrawing. `node plugin/build.mjs --full` keeps everything.
 - **The stage fits the pane.** Its width is the smaller of the pane's width and what the pane's height allows, up to 1,200 px (the standalone page stops at 900 px). A frame costs about 0.2 ms at that size in Chrome.
 - **Focus.** The game takes keyboard focus when the page opens. When focus leaves it (a click elsewhere in the app, the command palette, another window) a running match pauses (in an online match the pause is sent as a Start press, so both players' games pause together) and the stage shows "Click to play" in its top right corner (the one corner no screen draws in). The standalone page does not pause; it has the window to itself.
+- **Full screen.** The stage's ⛶ button (or F11) puts the stage frame, which lives in the shadow root, in full screen. The game finds the full-screen element through `stage.getRootNode()`. `destroy()` leaves full screen if the game is taken down while in it.
 - **Fonts** still come from Google Fonts, through one `<link>` added to the app's document while a game is mounted. Without a connection the page falls back to system fonts; text drawn on the canvas uses the game's own pixel font and is not affected.
 
 ## What the build refuses
@@ -42,7 +43,7 @@ The build stops with an error if the game starts using something the wrapper doe
 
 ## What the checks cover, and what they do not
 
-`test.cjs` part A drives the mount test page: mounting, stage fit at three window sizes, style isolation, keyboard play, keys not reaching the host, Cmd shortcuts passing through, pause on focus loss, storage, and that an unmount leaves no render loop, window listener, audio context or DOM behind, also after four mounts. It also opens the online screen, hosts against a stand-in signaling socket, and checks that an unmount closes the socket and stops the heartbeat timer.
+`test.cjs` part A drives the mount test page: mounting, stage fit at three window sizes, style isolation, keyboard play, keys not reaching the host, Cmd shortcuts passing through, pause on focus loss, storage, full screen in and out (button and F11), and that an unmount leaves no render loop, window listener, audio context or DOM behind, also after four mounts. It also opens the online screen, hosts against a stand-in signaling socket, and checks that an unmount closes the socket and stops the heartbeat timer.
 
 Part B runs `plugin.js` through the app's own loading steps. The import scan and rewrite are copied at run time from the hermes-agent checkout (`~/.hermes/hermes-agent/apps/desktop/src/contrib/runtime-loader.ts`, or `--hermes <path>`); without a checkout the test falls back to the documented pattern and says so. The module is then imported from a blob URL with shim modules, registered against a stand-in `ctx`, and mounted through a 20-line stand-in for React, including the effect, cleanup, effect order of StrictMode.
 

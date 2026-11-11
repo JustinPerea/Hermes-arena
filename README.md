@@ -2,7 +2,7 @@
 
 An original Smash-style platform fighter set in the world of the Nous Research Hermes mascot, built to run as a plugin for **Hermes Desktop**. All characters and stages are drawn procedurally in code: no image files ship with the game.
 
-The current direction is **pixel art** (`game/pixel-hermes.html`): four playable fighters (Hermes, Aethon, Kairos, Iris), two stages (Altar of the Agora and the big multi-storey Sanctuary of Kyllene), a CPU opponent, a second player on the same machine or a friend online (room code, direct browser-to-browser connection), full match flow (title, fighter select, 3-2-1-GO, pause, results), synthesized sound and gamepad support. `plugin/` builds it into a Hermes Desktop plugin. An earlier **cyanotype** (blue-ink engraving) engine lives in `cyanotype/`.
+The current direction is **pixel art** (`game/pixel-hermes.html`): four playable fighters (Hermes, Aethon, Kairos, Iris), two stages (Altar of the Agora and the big multi-storey Sanctuary of Kyllene), a CPU opponent, a second player on the same machine or a friend online (room code, direct browser-to-browser connection), full match flow (title, fighter select, 3-2-1-GO, pause, results), full screen, synthesized sound and gamepad support. `plugin/` builds it into a Hermes Desktop plugin. An earlier **cyanotype** (blue-ink engraving) engine lives in `cyanotype/`.
 
 ## Quick start
 

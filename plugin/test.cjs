@@ -117,12 +117,24 @@ async function partA(browser) {
   await sleep(1200);
   if (SHOT) await page.screenshot({ path: SHOT });
 
+  // full screen: the button puts the stage frame in full screen and the canvas fills it at 16:9; F11 leaves; an unmount leaves too
+  const fsBox = await inGame(page, root => { const r = root.getElementById('fsBtn').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; });
+  await page.mouse.click(fsBox.x, fsBox.y); await sleep(500);
+  const fs = await inGame(page, root => { const c = root.getElementById('stage'), r = c.getBoundingClientRect(); return { el: root.fullscreenElement && root.fullscreenElement.id, w: r.width, h: r.height, vw: innerWidth, vh: innerHeight, cw: c.width, focus: root.activeElement && root.activeElement.id }; });
+  check('the full-screen button fills the screen with the stage', fs.el === 'stageFrame' && Math.abs(fs.w - Math.min(fs.vw, fs.vh * 416 / 234)) <= 2 && Math.abs(fs.h - fs.w * 234 / 416) <= 2 && fs.cw >= Math.round(fs.w * Math.min(3, await page.evaluate(() => devicePixelRatio))) - 2, JSON.stringify(fs));
+  check('the game keeps the keys in full screen', fs.focus === 'stage' && await page.evaluate(() => arena.state()) === 'play');
+  await page.keyboard.press('F11'); await sleep(500);
+  check('F11 leaves full screen and the stage fits the pane again', await inGame(page, root => !root.fullscreenElement && Math.abs(root.getElementById('stage').getBoundingClientRect().width - root.getElementById('stageFrame').clientWidth) <= 1) && await page.evaluate(() => !document.fullscreenElement));
+  await page.mouse.click(fsBox.x, fsBox.y); await sleep(500);
+  const fsAgain = await page.evaluate(() => !!document.fullscreenElement);
+
   // unmount: nothing may be left behind
   await page.evaluate(() => { unmountArena(); });
   await sleep(400);
   const after = await fps(page, 400);
   const left = await page.evaluate(() => ({ mounts: document.querySelectorAll('.pxh-mount').length, kids: document.getElementById('pane').childElementCount, fonts: !!document.getElementById('pxh-fonts'), wl: window.__wl, ac: window.__acs.map(c => c.state) }));
   check('unmount removes the game from the page', left.mounts === 0 && left.kids === 0 && !left.fonts);
+  check('unmount in full screen leaves full screen', fsAgain && await page.evaluate(() => !document.fullscreenElement), fsAgain ? '' : 'did not enter full screen the second time');
   check('unmount stops the render loop', after.perSec === 0, after.perSec.toFixed(0) + ' frames/s');
   check('unmount removes every window listener', left.wl === baseListeners, `${left.wl} now, ${baseListeners} before mounting`);
   check('unmount closes the audio context', left.ac.every(s => s === 'closed'), left.ac.join(','));

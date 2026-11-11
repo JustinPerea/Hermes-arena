@@ -31,6 +31,13 @@ section{display:flex;flex-direction:column;gap:14px}
 .stage-frame{background:#bccbe9;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);overflow:hidden;line-height:0}
 canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
 #stage{display:block;max-width:100%}
+.stage-frame{position:relative}
+.fs-btn{position:absolute;right:6px;top:6px;width:26px;height:26px;padding:0;border:2px solid var(--ink);background:rgba(243,234,208,.85);color:var(--ink);font:700 15px/20px system-ui,sans-serif;cursor:pointer;opacity:.55;z-index:2}
+.fs-btn:hover,.fs-btn:focus-visible{opacity:1}
+.stage-frame:fullscreen{display:flex;align-items:center;justify-content:center;width:100vw;height:100vh;max-width:none;border:0;box-shadow:none;background:#0b1030}
+.stage-frame:fullscreen .fs-btn{opacity:.35}
+.stage-frame:fullscreen #stage:focus-visible{outline:none}
+.stage-frame::backdrop{background:#0b1030}
 .keys{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:14px;color:var(--ink-soft)}
 kbd{font-family:var(--label);font-size:11px;border:2px solid var(--ink);border-bottom-width:3px;padding:1px 6px;color:var(--ink);background:var(--paper);margin-right:4px}
 .touch{display:none;gap:10px;justify-content:space-between;flex-wrap:wrap}
@@ -89,7 +96,7 @@ kbd{font-family:var(--label);font-size:11px;border:2px solid var(--ink);border-b
   </header>
 
   <section aria-label="Playable stage">
-    <div class="stage-frame" id="stageFrame"><canvas id="stage" width="416" height="234" tabindex="0" aria-label="Playable Altar of the Agora stage: you against a CPU fighter"></canvas></div>
+    <div class="stage-frame" id="stageFrame"><button class="fs-btn" id="fsBtn" type="button" tabindex="-1" title="Full screen (F11)" aria-label="Full screen">&#x26F6;</button><canvas id="stage" width="416" height="234" tabindex="0" aria-label="Playable Altar of the Agora stage: you against a CPU fighter"></canvas></div>
     <div class="keys">
       <span><kbd>A</kbd><kbd>D</kbd> or <kbd>←</kbd><kbd>→</kbd> run</span>
       <span><kbd>Space</kbd> jump; tap it (or press jump and attack together) for a short hop (Hermes has 2 jumps; Aethon has 3, and after his last one he can glide for up to 1 second by holding jump)</span>
@@ -97,6 +104,7 @@ kbd{font-family:var(--label);font-size:11px;border:2px solid var(--ink);border-b
       <span><kbd>Right click</kbd> or <kbd>K</kbd> special: same four directions (side and up specials once per jump)</span>
       <span><kbd>Enter</kbd>, <kbd>P</kbd> or <kbd>Esc</kbd> pause (Start on a controller); in menus the arrows choose, attack or <kbd>Enter</kbd> confirms, <kbd>K</kbd> or <kbd>Esc</kbd> goes back, and you can click</span>
       <span><kbd>M</kbd> sound on or off (volume in Tuning)</span>
+      <span>Full screen: the &#x26F6; button in the stage's top right corner, or <kbd>F11</kbd> (<kbd>fn</kbd> <kbd>F11</kbd> on most Mac keyboards). <kbd>Esc</kbd> leaves full screen without pausing; press it again to pause</span>
       <span>Controller (Xbox or PlayStation layout): left stick or d-pad move, <kbd>A</kbd> attack, <kbd>B</kbd> special, <kbd>X</kbd>/<kbd>Y</kbd> jump, <kbd>LB</kbd>/<kbd>RB</kbd> grab, <kbd>LT</kbd>/<kbd>RT</kbd> shield. Flick the right stick for a smash attack on the ground (hold it to charge) or an aerial in the air. Press a button once to wake the controller <b id="padNote"></b></span>
       <span>Online: pick <kbd>Online</kbd> as the opponent. <kbd>Find a match</kbd> pairs you with anyone else looking right now. To play a particular friend, one of you hosts and gets a five-character room code and the other joins and types it. Both then play with the normal one-player controls. The host's stage, stocks and time limit are used; each player brings their own fighter. The two browsers connect directly, so each player can see the other's IP address, and a few strict networks will not connect.</span>
       <span>Two players: pick <kbd>Player 2</kbd> as the opponent on the fighter screen. During the match the keyboard is split. Player 1: <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move, <kbd>F</kbd> attack, <kbd>G</kbd> special, <kbd>Space</kbd> jump, left <kbd>Shift</kbd> shield, <kbd>Q</kbd> grab (and the mouse). Player 2: arrow keys move, <kbd>J</kbd> attack, <kbd>K</kbd> special, <kbd>N</kbd> jump, <kbd>L</kbd> or right <kbd>Shift</kbd> shield, <kbd>U</kbd> grab. One controller connected is player 2's; with two, the first is player 1's. Either player can pause</span>
@@ -2125,13 +2133,27 @@ buildSwatches();
 // =====================================================================
 const VW=416, VH=234;
 const stage=document.getElementById('stage'), sg=stage.getContext('2d');
+// full screen: the stage frame fills the screen and the canvas is the largest 16:9 that fits. getRootNode() is the page, or the
+// plugin's shadow root (whose fullscreenElement is the frame itself, not its host).
+const fsEl=()=>stage.getRootNode().fullscreenElement||null;
+let fsLeftAt=-1;
+function fsToggle(){ const F=document.getElementById('stageFrame');
+  if (fsEl()) F.ownerDocument.exitFullscreen().catch(()=>{});
+  else if (F.requestFullscreen) F.requestFullscreen({navigationUI:'hide'}).catch(()=>{});
+  stage.focus({preventScroll:true}); }
 function sizeStage(){
-  const w=document.getElementById('stageFrame').clientWidth, dpr=Math.min(3,window.devicePixelRatio||1);
+  const F=document.getElementById('stageFrame'), dpr=Math.min(3,window.devicePixelRatio||1);
+  const w=fsEl()===F?Math.floor(Math.min(F.clientWidth,F.clientHeight*VW/VH)):F.clientWidth;
   const cw=Math.round(w*dpr); if (stage.width!==cw){ stage.width=cw; stage.height=Math.round(cw*VH/VW); }
   stage.style.width=w+'px'; stage.style.height=Math.round(w*VH/VW)+'px'; sg.imageSmoothingEnabled=false;
 }
 function fitStage(){ sizeStage(); }
 addEventListener('resize',fitStage); fitStage();
+document.getElementById('fsBtn').addEventListener('click',fsToggle);
+document.getElementById('stageFrame').addEventListener('fullscreenchange',()=>{ if (!fsEl()) fsLeftAt=performance.now(); fitStage(); });
+// F11 toggles the stage's full screen (F alone is player 1's attack). In full screen, Esc only leaves full screen.
+addEventListener('keydown',e=>{ if (e.code==='F11' && !e.repeat){ e.preventDefault(); fsToggle(); }
+  else if (e.code==='Escape' && (fsEl() || performance.now()-fsLeftAt<250)){ e.preventDefault(); e.stopImmediatePropagation(); if (fsEl()) fsToggle(); } },true);
 
 // world geometry (pixels). Same layout as the Agora stage in the game, scaled to 0.33.
 let SOLIDS=[{l:96,r:181,t:139},{l:181,r:234,t:145},{l:234,r:320,t:139}];

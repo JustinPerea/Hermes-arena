@@ -163,7 +163,7 @@ function createPixelArena(host, env) {
   listen(page, 'keydown', e => {
     // Leave shortcuts to the host app. macOS sends no keyup for keys let go while Cmd is down, so drop them all.
     if (e.metaKey || e.ctrlKey || e.altKey) { release(); return; }
-    for (const fn of fns.keydown) fn(e);
+    for (const fn of fns.keydown) { fn(e); if (e.cancelBubble) break; }      // honour stopImmediatePropagation, as on a window
     if (e.defaultPrevented) { held.add(e.code); e.stopPropagation(); }
   });
   listen(page, 'keyup', e => {
@@ -192,6 +192,7 @@ function createPixelArena(host, env) {
     destroy() {
       if (dead) return;
       try { game.quit(); } catch (err) {}      // leave an online match, close the signaling socket
+      if (root.fullscreenElement) D.exitFullscreen().catch(() => {});      // a game taken down in full screen must not leave the window there
       dead = true;
       for (const id of timers) W.clearInterval(id);
       PXH_LIVE.delete(arena);
