@@ -2,11 +2,24 @@
 //   NODE_PATH=$(npm root -g) node ffa.cjs [--html file] [--seeds 12] [--n 4] [--shot out.png]
 // Checks that every match ends with one fighter left, that eliminated fighters stay out, that everyone takes part,
 // and that positions stay finite. It is a correctness check, not a balance report.
+// It also guards online play: a fixed two-fighter match is replayed and its end state compared with net-ver.json. If the
+// simulation changed but NET.ver in the game did not, two copies of different builds would start a match and go out of step.
+//   --update records the current end state and NET.ver; --fingerprint only prints them (use with --html on an old build).
 const path=require('path'); const {load,launch}=require('./page.cjs');
 const arg=(k,d)=>{ const i=process.argv.indexOf('--'+k); return i<0?d:process.argv[i+1]; };
+const fs=require('fs');
 const HTML=path.resolve(arg('html',path.join(__dirname,'../game/pixel-hermes.html'))), SEEDS=+arg('seeds',12), N=+arg('n',4), SHOT=arg('shot','');
+const VERFILE=path.join(__dirname,'net-ver.json'), UPDATE=process.argv.includes('--update'), PRINT=process.argv.includes('--fingerprint');
 const results=[]; const check=(name,ok,detail='')=>{ results.push(!!ok); console.log((ok?'  ok    ':'  FAIL  ')+name+(detail?'  ('+detail+')':'')); };
 (async()=>{ const browser=await launch(); const errors=[]; const page=await load(browser,errors,HTML);
+  const fp=await page.evaluate(()=>{ __seed(1); Object.assign(MS,{p1:'hermes',p2:'aethon',lv:2,stocks:3,time:0,stage:'altar'}); if ('n' in MS) MS.n=2; startMatch(); go('play');
+    for (let f=0;f<1500;f++){ simIn={demo:true}; step(1/60); simIn=null; }
+    const r=[H,D].map(F=>[F.x,F.y,F.dmg].map(v=>Math.round(v*100)).join(',')+','+F.stocks).join('|'); toMenu('select'); return {ver:typeof NET==='object'&&NET.ver||1,fp:r}; });
+  if (PRINT){ console.log(JSON.stringify(fp)); await browser.close(); return; }
+  if (UPDATE || !fs.existsSync(VERFILE)){ fs.writeFileSync(VERFILE,JSON.stringify(fp,null,1)+'\n'); console.log('  note  recorded NET.ver '+fp.ver+' in net-ver.json'); }
+  const rec=JSON.parse(fs.readFileSync(VERFILE,'utf8'));
+  check('the two-fighter simulation matches the one recorded for NET.ver '+rec.ver,rec.fp===fp.fp && rec.ver===fp.ver,
+    rec.fp===fp.fp?(rec.ver===fp.ver?'':'NET.ver is now '+fp.ver+': run ffa.cjs --update'):rec.ver===fp.ver?'the simulation changed: raise NET.ver in the game, then run ffa.cjs --update':'run ffa.cjs --update');
   const out=[];
   for (let seed=1;seed<=SEEDS;seed++) out.push(await page.evaluate(([seed,n])=>{ const R=['hermes','aethon','kairos','iris'], stage=seed%2?'kyllene':'altar';
     __seed(seed); Object.assign(MS,{n,p1:R[seed%4],p2:R[(seed+1)%4],p3:R[(seed+2)%4],p4:R[(seed+3)%4],lv:2,stocks:2,time:0,stage}); startMatch(); go('play');

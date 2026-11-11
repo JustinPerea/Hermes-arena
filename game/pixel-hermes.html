@@ -4127,7 +4127,9 @@ function flowTick(P,dt){
 // work a match must be a pure function of its inputs: fixed steps, its own seeded random numbers, default Tuning, and
 // fighters rebuilt from scratch at the start. Every 20 steps the two sides compare a summary of the state; a mismatch ends the match.
 // The connection is any object {send(obj), close()} whose owner calls netRecv(obj) for each message and netEnd() if it drops.
-const NET={on:false,link:null,me:0,delay:3,f:0,sent:0,loc:{},rem:{},ck:{},rck:{},ckAt:null,acc:0,stall:0,desync:null,cfg:null,rand:null,tune:null,pings:[],steps:0};
+// NET.ver: the version of the two-fighter simulation. Two copies only play each other when it matches. Raise it whenever a change
+// alters how a match plays out (feel-lab/ffa.cjs fails when the simulation changed and this number did not).
+const NET={ver:1,on:false,link:null,me:0,delay:3,f:0,sent:0,loc:{},rem:{},ck:{},rck:{},ckAt:null,acc:0,stall:0,desync:null,cfg:null,rand:null,tune:null,pings:[],steps:0};
 const NET_DT=1/60, NET_M=['left','right','up','down','start','back','attack','jump','special'];
 function netRng(seed){ let s=(seed>>>0)||1; return ()=>{ s|=0; s=s+0x6D2B79F5|0; let t=Math.imul(s^s>>>15,1|s); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 // this machine's input for one step, as three small numbers: held keys, fresh presses, right-stick flick
@@ -4183,9 +4185,10 @@ function netRecv(m){
   else if (m.t==='pong' && NET.me===0 && !NET.on && !NET.hold){ NET.pings.push(performance.now()-m.at);
     if (NET.pings.length<4) NET.link.send({t:'ping',at:performance.now()});
     else { const rtt=Math.min(...NET.pings), delay=clamp(Math.ceil(rtt/2/(1000*NET_DT))+2,2,10);
-      NET.hold={p1:MS.p1,lv:4,stocks:MS.stocks,time:MS.time,stage:MS.stage,seed:(Math.random()*4294967295)>>>0,delay};
+      NET.hold={ver:NET.ver,p1:MS.p1,lv:4,stocks:MS.stocks,time:MS.time,stage:MS.stage,seed:(Math.random()*4294967295)>>>0,delay};
       NET.link.send({t:'cfg',cfg:NET.hold}); } }
-  else if (m.t==='cfg' && NET.me===1 && !NET.on){ NET.link.send({t:'join',ch:MS.p1}); }                                   // guest: here is my fighter
+  else if (m.t==='cfg' && NET.me===1 && !NET.on){ if (((m.cfg||{}).ver||1)!==NET.ver){ NET.link.send({t:'ver',ver:NET.ver}); netEnd('DIFFERENT GAME VERSIONS'); return; } NET.link.send({t:'join',ch:MS.p1,ver:NET.ver}); }                                   // guest: here is my fighter
+  else if ((m.t==='ver' || m.t==='join' && (m.ver||1)!==NET.ver) && !NET.on){ netEnd('DIFFERENT GAME VERSIONS',m.t==='ver'); }      // a copy without a version is version 1
   else if (m.t==='join' && NET.hold){ const cfg={...NET.hold,p2:FIGHTERS.includes(m.ch)?m.ch:'hermes'}; NET.hold=null; NET.link.send({t:'go',cfg}); netStart(cfg); }
   else if (m.t==='go' && NET.me===1 && !NET.on){ const c=m.cfg||{}; if (FIGHTERS.includes(c.p1) && FIGHTERS.includes(c.p2) && STAGES[c.stage]) netStart({...c,lv:4,stocks:clamp(c.stocks|0,1,5),time:TIMES.includes(c.time)?c.time:0,delay:clamp(c.delay|0,2,10),seed:c.seed>>>0}); }
   else if (m.t==='bye') netEnd('OPPONENT LEFT',true);
@@ -4309,7 +4312,7 @@ function drawFlow(){
     hitArea(0,0,60,18,()=>{ sfx('menu'); go('title'); }); TX('< BACK',6,6,tSm('#c3cce3')); return; }
   if (s==='online'){ dim(0.92);
     TX('PLAY ONLINE',VW/2,20,tBig(3),'c');
-    const bad=/^(NO |COULD|THE MATCH|ONLINE PLAY|OPPONENT|CONNECTION|OUT OF)/.test(LOB.note), dots=bad||!LOB.note?'':'...'.slice(0,1+Math.floor(flow.t*2)%3);
+    const bad=/^(NO |COULD|THE MATCH|ONLINE PLAY|OPPONENT|CONNECTION|OUT OF|DIFFERENT)/.test(LOB.note), dots=bad||!LOB.note?'':'...'.slice(0,1+Math.floor(flow.t*2)%3);
     if (LOB.mode==='menu'){
       [['HOST A MATCH','GET A ROOM CODE TO GIVE TO A FRIEND'],['JOIN A MATCH','TYPE THE ROOM CODE A FRIEND GAVE YOU']].forEach(([lab,sub],i)=>{ const y=62+i*36, on=flow.row===i;
         box(98,y,220,28,on); TX(lab,VW/2,y+4,tMd(on?GOLD:CREAM),'c'); TX(sub,VW/2,y+19,tSm('#c3cce3'),'c'); hitArea(98,y,220,28,()=>{ sfx('ok'); flow.row=i; lobStart(i===0); }); });

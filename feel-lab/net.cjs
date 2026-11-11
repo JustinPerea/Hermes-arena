@@ -36,9 +36,9 @@ const DIGEST=()=>{ window.__dig={}; window.__sent=0;
   const both=fn=>Promise.all(pages.map(p=>p.evaluate(fn)));
   const until=async(fn,ms=8000)=>{ const t0=Date.now(); while (Date.now()-t0<ms){ const r=await both(fn); if (r[0] && r[1]) return true; await sleep(50); } return false; };
   const tap=async(p,k,ms=70)=>{ await p.keyboard.down(k); await sleep(ms); await p.keyboard.up(k); await sleep(80); };
-  const connect=async(a,b,stage,stocks)=>{ await both(()=>{ window.__dig={}; if (flow.s==='title') go('select'); });
+  const connect=async(a,b,stage,stocks,ms=9000)=>{ await both(()=>{ window.__dig={}; if (flow.s==='title') go('select'); });
     await A.evaluate(([c,s,n])=>{ MS.p1=c; MS.stage=s; MS.stocks=n; MS.time=0; },[a,stage,stocks]); await B.evaluate(c=>{ MS.p1=c; },b);
-    await B.evaluate(()=>netOpen(window.__link(),false)); await A.evaluate(()=>netOpen(window.__link(),true)); return until(()=>NET.on && flow.s==='play',9000); };
+    await B.evaluate(()=>netOpen(window.__link(),false)); await A.evaluate(()=>netOpen(window.__link(),true)); return until(()=>NET.on && flow.s==='play',ms); };
   // compare the two pages' summaries for every step both have
   const compare=async()=>{ const [a,b]=await both(()=>window.__dig); let n=0, bad=null; for (const f of Object.keys(a)){ if (!(f in b)) continue; n++; if (a[f]!==b[f] && (bad===null || +f<bad)) bad=+f; }
     let where=''; if (bad!==null){ const x=a[bad].split(/[,#{}]/), y=b[bad].split(/[,#{}]/); where=x.filter((v,i)=>v!==y[i]).slice(0,6).join(' ')+' vs '+y.filter((v,i)=>v!==x[i]).slice(0,6).join(' '); }
@@ -80,6 +80,9 @@ const DIGEST=()=>{ window.__dig={}; window.__sent=0;
   console.log('leaving and a dropped line');
   await B.evaluate(()=>netEnd()); 
   check('one side leaving sends both back to the fighter screen',await until(()=>!NET.on && flow.s==='select',4000) && (await A.evaluate(()=>flow.msg&&flow.msg.text))==='OPPONENT LEFT');
+  await both(()=>{ flow.msg=null; }); await B.evaluate(()=>{ window.__ver=NET.ver; NET.ver=99; }); await connect('hermes','aethon','altar',3,2500);
+  const vm=await both(()=>({on:NET.on,link:!!NET.link,msg:flow.msg&&flow.msg.text})); await B.evaluate(()=>{ NET.ver=window.__ver; });
+  check('two copies of different versions refuse to start, and both say why',!vm[0].on && !vm[1].on && !vm[0].link && !vm[1].link && vm[0].msg==='DIFFERENT GAME VERSIONS' && vm[1].msg==='DIFFERENT GAME VERSIONS',JSON.stringify(vm.map(v=>v.msg)));
   await connect('hermes','aethon','altar',3); net.cut=true; const t0=Date.now();
   const lost=await until(()=>!NET.on && flow.s==='select',30000); net.cut=false;
   check('a dead line ends the match on both sides',lost && (await A.evaluate(()=>flow.msg&&flow.msg.text))==='CONNECTION LOST',`after ${((Date.now()-t0)/1000).toFixed(0)} s`);
