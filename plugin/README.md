@@ -60,6 +60,8 @@ Installed next to three other plugins and driven with the `agent-desktop` CLI:
 
 Online play (v35 build, app v0.23.1, same day): the app hosted a room and got its code from the signaling server, a headless Chrome page on the same Mac joined with that code, and the match ran over the WebRTC channel for 707 steps with no stall and no out-of-step report. When the Chrome page left, the app showed OPPONENT LEFT on the fighter screen. Both ends were on one machine, so this does not show a connection between two networks.
 
-Not tried there: a controller, touch, the Tuning panel, and joining a room from inside the app.
+Joining from inside the app (build after v35, same evening): a headless Chrome page hosted, the app joined by typing the code, and the match ran over WebRTC for 607 steps with no stall.
+
+Not tried there: a controller, touch, and the Tuning panel.
 
 To repeat it: keys reach the app only while it is the front app, so key presses need `agent-desktop press --headed --app Hermes <key>`; check first that the canvas (accessible name "Playable Altar of the Agora stage...") has the `focused` state, and do not send Enter. Check the focus before every batch of keys: `agent-desktop click` takes only the element ref (no `--app`), and a click that fails leaves the keys going to whatever page the app is showing.

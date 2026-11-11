@@ -85,7 +85,7 @@ kbd{font-family:var(--label);font-size:11px;border:2px solid var(--ink);border-b
   <header>
     <div class="eyebrow">Hermes Arena · pixel style study</div>
     <h1>Pixel Hermes</h1>
-    <p class="lede">Pixel-art fighters and the Altar of the Agora, all drawn entirely in code. Press attack on the title screen, then pick both fighters, the opponent (a CPU level, a second player on this machine, a friend online, or a training dummy that stands still), the number of stocks and a time limit. Every sprite and the whole stage are built at load time from ellipses, capsules, feathers and polygons rasterised onto a pixel grid, then shaded with five-tone ramps and a 4 × 4 dither. No image files. Everything, from fighters to columns to the damage readout, sits on the same fine pixel grid. Spar on the altar, or study each animation frame by frame below.</p>
+    <p class="lede">Four pixel-art fighters and two stages, the Altar of the Agora and the Sanctuary of Kyllene, all drawn entirely in code. Press attack on the title screen, then pick both fighters, the opponent (a CPU level, a second player on this machine, a friend online, or a training dummy that stands still), the number of stocks, a time limit and the stage. Every sprite and both stages are built at load time from ellipses, capsules, feathers and polygons rasterised onto a pixel grid, then shaded with five-tone ramps and a 4 × 4 dither. No image files. Everything, from fighters to columns to the damage readout, sits on the same fine pixel grid. Fight, or study each animation frame by frame below.</p>
   </header>
 
   <section aria-label="Playable stage">
@@ -4323,7 +4323,8 @@ function drawFlow(){
       TX(LOB.note+dots,VW/2,128,tMd(CREAM),'c'); TX('GIVE THIS CODE TO YOUR FRIEND. THEY PICK ONLINE AND JOIN A MATCH',VW/2,146,tSm('#c3cce3'),'c'); }
     else { TX('TYPE THE ROOM CODE',VW/2,58,tMd('#c3cce3'),'c');
       for (let i=0;i<5;i++){ const x=133+i*31; box(x,76,26,30,i===LOB.code.length && !LOB.ws); if (LOB.code[i]) TX(LOB.code[i],x+13,81,{...tMd(GOLD),cell:3},'c'); }
-      if (LOB.note) TX(LOB.note+dots,VW/2,128,tMd(bad?'#ff8a5a':CREAM),'c'); else TX('LETTERS AND NUMBERS ON THE KEYBOARD',VW/2,128,tSm('#c3cce3'),'c'); }
+      if (LOB.note) TX(LOB.note+dots,VW/2,128,tMd(bad?'#ff8a5a':CREAM),'c'); else TX('LETTERS AND NUMBERS ON THE KEYBOARD',VW/2,128,tSm('#c3cce3'),'c');
+      if (LOB.note==='COULD NOT CONNECT') TX('CHECK THE CODE. SOME OFFICE AND MOBILE NETWORKS BLOCK DIRECT CONNECTIONS',VW/2,146,tSm('#c3cce3'),'c'); }
     TX('A DIRECT CONNECTION: YOUR FRIEND CAN SEE YOUR IP ADDRESS',VW/2,200,tSm('#8090c8'),'c');
     TX('ESC OR K BACK',VW/2,224,tSm('#c3cce3'),'c');
     hitArea(0,0,60,18,()=>{ pressed.back=true; }); TX('< BACK',6,6,tSm('#c3cce3')); return; }
