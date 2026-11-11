@@ -253,6 +253,9 @@ export default {
 `;
 mkdirSync(join(OUT, 'hermes-arena'), { recursive: true });
 writeFileSync(join(OUT, 'hermes-arena/plugin.js'), plugin);
+// The catalog package (hermes-plugin/, committed): the Hermes plugin catalog installs a pinned commit of this folder, so the
+// default build keeps its desktop/plugin.js in step with the game. A diff there after a build means it was stale.
+if (!opt('out', '') && !FULL) { mkdirSync(join(HERE, '../hermes-plugin/desktop'), { recursive: true }); writeFileSync(join(HERE, '../hermes-plugin/desktop/plugin.js'), plugin); }
 
 // ---- mount test page: a stand-in for the app shell (sidebar, a text box, a pane) ----
 writeFileSync(join(OUT, 'engine.js'), banner + engine);

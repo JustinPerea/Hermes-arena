@@ -1,0 +1,5 @@
+name: hermes-arena
+version: "1.0.0"
+description: "Hermes Arena: a pixel-art platform fighter in Hermes Desktop. Play a CPU, a second player on the same keyboard, or a friend online with a room code."
+author: "Justin Perea"
+requires_hermes: ">=0.23.0"
