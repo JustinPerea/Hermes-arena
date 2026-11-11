@@ -1,8 +1,10 @@
 # Hermes Arena
 
+![Hermes Arena: Hermes throws a letter at Aethon on the Altar stage](docs/media/banner.png)
+
 An original Smash-style platform fighter set in the world of the Nous Research Hermes mascot, built to run as a plugin for **Hermes Desktop**. All characters and stages are drawn procedurally in code: no image files ship with the game.
 
-The current direction is **pixel art** (`game/pixel-hermes.html`): four playable fighters (Hermes, Aethon, Kairos, Iris), two stages (Altar of the Agora and the big multi-storey Sanctuary of Kyllene), a CPU opponent, a second player on the same machine or a friend online (room code, direct browser-to-browser connection), full match flow (title, fighter select, 3-2-1-GO, pause, results), full screen, synthesized sound and gamepad support. `plugin/` builds it into a Hermes Desktop plugin. An earlier **cyanotype** (blue-ink engraving) engine lives in `cyanotype/`.
+The current direction is **pixel art** (`game/pixel-hermes.html`): four playable fighters (Hermes, Aethon, Kairos, Iris), two stages (Altar of the Agora and the big multi-storey Sanctuary of Kyllene), a CPU opponent, a second player on the same machine or someone online (Find a match, or a room code for a friend; direct browser-to-browser connection), full match flow (title, fighter select, 3-2-1-GO, pause, results), full screen, synthesized sound and gamepad support. `plugin/` builds it into a Hermes Desktop plugin. An earlier **cyanotype** (blue-ink engraving) engine lives in `cyanotype/`.
 
 ## Quick start
 
@@ -21,6 +23,8 @@ Useful URL flags: `?stage=kyllene` picks a stage; `?n=4` (or `n=3`) adds CPUs as
 |---|---|
 | `game/pixel-hermes.html` | **The current game.** Single file: rasteriser, all four fighters, moves, CPU, camera, stages, match flow, sound, tuning panel, animation sheet. |
 | `stages/` | Stage registry (`stages.js`), the patch that merges it into the game (`apply-stages.cjs`), previews, and parked drop-1 stages (`stages-archive.js`). See `stages/README.md`. |
+| `hermes-plugin/` | The packaged plugin that Hermes installs: `plugin.yaml`, `desktop/plugin.js` (the output of `plugin/build.mjs`) and its README. |
+| `docs/media/` | Banner and screenshots for the Hermes plugin catalog. |
 | `plugin/` | Builds the pixel game into a **Hermes Desktop plugin** (`build.mjs`) and checks it in Chrome (`test.cjs`). The game file is not changed; see `plugin/README.md`. |
 | `feel-lab/` | Automated feel testing: drives the real game headless, scores it against Smash-derived targets (`spec.json`), renders GIF/video comparisons. `PROTOCOL.md` is the improvement loop, `LOG.md` the change history, `QUESTIONS.md` open design questions. |
 | `art/` | Pixel design studies: front-facing portraits (`front-views/`), Kairos and Iris design code and sheets (`kairos-iris/`), the v26 arm comparison. |
@@ -59,6 +63,16 @@ node video.cjs --before old.html         # side-by-side before/after MP4
 The scripts default to `../game/pixel-hermes.html`; pass `--html <file>` to test another build, and use the installed Google Chrome when there is one. Last recorded score: 99.3 (v35, also with all four fighters). The lab's yardstick grew twice, so earlier scores in LOG.md are not comparable: since v31 it plays 30 CPU matches per fighter, and since v32 another 10 on the big map, Kyllene (`--big <stage>`), to check that the CPUs find each other there (v31 re-measured: 97.9 with all four).
 
 ## Hermes Desktop plugin (pixel game)
+
+Install the packaged plugin (`hermes-plugin/`) straight from this repository:
+
+```
+hermes plugins install JustinPerea/Hermes-arena#hermes-plugin
+```
+
+Say yes when it asks whether to enable it, then restart Hermes Desktop: the game appears as "Hermes Arena" in the sidebar. What the plugin does on your computer (network, storage) is in `hermes-plugin/README.md`.
+
+To build it yourself:
 
 ```
 node plugin/build.mjs                              # writes plugin/dist/hermes-arena/plugin.js

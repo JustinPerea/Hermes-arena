@@ -356,8 +356,30 @@ _Where the Claude Code session of 2026-11-10 left the pixel game (branch `cpu-do
   3. Results screen with placings and all four stat columns; elimination order kept in `match`.
   4. Online for three and four: the host keeps the room open and holds one data channel per guest (a star, the host relays every player's input each step, no mesh); the online screen shows who has joined and the host starts the match; `cfg` carries the number of players and each fighter; `netIn` and the per-step input pair become one entry per player; a step runs when every player's input is in; each guest compares its state summary with the host's. `net.cjs` needs three- and four-page runs. The signaling server allows this: the host's socket already stays open until the first channel opens, and each guest has its own id.
   5. Controllers for players 3 and 4 on one machine.
+- v37 (2026-11-10 late): full screen (button in the stage corner, or F11; Esc only leaves full screen). Pushed 2026-11-11 as a40dca7.
+- Install from GitHub (checked 2026-11-11 with Hermes 0.23.1 in a throwaway HERMES_HOME): `hermes plugins install JustinPerea/Hermes-arena#hermes-plugin` works, and so does the full `https://github.com/JustinPerea/Hermes-arena#hermes-plugin`. The form without the scheme, `github.com/JustinPerea/Hermes-arena#hermes-plugin`, fails: the CLI reads `github.com/JustinPerea` as owner/repo. The installed `desktop/plugin.js` matched the repo's byte for byte.
+- Catalog entry (2026-11-11): the store banner and screenshots are the `image` and `screenshots` fields of `plugin-catalog/hermes-arena.yaml` in NousResearch/hermes-agent, https URLs on GitHub hosts pinned to a commit. They live in `docs/media/` here (banner 1200x600, up to six screenshots). Changing them after the entry is merged is a new PR to the catalog file. The entry and PR text are in `submission/`. `docs/media/desktop.png` is the real Hermes Desktop 0.23.1 window capture with a title-screen frame placed over the game canvas (the capture predates Find a match) and the private sidebar rows blurred.
 - Not done: a third map (the three parked in stages/stages-archive.js were judged too simple; wait for Justin's reaction to Kyllene); the copy of the plugin in Hermes Desktop is v31 until Justin asks for an update.
 - Pixel game as a Hermes Desktop plugin: built (`plugin/build.mjs`, checks in `plugin/test.cjs`, decisions in `plugin/README.md`). The game file is untouched; the build wraps its script so it runs in a Shadow DOM and can be unmounted. Passes 43 checks against a stand-in for the app shell, including the app's own import scan (hermes-agent checkout at `~/.hermes/hermes-agent`, commit 2bd378ed1b). **Installed and played in Hermes Desktop v0.23.0 on 2026-11-10** at Justin's request (`~/.hermes/desktop-plugins/hermes-arena/plugin.js`, next to his hermes-bots, ninsei and pheme plugins; do not touch those): loads, shows in the Sessions sidebar, mouse and keyboard play work, a match pauses when the app loses focus, and overwriting the file hot-reloads it. What was checked and how to repeat it: `plugin/README.md`. After changing the game, rebuild and copy the file again. Layout choices he may want to change: play layout hides the header, animation sheet and design notes; a match pauses when focus leaves the game.
 - Plugin format facts confirmed from the checkout (2026-11-10): the loader refuses any import outside `@hermes/plugin-sdk`, `react`, `react/jsx-runtime`, `react/jsx-dev-runtime`; it finds imports by scanning the source text, so `plugin/test.cjs` runs that scan on the built file; module evaluation has a 10 s deadline; `ctx.storage` is synchronous (`get(key, default)`, `set`, `remove`).
 - Machine notes: run the lab with `NODE_PATH=$(npm root -g)` (Playwright is installed globally, not in the repo). The lab drives the installed Google Chrome. ImageMagick here is v7; `convert` and `montage` still work.
 
+
+## ninsei-link (planned, after the hackathon)
+
+Justin, 2026-11-11: usernames for online play, taken from Ninsei, and a way to start an Arena match from a Ninsei room. He agreed to do it after submission ("okay after submission sounds fine to me"). Nothing is built. Worked out with the Ninsei session (`~/Developer/projects/hermes-room`, GoodMachines/ninsei main 7016431).
+
+The design:
+- Ninsei starts the match. The host's Ninsei draws a five-character code from Arena's alphabet (`SIG.ab`), posts an "Arena match" card in the room with a Join button, and navigates to Arena's route with `name=<n>&host=<CODE>`. Join navigates to the same route with `name=<n>&join=<CODE>`. Because Ninsei picks the code, no message has to come back from Arena.
+- Arena adds: a display name carried in the `cfg` and `join` messages and shown on the fighter marker and the HUD; and the start-up parameters `name`, `host` (host under a given code, the PeerJS id derived from it) and `join`. Without Ninsei the name is typed in Arena.
+- The name is passed in by Ninsei and stays editable in Arena. Arena does not read Ninsei's database (`<HERMES_HOME>/plugin-data/ninsei/ninsei.db` is private, with no read contract).
+
+Constraints:
+- Ninsei names are free Unicode up to 32 characters. Arena's font draws A-Z and 0-9, so either fold the name (lossy for "José", "まや") or widen the font.
+- Arena cannot run as a Ninsei toy: toys are capped at about 48 KB, run under `default-src 'none'`, and have the WebRTC constructors hidden. Arena opens in its own tab.
+- Join is a person-only button (agents never start or join) and needs a one-line notice that a direct match shows your IP address to the opponent and to PeerJS. The card's code and name are untrusted text; validate both.
+- Desktop only: the dashboard build has no `host.navigate`, so it shows the code as text.
+
+To verify first: whether a query string survives `host.navigate('/hermes-arena?name=X&join=CODE')` in Hermes Desktop. The SDK doc (`website/docs/developer-guide/desktop-plugin-sdk.md`) only shows bare paths. Arena's route is `/hermes-arena` (`plugin/build.mjs`, area `routes`).
+
+Order: display name in Arena, then the parameters, then the Ninsei card (its main is protected: PR, CI, catalog bump).
